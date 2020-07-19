@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Links</title>
+      <link>http://luky116.github.io/links/</link>
+      <pubDate>Sun, 19 Jul 2020 23:53:09 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/links/</guid>
+      <description>Test 111</description>
+    </item>
+    
+    <item>
       <title>23种设计模式(1) - 工厂方法模式</title>
       <link>http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1-%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/</link>
       <pubDate>Sun, 14 Jun 2020 10:22:17 +0800</pubDate>

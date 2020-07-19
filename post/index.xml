@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Luky116 Blog</title>
-    <link>http://luky116.github.io/</link>
-    <description>Recent content on Luky116 Blog</description>
+    <title>Posts on Luky116 Blog</title>
+    <link>http://luky116.github.io/post/</link>
+    <description>Recent content in Posts on Luky116 Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sun, 14 Jun 2020 10:22:17 +0800</lastBuildDate>
     
-	<atom:link href="http://luky116.github.io/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://luky116.github.io/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>

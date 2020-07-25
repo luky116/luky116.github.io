@@ -16,7 +16,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
 
 
-<meta name="author" content="Sanyue" /><meta name="description" content="23种设计模式(1) - 工厂方法模式 1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举" /><meta name="keywords" content="Hugo, theme, even" />
+<meta name="author" content="Sanyue" /><meta name="description" content="1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举例 有一个Animal接口，有两个类" /><meta name="keywords" content="Hugo, theme, even" />
 
 
 
@@ -40,22 +40,22 @@
 
 
 <meta property="og:title" content="23种设计模式(1) - 工厂方法模式" />
-<meta property="og:description" content="23种设计模式(1) - 工厂方法模式 1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举" />
+<meta property="og:description" content="1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举例 有一个Animal接口，有两个类" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1-%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/" />
 <meta property="article:published_time" content="2020-06-14T10:22:17+08:00" />
 <meta property="article:modified_time" content="2020-06-14T10:22:17+08:00" />
 <meta itemprop="name" content="23种设计模式(1) - 工厂方法模式">
-<meta itemprop="description" content="23种设计模式(1) - 工厂方法模式 1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举">
+<meta itemprop="description" content="1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举例 有一个Animal接口，有两个类">
 <meta itemprop="datePublished" content="2020-06-14T10:22:17&#43;08:00" />
 <meta itemprop="dateModified" content="2020-06-14T10:22:17&#43;08:00" />
-<meta itemprop="wordCount" content="1074">
+<meta itemprop="wordCount" content="1057">
 
 
 
 <meta itemprop="keywords" content="设计模式," /><meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="23种设计模式(1) - 工厂方法模式"/>
-<meta name="twitter:description" content="23种设计模式(1) - 工厂方法模式 1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举"/>
+<meta name="twitter:description" content="1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举例 有一个Animal接口，有两个类"/>
 
 <!--[if lte IE 9]>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
@@ -134,7 +134,7 @@
   <div class="post-toc-content always-active">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#23种设计模式1---工厂方法模式">23种设计模式(1) - 工厂方法模式</a>
+    <li>
       <ul>
         <li><a href="#1定义">1、定义</a></li>
         <li><a href="#2举例">2、举例</a></li>
@@ -148,8 +148,7 @@
   </div>
 </div>
     <div class="post-content">
-      <h2 id="23种设计模式1---工厂方法模式">23种设计模式(1) - 工厂方法模式</h2>
-<h3 id="1定义">1、定义</h3>
+      <h3 id="1定义">1、定义</h3>
 <p>定义一个用于创建对象的<code>接口</code>，让<code>子类</code>决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。</p>
 <h3 id="2举例">2、举例</h3>
 <p>有一个<code>Animal</code>接口，有两个类<code>Dog</code>和<code>Cat</code>分别继承了该接口。我们通过一个叫<code>AnimalDactory</code>的工厂类接口，再定义<code>DogFactory</code>和<code>CatFactory</code>类来分别创建<code>Dog</code>和<code>Cat</code>实例，由调用端来决定使用哪个工厂来创建对象。</p>

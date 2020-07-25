@@ -22,10 +22,10 @@
     
     <item>
       <title>Guava 快速入门</title>
-      <link>http://luky116.github.io/post/guava-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
+      <link>http://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
       <pubDate>Tue, 05 May 2020 17:00:17 +0800</pubDate>
       
-      <guid>http://luky116.github.io/post/guava-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
+      <guid>http://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
       <description>Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符</description>
     </item>
     

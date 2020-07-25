@@ -12,12 +12,21 @@
     
     
     <item>
-      <title>Mockito学习(1) --- 快速入门</title>
+      <title>Mockito学习(1) - 快速入门</title>
       <link>http://luky116.github.io/post/mockito%E5%AD%A6%E4%B9%A01-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
       <pubDate>Sat, 25 Jul 2020 17:00:17 +0800</pubDate>
       
       <guid>http://luky116.github.io/post/mockito%E5%AD%A6%E4%B9%A01-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
       <description>Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1</description>
+    </item>
+    
+    <item>
+      <title>Guava 快速入门</title>
+      <link>http://luky116.github.io/post/guava-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Tue, 05 May 2020 17:00:17 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/guava-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
+      <description>Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符</description>
     </item>
     
   </channel>

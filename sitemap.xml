@@ -50,4 +50,25 @@
     <priority>0.5</priority>
   </url>
   
+  <url>
+    <loc>http://luky116.github.io/tags/guava/</loc>
+    <lastmod>2020-05-05T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/categories/guava/</loc>
+    <lastmod>2020-05-05T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/post/guava-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</loc>
+    <lastmod>2020-05-05T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
 </urlset>

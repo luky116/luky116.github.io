@@ -3,18 +3,49 @@
   
   <url>
     <loc>http://luky116.github.io/categories/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>http://luky116.github.io/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/tags/mockito/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/post/mockito%E5%AD%A6%E4%B9%A01-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/post/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
     <loc>http://luky116.github.io/tags/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>http://luky116.github.io/categories/%E6%B5%8B%E8%AF%95/</loc>
+    <lastmod>2020-07-25T17:00:17+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>

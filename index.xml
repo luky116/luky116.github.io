@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Luky116 Blog</title>
+    <link>http://luky116.github.io/</link>
+    <description>Recent content on Luky116 Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 25 Jul 2020 17:00:17 +0800</lastBuildDate>
+    
+	<atom:link href="http://luky116.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Mockito学习(1) - 快速入门</title>
+      <link>http://luky116.github.io/post/mockito%E5%AD%A6%E4%B9%A01-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Sat, 25 Jul 2020 17:00:17 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/mockito%E5%AD%A6%E4%B9%A01-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
+      <description>Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1</description>
+    </item>
+    
+    <item>
+      <title>23种设计模式(1) - 工厂方法模式</title>
+      <link>http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1-%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/</link>
+      <pubDate>Sun, 14 Jun 2020 10:22:17 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1-%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/</guid>
+      <description>23种设计模式(1) - 工厂方法模式 1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举</description>
+    </item>
+    
+    <item>
+      <title>23种设计模式(3) - 创建者模式</title>
+      <link>http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F3-%E5%88%9B%E5%BB%BA%E8%80%85%E6%A8%A1%E5%BC%8F-/</link>
+      <pubDate>Sun, 14 Jun 2020 10:22:17 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F3-%E5%88%9B%E5%BB%BA%E8%80%85%E6%A8%A1%E5%BC%8F-/</guid>
+      <description>23种设计模式(3) - 创建者模式 1、定义 将一个复杂对象的创建和他的表示分离，使用同样的创建过程可以创建不同的表示（类的不同属性的实例）。 2、</description>
+    </item>
+    
+    <item>
+      <title>Guava 快速入门</title>
+      <link>http://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Tue, 05 May 2020 17:00:17 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
+      <description>Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符</description>
+    </item>
+    
+  </channel>
+</rss>

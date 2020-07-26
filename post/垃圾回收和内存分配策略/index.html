@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>垃圾回收和内存分配策略 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="垃圾回收和内存分配策略" />
+<meta property="og:description" content="垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/" />
+<meta property="article:published_time" content="2017-09-24T14:43:00+08:00" />
+<meta property="article:modified_time" content="2017-09-24T14:43:00+08:00" />
+<meta itemprop="name" content="垃圾回收和内存分配策略">
+<meta itemprop="description" content="垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对">
+<meta itemprop="datePublished" content="2017-09-24T14:43:00&#43;08:00" />
+<meta itemprop="dateModified" content="2017-09-24T14:43:00&#43;08:00" />
+<meta itemprop="wordCount" content="1892">
+
+
+
+<meta itemprop="keywords" content="JVM垃圾回收," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="垃圾回收和内存分配策略"/>
+<meta name="twitter:description" content="垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">垃圾回收和内存分配策略</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-09-24 </span>
+        <div class="post-category">
+            <a href="/categories/jvm/"> JVM </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1-如何判断对象是否已死">1 如何判断对象是否已死</a>
+      <ul>
+        <li><a href="#11-引用计数器">1.1 引用计数器</a></li>
+        <li><a href="#12--可达性分析">1.2  可达性分析</a></li>
+      </ul>
+    </li>
+    <li><a href="#13-回收过程">1.3 回收过程</a></li>
+    <li><a href="#14-常见的垃圾回收算法">1.4 常见的垃圾回收算法</a></li>
+    <li><a href="#15-堆里面的分区edenservival-to-from-to老年代">1.5 堆里面的分区：Eden、servival to 、from to、老年代</a></li>
+    <li><a href="#16-minor-gc-和-full-gc">1.6 Minor GC 和 Full GC</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h1 id="垃圾回收和内存分配策略">垃圾回收和内存分配策略</h1>
+<pre><code>由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。
+</code></pre>
+<h2 id="1-如何判断对象是否已死">1 如何判断对象是否已死</h2>
+<h3 id="11-引用计数器">1.1 引用计数器</h3>
+<pre><code>给对象添加一个引用计数器，当有一个应用引用他时，计数器加一，引用失效时减一。
+
+无法解决对象间相互循环引用的问题，Java 未使用。
+</code></pre>
+<h3 id="12--可达性分析">1.2  可达性分析</h3>
+<pre><code>通过一系列称为“GC Root&quot;的对象作为起点，向下搜索，搜索所走的路径称为引用链。当一个对象没有任何引用链相连时，证明此对象是不可用的。
+
+GC Root 对象包含如下：
+</code></pre>
+<ul>
+<li>虚拟机栈（栈帧中的本地变量表）中引用的对象</li>
+<li>方法区中静态属性引用的对象</li>
+<li>方法区中常量引用的对象</li>
+<li>本地方法栈中JNI（即，native方法）引用的对象</li>
+</ul>
+<h2 id="13-回收过程">1.3 回收过程</h2>
+<pre><code>如 
+</code></pre>
+<h2 id="14-常见的垃圾回收算法">1.4 常见的垃圾回收算法</h2>
+<ul>
+<li>
+<p>标记 - 清除 算法</p>
+<ul>
+<li>
+<p>原理：</p>
+<pre><code>标记所有需要回收的对象，然后统一回收
+</code></pre>
+</li>
+<li>
+<p>缺陷</p>
+<pre><code>效率问题，标记和清除的效率都不高；标记清除后有大量的不连续内存碎片。
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>复制算法</p>
+<ul>
+<li>
+<p>原理</p>
+<pre><code>将内存划分为新生代和老年代，新生代分为 一块较大的Eden 空间和两块较小的 Survicor 空间，每次只使用Eden 空间和一块Survivor 空间，然后把已使用的那块一次清理。**新生代的收集全部采用复制算法。**
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>标记 - 整理 算法</p>
+<ul>
+<li>
+<p>原理</p>
+<pre><code>先标记需要回收的对象，然后让所有的存活的对象向一段移动，然后清理边界以外的内存。**针对存活率较高时候的情形，因为复制代价会比较大。**
+</code></pre>
+</li>
+</ul>
+</li>
+<li>
+<p>分代收集</p>
+<p>在新生代，每次回收都会有大量对象死亡，所以使用 复制算法，老年代对象存活率较高，所以使用“标记-清理” 或 “标记-整理” 算法。</p>
+</li>
+</ul>
+<h2 id="15-堆里面的分区edenservival-to-from-to老年代">1.5 堆里面的分区：Eden、servival to 、from to、老年代</h2>
+<ul>
+<li>
+<p>Eden 区</p>
+<p>位于Java 堆的新生代。新生代中的对象寿命比较短。</p>
+<pre><code>  大多数情况下对象有现在的Eden 区分配，如果启动了TLAB （本地线程分配缓冲）则优先在TLAB上分配。如果 Eden 区内存也用完了，则会进行一次 Minor GC。
+</code></pre>
+</li>
+<li>
+<p>Servivor 区</p>
+<p>复制算法将内存分为Eden 、 from 、 to survivor 三个区域，使用的时候每次只使用Eden 和 from  survivor  区域，当回收时将Eden 和 from survivor 区中活着的对象复制到to survivor 区上。</p>
+</li>
+<li>
+<p>老年代</p>
+<p>里面存放都是存活时间交久的对象：</p>
+<pre><code>  如果大量连续内存空间的大对象直接进入老年代、长期存活的对象将进入老年代。
+
+  当老年代容量满的时候，会触发一次full GC，回收老年代和年轻代中不再使用的对象资源。
+</code></pre>
+</li>
+<li>
+<p>TLAB</p>
+<blockquote>
+<pre><code>    JVM在内存新生代Eden Space中开辟了一小块线程私有的区域，称作TLAB（Thread-local allocation buffer）。默认设定为占用Eden Space的1%。在Java程序中很多对象都是小对象且用过即丢，它们不存在线程共享也适合被快速GC，所以对于小对象通常JVM会优先分配在TLAB上，并且TLAB上的分配由于是线程私有所以没有锁开销。因此在实践中分配多个小对象的效率通常比分配一个大对象的效率要高。
+    也就是说，Java中每个线程都会有自己的缓冲区称作TLAB（Thread-local allocation buffer），每个TLAB都只有一个线程可以操作，TLAB结合bump-the-pointer技术可以实现快速的对象分配，而不需要任何的锁进行同步，也就是说，在对象分配的时候不用锁住整个堆，而只需要在自己的缓冲区分配即可。
+</code></pre>
+</blockquote>
+</li>
+<li>
+<p>Java对象分配的过程</p>
+<blockquote>
+<ol>
+<li>
+<p>编译器通过逃逸分析，确定对象是在栈上分配还是在堆上分配。如果是在堆上分配，则进入选项2.</p>
+</li>
+<li>
+<p>如果tlab_top + size &lt;= tlab_end，则在在TLAB上直接分配对象并增加tlab_top 的值，如果现有的TLAB不足以存放当前对象则3.</p>
+</li>
+<li>
+<p>重新申请一个TLAB，并再次尝试存放当前对象。如果放不下，则4.</p>
+</li>
+<li>
+<p>在Eden区加锁（这个区是多线程共享的），如果eden_top + size &lt;= eden_end则将对象存放在Eden区，增加eden_top 的值，如果Eden区不足以存放，则5.</p>
+</li>
+<li>
+<p>执行一次Young GC（minor collection）。</p>
+</li>
+<li>
+<p>经过Young GC之后，如果Eden区任然不足以存放当前对象，则直接分配到老年代。</p>
+<pre><code> 对象不在堆上分配主要的原因还是堆是共享的，在堆上分配有锁的开销。无论是TLAB还是栈都是线程私有的，私有即避免了竞争（当然也可能产生额外的问题例如可见性问题），这是典型的用空间换效率的做法。
+</code></pre>
+</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+<h2 id="16-minor-gc-和-full-gc">1.6 Minor GC 和 Full GC</h2>
+<ul>
+<li>Minor GC（新生代 GC ）：大多数情况下，对象在新生代Eden 区中分配，当Eden 区中没有足够空间时候，虚拟机触发一次Minor GC。Minor GC 非常频繁，速度快。</li>
+<li>Full GC
+<ul>
+<li>在 Minor GC 之前会检查老年代中最大可用连续空间是否大于新生代中的对象，如果成立，则这次Mior GC 是安全的，否则要查看是否允许担保失败，如果不允许则改进为Full GC ，允许的话尝试一次Minor GC</li>
+<li>老年代满时，也会触发Full GC</li>
+</ul>
+</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-09-24
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/jvm%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/">JVM垃圾回收</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java中断机制(interrupt))</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
+            <span class="next-text nav-default">Java虚拟机的类加载机制</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

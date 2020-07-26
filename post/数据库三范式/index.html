@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>数据库三范式 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="数据库三范式" />
+<meta property="og:description" content="1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/" />
+<meta property="article:published_time" content="2017-08-29T14:43:00+08:00" />
+<meta property="article:modified_time" content="2017-08-29T14:43:00+08:00" />
+<meta itemprop="name" content="数据库三范式">
+<meta itemprop="description" content="1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求">
+<meta itemprop="datePublished" content="2017-08-29T14:43:00&#43;08:00" />
+<meta itemprop="dateModified" content="2017-08-29T14:43:00&#43;08:00" />
+<meta itemprop="wordCount" content="831">
+
+
+
+<meta itemprop="keywords" content="MySQL范式," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="数据库三范式"/>
+<meta name="twitter:description" content="1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">数据库三范式</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-08-29 </span>
+        <div class="post-category">
+            <a href="/categories/mysql/"> MySQL </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1前言">1、前言</a></li>
+    <li><a href="#2第一范式">2、第一范式</a>
+      <ul>
+        <li><a href="#21-定义">2.1 定义</a></li>
+        <li><a href="#22-案例">2.2 案例</a></li>
+      </ul>
+    </li>
+    <li><a href="#3第二范式">3、第二范式</a>
+      <ul>
+        <li><a href="#31-定义">3.1 定义</a></li>
+        <li><a href="#32-案例">3.2 案例</a></li>
+      </ul>
+    </li>
+    <li><a href="#4第三范式">4、第三范式</a>
+      <ul>
+        <li><a href="#41-定义">4.1 定义</a></li>
+        <li><a href="#42-案例">4.2 案例</a></li>
+        <li><a href="#如图主键为-orderid其余所有属性都完全依赖于这个主键但是productname产品名字producter生产商属性直接依赖于productidproductid依赖于主键这就是-通过传递才依赖主键的不符合3nf拆分后满足">　　如图，主键为 OrderId，其余所有属性都完全依赖于这个主键，但是ProductName（产品名字）、Producter（生产商）属性直接依赖于ProductId，ProductId依赖于主键，这就是 通过传递才依赖主键的，不符合3NF。拆分后，满足。</a></li>
+      </ul>
+    </li>
+    <li><a href="#5第二范式和第三范式">5、第二范式和第三范式</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="1前言">1、前言</h2>
+<p>　　数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求越来越严格，他们之间的关系为 1NF ⊂ 2NF ⊂ 3NF ⊂ BCNF，即，如果满足第二范式一定满足第一范式，满足第三范式一定满足第二范式，以此类推。</p>
+<h2 id="2第一范式">2、第一范式</h2>
+<h3 id="21-定义">2.1 定义</h3>
+<p>　　如果一关系模式r(R)的每个属性对应的域值是不可分的，则称r(R)属于第一范式，记为r(R)⊂1NF。</p>
+<h3 id="22-案例">2.2 案例</h3>
+<p>　　如下图所示的关系模式是一个非规范化的关系模式，因为address的值域是可分的。</p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>sex</th>
+<th>address</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>province</td>
+<td>city</td>
+<td>street</td>
+</tr>
+</tbody>
+</table>
+<p>　　将上述关系模式规范化如下图，才是 1NF 关系模式：</p>
+<table>
+<thead>
+<tr>
+<th>name</th>
+<th>sex</th>
+<th>province</th>
+<th>city</th>
+<th>street</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="3第二范式">3、第二范式</h2>
+<h3 id="31-定义">3.1 定义</h3>
+<p>　　首先是 2NF，另外非主键列必须直接依赖于主键，不能存在传递依赖。即不能存在：非主键列 A 依赖于非主键列 B，非主键列 B 依赖于主键的情况。</p>
+<p>　　第二范式满足两部分内容：一是表必须有一个主键；二是非主键属性必须完全依赖于主键，而不能只依赖于部分主键。</p>
+<h3 id="32-案例">3.2 案例</h3>
+<p>　　如表主键为（OrderId,ProductId）,Price（价格）和DisCount（折扣）项完全依赖于主键（OrderId,ProductId），而ProductName（产品名字）、Producter（生产商）仅仅依赖于ProductId，即部分主键，因此不符合第二范式，这样会导致数据冗余。可以拆分成如下两个表</p>
+<p><img src="http://images2017.cnblogs.com/blog/834666/201708/834666-20170830090932437-1328963700.png" alt="img"></p>
+<h2 id="4第三范式">4、第三范式</h2>
+<h3 id="41-定义">4.1 定义</h3>
+<p>　　首先是 2NF，另外非主键列必须直接依赖于主键，不能存在传递依赖。即不能存在：非主键列 A 依赖于非主键列 B，非主键列 B 依赖于主键的情况。</p>
+<h3 id="42-案例">4.2 案例</h3>
+<h3 id="如图主键为-orderid其余所有属性都完全依赖于这个主键但是productname产品名字producter生产商属性直接依赖于productidproductid依赖于主键这就是-通过传递才依赖主键的不符合3nf拆分后满足">　　如图，主键为 OrderId，其余所有属性都完全依赖于这个主键，但是ProductName（产品名字）、Producter（生产商）属性直接依赖于ProductId，ProductId依赖于主键，这就是 通过传递才依赖主键的，不符合3NF。拆分后，满足。</h3>
+<p><img src="http://images2017.cnblogs.com/blog/834666/201708/834666-20170830091151358-28919448.png" alt="img"></p>
+<h2 id="5第二范式和第三范式">5、第二范式和第三范式</h2>
+<p>　2NF 和 3NF很容易混淆，满足3NF一定满足2NF，总结下就是：</p>
+<ul>
+<li>2NF：是否存在部分依赖主键</li>
+<li>3NF：是否存在主键依赖传递</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-08-29
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/mysql%E8%8C%83%E5%BC%8F/">MySQL范式</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mysql%E7%B4%A2%E5%BC%95/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">MySQL索引</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

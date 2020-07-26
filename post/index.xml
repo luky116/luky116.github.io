@@ -191,5 +191,50 @@
       <description>1、Comparable 介绍 Comparable 是一个排序接口，如果一个类实现了该接口，说明该类本身是可以进行排序的。注意，除了基本数据类型（八大基本数据类型</description>
     </item>
     
+    <item>
+      <title>Java中断机制(interrupt))</title>
+      <link>http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/</link>
+      <pubDate>Fri, 29 Sep 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/</guid>
+      <description>中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T</description>
+    </item>
+    
+    <item>
+      <title>垃圾回收和内存分配策略</title>
+      <link>http://luky116.github.io/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</link>
+      <pubDate>Sun, 24 Sep 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</guid>
+      <description>垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对</description>
+    </item>
+    
+    <item>
+      <title>Java虚拟机的类加载机制</title>
+      <link>http://luky116.github.io/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</link>
+      <pubDate>Fri, 15 Sep 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</guid>
+      <description>Java 虚拟机的类加载机制 关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟</description>
+    </item>
+    
+    <item>
+      <title>MySQL索引</title>
+      <link>http://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</link>
+      <pubDate>Wed, 30 Aug 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</guid>
+      <description>1、为什么会有索引 当数据保存在磁盘介质上时，它是作为数据库存放的，每条数据是作为一个整体存储的。磁盘存放数据的数据结构类似于链表，即，每个节</description>
+    </item>
+    
+    <item>
+      <title>数据库三范式</title>
+      <link>http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</link>
+      <pubDate>Tue, 29 Aug 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</guid>
+      <description>1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求</description>
+    </item>
+    
   </channel>
 </rss>

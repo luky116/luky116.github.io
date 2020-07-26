@@ -20,5 +20,23 @@
       <description>1. 关联查询执行流程 MySQL执行关联查询的策略很简单，他会从一个表中循环取出单条数据，然后用该条数据到下一个表中寻找匹配的行，然后回溯到上一</description>
     </item>
     
+    <item>
+      <title>MySQL索引</title>
+      <link>http://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</link>
+      <pubDate>Wed, 30 Aug 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</guid>
+      <description>1、为什么会有索引 当数据保存在磁盘介质上时，它是作为数据库存放的，每条数据是作为一个整体存储的。磁盘存放数据的数据结构类似于链表，即，每个节</description>
+    </item>
+    
+    <item>
+      <title>数据库三范式</title>
+      <link>http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</link>
+      <pubDate>Tue, 29 Aug 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</guid>
+      <description>1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求</description>
+    </item>
+    
   </channel>
 </rss>

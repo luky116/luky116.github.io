@@ -38,5 +38,14 @@
       <description>1、Comparable 介绍 Comparable 是一个排序接口，如果一个类实现了该接口，说明该类本身是可以进行排序的。注意，除了基本数据类型（八大基本数据类型</description>
     </item>
     
+    <item>
+      <title>Java中断机制(interrupt))</title>
+      <link>http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/</link>
+      <pubDate>Fri, 29 Sep 2017 14:43:00 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/</guid>
+      <description>中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T</description>
+    </item>
+    
   </channel>
 </rss>

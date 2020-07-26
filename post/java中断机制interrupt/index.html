@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java中断机制(interrupt)) - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java中断机制(interrupt))" />
+<meta property="og:description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/" />
+<meta property="article:published_time" content="2017-09-29T14:43:00+08:00" />
+<meta property="article:modified_time" content="2017-09-29T14:43:00+08:00" />
+<meta itemprop="name" content="Java中断机制(interrupt))">
+<meta itemprop="description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T">
+<meta itemprop="datePublished" content="2017-09-29T14:43:00&#43;08:00" />
+<meta itemprop="dateModified" content="2017-09-29T14:43:00&#43;08:00" />
+<meta itemprop="wordCount" content="2069">
+
+
+
+<meta itemprop="keywords" content="Java中断," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java中断机制(interrupt))"/>
+<meta name="twitter:description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java中断机制(interrupt))</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-09-29 </span>
+        <div class="post-category">
+            <a href="/categories/java%E6%BA%90%E7%A0%81/"> Java源码 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p><strong>中断线程</strong></p>
+<p>在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，Thread中的interrupt() 方法被调用时，线程中断状态将被置位，由于线程在运行期间，会不断的检测这个状态位，以判断程序是否被中断。</p>
+<p><strong>检测线程是否被中断</strong></p>
+<p>在实际开发中，要判断中断状态位是否被置位，首先使用静态方法 Thread.currentThread() 方法来获取当前线程，在调用 interrupted() 方法来判断中断位的状态。如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="k">while</span> <span class="o">(!</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupted</span><span class="o">()</span> <span class="o">&amp;&amp;</span> <span class="n">more</span> <span class="n">work</span> <span class="n">to</span> <span class="k">do</span><span class="o">)</span> <span class="o">{}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>interrupted 和 isInterrupted 区别</strong></p>
+<p>interrupted 是一个静态方法，他检测当前线程是否中断，并且会清除当前线程的中断位。isInterrupted 是一个实例方法，检测线程中断位，不会清除状态位。</p>
+<p><strong>如何中断线程</strong></p>
+<p>如果线程被Object.wait, Thread.join和Thread.sleep三种方法之一阻塞，那么，它将接收到一个中断异常（InterruptedException），从而提早地终结被阻塞状态。interrupt 不会中断一个正在运行的线程。</p>
+<p>要注意的是，中断线程不等于终止线程，interrupt 只是只是改变了线程的状态位，来引起线程的注意或是唤醒沉睡的线程。但是当线程注意到（捕获到InterruptedException异常或是检测到状态位的改变），可以自行决定如何处理该线程，比如，可以让线程捕获异常后继续执行，或是中断线程。</p>
+<p>在实际操作中，一般会把线程中断当做线程结束的条件，格式如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">while</span><span class="o">(!</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">isInterrupted</span><span class="o">()</span> <span class="o">){</span>
+        <span class="k">try</span><span class="o">{</span>
+            <span class="c1">//处理正常的逻辑
+</span><span class="c1"></span>            <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">){</span>
+            <span class="c1">//被中断后的进入
+</span><span class="c1"></span>
+            <span class="c1">//由于抛出异常后会把状态位改变，所以这里应该手动改变状态位
+</span><span class="c1"></span>            <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupt</span><span class="o">();</span>
+        <span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+            <span class="c1">// 线程结束前的后续操作
+</span><span class="c1"></span>        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>一般不会在捕获的异常中不进行任何操作，这样可能会处理不当中断，比如：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">try</span><span class="o">{</span>
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+    <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">){</span> <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>选择抛出异常，也是很好的选择：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kt">void</span> <span class="nf">mySubTask</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+           <span class="o">...</span>
+        <span class="n">sleep</span><span class="o">(</span><span class="n">delay</span><span class="o">);</span>
+           <span class="o">...</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>如何中断一个线程</strong></p>
+<p><strong>实例一：</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Example1</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">float</span> <span class="n">d</span><span class="o">;</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">10000000</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="o">(</span><span class="n">d</span> <span class="o">+</span> <span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">PI</span> <span class="o">+</span> <span class="n">Math</span><span class="o">.</span><span class="na">E</span><span class="o">)</span> <span class="o">/</span> <span class="n">d</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;I&#39;m counting......&#34;</span><span class="o">);</span>
+            <span class="c1">//转让调度器使用权
+</span><span class="c1"></span>            <span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">Example1</span> <span class="n">example1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Example1</span><span class="o">();</span>
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">example1</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;开始中断线程。。。。。。&#34;</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>输出：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">I&#39;m counting......
+开始中断线程。。。。。。
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+</code></pre></td></tr></table>
+</div>
+</div><p>可以看出来，线程被调用interrupt方法后，并没有被中断，任然在运行，所以说，interrupt 方法并不能是线程终止运行。</p>
+<p>要是线程中断运行，有三种方法，抛出Interrupt异常，使用 Thread.interrupted() 不断检查中断状态位，使用信号量进行控制。</p>
+<p><strong>方法一：信号量法</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">class</span> <span class="nc">Example2</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="n">isLive</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="kt">float</span> <span class="n">d</span><span class="o">;</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">while</span><span class="o">(</span><span class="n">isLive</span><span class="o">){</span>
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">10000000</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="o">(</span><span class="kt">float</span><span class="o">)</span> <span class="o">(</span><span class="n">d</span> <span class="o">+</span> <span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">PI</span> <span class="o">+</span> <span class="n">Math</span><span class="o">.</span><span class="na">E</span><span class="o">)</span> <span class="o">/</span> <span class="n">d</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;I&#39;m counting......&#34;</span><span class="o">);</span>
+            <span class="c1">//转让调度器使用权
+</span><span class="c1"></span>            <span class="n">Thread</span><span class="o">.</span><span class="na">yield</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">Example2</span> <span class="n">e2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Example2</span><span class="o">();</span>
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">e2</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;开始中断线程。。。。。。&#34;</span><span class="o">);</span>
+
+        <span class="c1">//设置改变信号量
+</span><span class="c1"></span>        <span class="n">e2</span><span class="o">.</span><span class="na">isLive</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>输出结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">I&#39;m counting......
+开始中断线程。。。。。。
+I&#39;m counting......
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>方法二：抛出异常法</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Example1</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+
+        <span class="kd">private</span> <span class="kt">double</span> <span class="n">d</span> <span class="o">=</span> <span class="n">0</span><span class="o">.</span><span class="na">0</span><span class="o">;</span>
+        <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+            <span class="c1">//死循环执行打印&#34;I am running!&#34; 和做消耗时间的浮点计算
+</span><span class="c1"></span>            <span class="k">try</span> <span class="o">{</span>
+                <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;I am running!&#34;</span><span class="o">);</span>
+                    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">900000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+                        <span class="n">d</span> <span class="o">=</span>  <span class="n">d</span> <span class="o">+</span> <span class="o">(</span><span class="n">Math</span><span class="o">.</span><span class="na">PI</span> <span class="o">+</span> <span class="n">Math</span><span class="o">.</span><span class="na">E</span><span class="o">)</span> <span class="o">/</span> <span class="n">d</span><span class="o">;</span>
+                    <span class="o">}</span>
+                    <span class="c1">//休眠一断时间,中断时会抛出InterruptedException
+</span><span class="c1"></span>                    <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">50</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;ATask.run() interrupted!&#34;</span><span class="o">);</span>
+            <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">Example1</span> <span class="n">example1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Example1</span><span class="o">();</span>
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">example1</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;开始中断线程。。。。。。&#34;</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>输出结果</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">I am running!
+I am running!
+开始中断线程。。。。。。
+ATask.run() interrupted!
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>方法三：*<em>Thread.interrupted()监听*</em></strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">class</span> <span class="nc">Example3</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">while</span> <span class="o">(!</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupted</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;I&#39;m counting......&#34;</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">//设置状态位
+</span><span class="c1"></span>                <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupt</span><span class="o">();</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">Example3</span> <span class="n">e</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Example3</span><span class="o">();</span>
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">800</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;开始中断线程。。。。。。&#34;</span><span class="o">);</span>
+
+        <span class="n">t1</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>输出为：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+开始中断线程。。。。。。
+</code></pre></td></tr></table>
+</div>
+</div><p><strong>被遗弃的stop和suspend</strong></p>
+<p>早起的Java版本提供了stop方法来终止一个线程，以及suspend来阻塞一个线程直到另一个线程调用resume来唤醒线程。stop和suspend这两个方法都试图控制给定线程的想行为。</p>
+<p>stop 方法试图终止一个线程的执行，包括未执完的run方法，其本身是很不安全的。比如说，当一个线程试图从一个账户转账到另一个账户，一个线程已经把钱取出来了，但是此正好被stop终止了线程，但是钱却没有转到另一个账户。这样的突然终止导致银行对象出于不稳定的状态。虽然此时锁被释放了，但是他的不稳定状态却不能被其他线程看到，这是很危险的。</p>
+<p>suspend 方法用来挂起一个锁，虽然不会破坏对象，但是有可能导致死锁。假设如果用suspend方法挂起一个拥有锁的线程，那么，该锁在恢复之前是不可用的。如果此时，调用suspend方法的线程试图获取同一个锁，那么，此时就会出现死锁。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-09-29
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java%E4%B8%AD%E6%96%AD/">Java中断</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E4%B8%ADcomparable%E5%92%8Ccomparator%E6%AF%94%E8%BE%83/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java中Comparable和Comparator比较</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
+            <span class="next-text nav-default">垃圾回收和内存分配策略</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

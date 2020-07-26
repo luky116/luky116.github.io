@@ -92,5 +92,14 @@
       <description>1、命名篇 避免使用误导性的命名，比如是List类型变量才会命名为accountList；不使用小写的字母L和大写的字母O来命名变量，因为他们</description>
     </item>
     
+    <item>
+      <title>MySQL查询优化 关联查询</title>
+      <link>http://luky116.github.io/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/</link>
+      <pubDate>Sat, 10 Aug 2019 14:04:09 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/</guid>
+      <description>1. 关联查询执行流程 MySQL执行关联查询的策略很简单，他会从一个表中循环取出单条数据，然后用该条数据到下一个表中寻找匹配的行，然后回溯到上一</description>
+    </item>
+    
   </channel>
 </rss>

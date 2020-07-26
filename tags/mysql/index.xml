@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MySQL on Luky116 Blog</title>
+    <link>http://luky116.github.io/tags/mysql/</link>
+    <description>Recent content in MySQL on Luky116 Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 10 Aug 2019 14:04:09 +0800</lastBuildDate>
+    
+	<atom:link href="http://luky116.github.io/tags/mysql/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>MySQL查询优化 关联查询</title>
+      <link>http://luky116.github.io/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/</link>
+      <pubDate>Sat, 10 Aug 2019 14:04:09 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/</guid>
+      <description>1. 关联查询执行流程 MySQL执行关联查询的策略很简单，他会从一个表中循环取出单条数据，然后用该条数据到下一个表中寻找匹配的行，然后回溯到上一</description>
+    </item>
+    
+  </channel>
+</rss>

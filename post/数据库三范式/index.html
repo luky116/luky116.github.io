@@ -151,7 +151,6 @@
       <ul>
         <li><a href="#41-定义">4.1 定义</a></li>
         <li><a href="#42-案例">4.2 案例</a></li>
-        <li><a href="#如图主键为-orderid其余所有属性都完全依赖于这个主键但是productname产品名字producter生产商属性直接依赖于productidproductid依赖于主键这就是-通过传递才依赖主键的不符合3nf拆分后满足">　　如图，主键为 OrderId，其余所有属性都完全依赖于这个主键，但是ProductName（产品名字）、Producter（生产商）属性直接依赖于ProductId，ProductId依赖于主键，这就是 通过传递才依赖主键的，不符合3NF。拆分后，满足。</a></li>
       </ul>
     </li>
     <li><a href="#5第二范式和第三范式">5、第二范式和第三范式</a></li>
@@ -215,7 +214,7 @@
 <h3 id="41-定义">4.1 定义</h3>
 <p>　　首先是 2NF，另外非主键列必须直接依赖于主键，不能存在传递依赖。即不能存在：非主键列 A 依赖于非主键列 B，非主键列 B 依赖于主键的情况。</p>
 <h3 id="42-案例">4.2 案例</h3>
-<h3 id="如图主键为-orderid其余所有属性都完全依赖于这个主键但是productname产品名字producter生产商属性直接依赖于productidproductid依赖于主键这就是-通过传递才依赖主键的不符合3nf拆分后满足">　　如图，主键为 OrderId，其余所有属性都完全依赖于这个主键，但是ProductName（产品名字）、Producter（生产商）属性直接依赖于ProductId，ProductId依赖于主键，这就是 通过传递才依赖主键的，不符合3NF。拆分后，满足。</h3>
+<p>如图，主键为 OrderId，其余所有属性都完全依赖于这个主键，但是ProductName（产品名字）、Producter（生产商）属性直接依赖于ProductId，ProductId依赖于主键，这就是 通过传递才依赖主键的，不符合3NF。拆分后，满足。</p>
 <p><img src="http://images2017.cnblogs.com/blog/834666/201708/834666-20170830091151358-28919448.png" alt="img"></p>
 <h2 id="5第二范式和第三范式">5、第二范式和第三范式</h2>
 <p>　2NF 和 3NF很容易混淆，满足3NF一定满足2NF，总结下就是：</p>

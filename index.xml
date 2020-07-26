@@ -206,7 +206,7 @@
       <pubDate>Sun, 24 Sep 2017 14:43:00 +0800</pubDate>
       
       <guid>http://luky116.github.io/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/</guid>
-      <description>垃圾回收和内存分配策略 由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对</description>
+      <description>由于程序计数器、虚拟机栈、本地方法栈随线程而生，随线程而灭一般的垃圾回收指Java 堆和方法区出的内存回收。 1 如何判断对象是否已死 1.1 引用计数器</description>
     </item>
     
     <item>
@@ -215,7 +215,7 @@
       <pubDate>Fri, 15 Sep 2017 14:43:00 +0800</pubDate>
       
       <guid>http://luky116.github.io/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</guid>
-      <description>Java 虚拟机的类加载机制 关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟</description>
+      <description>关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java</description>
     </item>
     
     <item>

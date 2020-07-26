@@ -65,5 +65,32 @@
       <description></description>
     </item>
     
+    <item>
+      <title>Java源码</title>
+      <link>http://luky116.github.io/categories/java%E6%BA%90%E7%A0%81/</link>
+      <pubDate>Mon, 20 Nov 2017 14:09:22 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/categories/java%E6%BA%90%E7%A0%81/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>MyBatis</title>
+      <link>http://luky116.github.io/categories/mybatis/</link>
+      <pubDate>Wed, 18 Oct 2017 14:29:03 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/categories/mybatis/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Spring</title>
+      <link>http://luky116.github.io/categories/spring/</link>
+      <pubDate>Wed, 11 Oct 2017 14:29:03 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/categories/spring/</guid>
+      <description></description>
+    </item>
+    
   </channel>
 </rss>

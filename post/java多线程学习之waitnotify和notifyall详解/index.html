@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之wait、notify和notifyAll详解 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="1、wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 2、wait()使当前线程阻塞，前" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bwaitnotify%E5%92%8Cnotifyall%E8%AF%A6%E8%A7%A3/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java多线程学习之wait、notify和notifyAll详解" />
+<meta property="og:description" content="1、wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 2、wait()使当前线程阻塞，前" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bwaitnotify%E5%92%8Cnotifyall%E8%AF%A6%E8%A7%A3/" />
+<meta property="article:published_time" content="2017-10-06T14:29:03+08:00" />
+<meta property="article:modified_time" content="2017-10-06T14:29:03+08:00" />
+<meta itemprop="name" content="Java多线程学习之wait、notify和notifyAll详解">
+<meta itemprop="description" content="1、wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 2、wait()使当前线程阻塞，前">
+<meta itemprop="datePublished" content="2017-10-06T14:29:03&#43;08:00" />
+<meta itemprop="dateModified" content="2017-10-06T14:29:03&#43;08:00" />
+<meta itemprop="wordCount" content="3054">
+
+
+
+<meta itemprop="keywords" content="notify,源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java多线程学习之wait、notify和notifyAll详解"/>
+<meta name="twitter:description" content="1、wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。 2、wait()使当前线程阻塞，前"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之wait、notify和notifyAll详解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-10-06 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>1、wait()、notify/notifyAll() 方法是Object的本地final方法，无法被重写。</p>
+<p>2、wait()使当前线程阻塞，前提是 必须先获得锁，一般配合synchronized 关键字使用，即，一般在synchronized 同步代码块里使用 wait()、notify/notifyAll() 方法。</p>
+<p>3、 由于 wait()、notify/notifyAll() 在synchronized 代码块执行，说明当前线程一定是获取了锁的。</p>
+<p>当线程执行wait()方法时候，会释放当前的锁，然后让出CPU，进入等待状态。</p>
+<p>只有当 notify/notifyAll() 被执行时候，才会唤醒一个或多个正处于等待状态的线程，然后继续往下执行，直到执行完synchronized 代码块的代码或是中途遇到wait() ，再次释放锁。</p>
+<p>也就是说，notify/notifyAll() 的执行只是唤醒沉睡的线程，而不会立即释放锁，锁的释放要看代码块的具体执行情况。所以在编程中，尽量在使用了notify/notifyAll() 后立即退出临界区，以唤醒其他线程让其获得锁</p>
+<p>4、wait() 需要被try catch包围，以便发生异常中断也可以使wait等待的线程唤醒。</p>
+<p>5、notify 和wait 的顺序不能错，如果A线程先执行notify方法，B线程在执行wait方法，那么B线程是无法被唤醒的。</p>
+<p>6、notify 和 notifyAll的区别</p>
+<p>notify方法只唤醒一个等待（对象的）线程并使该线程开始执行。所以如果有多个线程等待一个对象，这个方法只会唤醒其中一个线程，选择哪个线程取决于操作系统对多线程管理的实现。notifyAll 会唤醒所有等待(对象的)线程，尽管哪一个线程将会第一个处理取决于操作系统的实现。如果当前情况下有多个线程需要被唤醒，推荐使用notifyAll 方法。比如在生产者-消费者里面的使用，每次都需要唤醒所有的消费者或是生产者，以判断程序是否可以继续往下执行。</p>
+<p>7、在多线程中要测试某个条件的变化，使用if 还是while？</p>
+<p>　　要注意，notify唤醒沉睡的线程后，线程会接着上次的执行继续往下执行。所以在进行条件判断时候，可以先把 wait 语句忽略不计来进行考虑；显然，要确保程序一定要执行，并且要保证程序直到满足一定的条件再执行，要使用while进行等待，直到满足条件才继续往下执行。如下代码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">K</span> <span class="o">{</span>
+    <span class="c1">//状态锁
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="n">Object</span> <span class="n">lock</span><span class="o">;</span>
+    <span class="c1">//条件变量
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">now</span><span class="o">,</span><span class="n">need</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">produce</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">){</span>
+        <span class="c1">//同步
+</span><span class="c1"></span>        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">lock</span><span class="o">){</span>
+           <span class="c1">//当前有的不满足需要，进行等待，直到满足条件
+</span><span class="c1"></span>            <span class="k">while</span><span class="o">(</span><span class="n">now</span> <span class="o">&lt;</span> <span class="n">need</span><span class="o">){</span>
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="c1">//等待阻塞
+</span><span class="c1"></span>                    <span class="n">lock</span><span class="o">.</span><span class="na">wait</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;我被唤醒了！&#34;</span><span class="o">);</span>
+            <span class="o">}</span>
+           <span class="c1">// 做其他的事情
+</span><span class="c1"></span>        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>显然，只有当前值满足需要值的时候，线程才可以往下执行，所以，必须使用while 循环阻塞。注意，wait() 当被唤醒时候，只是让while循环继续往下走.如果此处用if的话，意味着if继续往下走，会跳出if语句块。</p>
+<p>8、实现生产者和消费者问题</p>
+<p>　　什么是生产者-消费者问题呢？<img src="http://images2017.cnblogs.com/blog/834666/201710/834666-20171006132515411-1581950806.jpg" alt="img"></p>
+<p>　　如上图，假设有一个公共的容量有限的池子，有两种人，一种是生产者，另一种是消费者。需要满足如下条件：</p>
+<p>　　　　1、生产者产生资源往池子里添加，前提是池子没有满，如果池子满了，则生产者暂停生产，直到自己的生成能放下池子。</p>
+<p>　　　　2、消费者消耗池子里的资源，前提是池子的资源不为空，否则消费者暂停消耗，进入等待直到池子里有资源数满足自己的需求。</p>
+<p>　　- 仓库类</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kn">import</span> <span class="nn">java.util.LinkedList</span><span class="o">;</span>
+
+<span class="cm">/**
+</span><span class="cm"> *  生产者和消费者的问题
+</span><span class="cm"> *  wait、notify/notifyAll() 实现
+</span><span class="cm"> */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Storage1</span> <span class="kd">implements</span> <span class="n">AbstractStorage</span> <span class="o">{</span>
+    <span class="c1">//仓库最大容量
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">MAX_SIZE</span> <span class="o">=</span> <span class="n">100</span><span class="o">;</span>
+    <span class="c1">//仓库存储的载体
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="n">LinkedList</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LinkedList</span><span class="o">();</span>
+
+    <span class="c1">//生产产品
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">produce</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">){</span>
+        <span class="c1">//同步
+</span><span class="c1"></span>        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">list</span><span class="o">){</span>
+            <span class="c1">//仓库剩余的容量不足以存放即将要生产的数量，暂停生产
+</span><span class="c1"></span>            <span class="k">while</span><span class="o">(</span><span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()+</span><span class="n">num</span> <span class="o">&gt;</span> <span class="n">MAX_SIZE</span><span class="o">){</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【要生产的产品数量】:&#34;</span> <span class="o">+</span> <span class="n">num</span> <span class="o">+</span> <span class="s">&#34;\t【库存量】:&#34;</span>
+                        <span class="o">+</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;\t暂时不能执行生产任务!&#34;</span><span class="o">);</span>
+
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="c1">//条件不满足，生产阻塞
+</span><span class="c1"></span>                    <span class="n">list</span><span class="o">.</span><span class="na">wait</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">num</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+                <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="n">Object</span><span class="o">());</span>
+            <span class="o">}</span>
+
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【已经生产产品数】:&#34;</span> <span class="o">+</span> <span class="n">num</span> <span class="o">+</span> <span class="s">&#34;\t【现仓储量为】:&#34;</span> <span class="o">+</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+
+            <span class="n">list</span><span class="o">.</span><span class="na">notifyAll</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">//消费产品
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">consume</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">){</span>
+        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">list</span><span class="o">){</span>
+
+            <span class="c1">//不满足消费条件
+</span><span class="c1"></span>            <span class="k">while</span><span class="o">(</span><span class="n">num</span> <span class="o">&gt;</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()){</span>
+                <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【要消费的产品数量】:&#34;</span> <span class="o">+</span> <span class="n">num</span> <span class="o">+</span> <span class="s">&#34;\t【库存量】:&#34;</span>
+                        <span class="o">+</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;\t暂时不能执行生产任务!&#34;</span><span class="o">);</span>
+
+                <span class="k">try</span> <span class="o">{</span>
+                    <span class="n">list</span><span class="o">.</span><span class="na">wait</span><span class="o">();</span>
+                <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                    <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+                <span class="o">}</span>
+            <span class="o">}</span>
+
+            <span class="c1">//消费条件满足，开始消费
+</span><span class="c1"></span>            <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="n">0</span><span class="o">;</span><span class="n">i</span><span class="o">&lt;</span><span class="n">num</span><span class="o">;</span><span class="n">i</span><span class="o">++){</span>
+                <span class="n">list</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+            <span class="o">}</span>
+
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【已经消费产品数】:&#34;</span> <span class="o">+</span> <span class="n">num</span> <span class="o">+</span> <span class="s">&#34;\t【现仓储量为】:&#34;</span> <span class="o">+</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">());</span>
+
+            <span class="n">list</span><span class="o">.</span><span class="na">notifyAll</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　- 抽象仓库类</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">AbstractStorage</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">consume</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">);</span>
+    <span class="kt">void</span> <span class="nf">produce</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　- 生产者</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Producer</span> <span class="kd">extends</span> <span class="n">Thread</span><span class="o">{</span>
+    <span class="c1">//每次生产的数量
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">num</span> <span class="o">;</span>
+
+    <span class="c1">//所属的仓库
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="n">AbstractStorage</span> <span class="n">abstractStorage</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Producer</span><span class="o">(</span><span class="n">AbstractStorage</span> <span class="n">abstractStorage</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">abstractStorage</span> <span class="o">=</span> <span class="n">abstractStorage</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setNum</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">num</span> <span class="o">=</span> <span class="n">num</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 线程run函数
+</span><span class="c1"></span>    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="n">produce</span><span class="o">(</span><span class="n">num</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 调用仓库Storage的生产函数
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">produce</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="n">abstractStorage</span><span class="o">.</span><span class="na">produce</span><span class="o">(</span><span class="n">num</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　- 消费者</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Consumer</span> <span class="kd">extends</span> <span class="n">Thread</span><span class="o">{</span>
+    <span class="c1">// 每次消费的产品数量
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">num</span><span class="o">;</span>
+
+    <span class="c1">// 所在放置的仓库
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="n">AbstractStorage</span> <span class="n">abstractStorage1</span><span class="o">;</span>
+
+    <span class="c1">// 构造函数，设置仓库
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="nf">Consumer</span><span class="o">(</span><span class="n">AbstractStorage</span> <span class="n">abstractStorage1</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">abstractStorage1</span> <span class="o">=</span> <span class="n">abstractStorage1</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 线程run函数
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="n">consume</span><span class="o">(</span><span class="n">num</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 调用仓库Storage的生产函数
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">consume</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">)</span>
+    <span class="o">{</span>
+        <span class="n">abstractStorage1</span><span class="o">.</span><span class="na">consume</span><span class="o">(</span><span class="n">num</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setNum</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">num</span> <span class="o">=</span> <span class="n">num</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　- 测试</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// 仓库对象
+</span><span class="c1"></span>        <span class="n">AbstractStorage</span> <span class="n">abstractStorage</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Storage1</span><span class="o">();</span>
+
+        <span class="c1">// 生产者对象
+</span><span class="c1"></span>        <span class="n">Producer</span> <span class="n">p1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p3</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p4</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p5</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p6</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Producer</span> <span class="n">p7</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Producer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+
+        <span class="c1">// 消费者对象
+</span><span class="c1"></span>        <span class="n">Consumer</span> <span class="n">c1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Consumer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Consumer</span> <span class="n">c2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Consumer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+        <span class="n">Consumer</span> <span class="n">c3</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Consumer</span><span class="o">(</span><span class="n">abstractStorage</span><span class="o">);</span>
+
+        <span class="c1">// 设置生产者产品生产数量
+</span><span class="c1"></span>        <span class="n">p1</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p2</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p3</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p4</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p5</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p6</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">10</span><span class="o">);</span>
+        <span class="n">p7</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">80</span><span class="o">);</span>
+
+        <span class="c1">// 设置消费者产品消费数量
+</span><span class="c1"></span>        <span class="n">c1</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">50</span><span class="o">);</span>
+        <span class="n">c2</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">20</span><span class="o">);</span>
+        <span class="n">c3</span><span class="o">.</span><span class="na">setNum</span><span class="o">(</span><span class="n">30</span><span class="o">);</span>
+
+        <span class="c1">// 线程开始执行
+</span><span class="c1"></span>        <span class="n">c1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">c2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">c3</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+        <span class="n">p1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p3</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p4</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p5</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p6</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">p7</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　- 输出</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">【要消费的产品数量】:50    【库存量】:0    暂时不能执行生产任务!
+【要消费的产品数量】:20    【库存量】:0    暂时不能执行生产任务!
+【要消费的产品数量】:30    【库存量】:0    暂时不能执行生产任务!
+【已经生产产品数】:10    【现仓储量为】:10
+【要消费的产品数量】:30    【库存量】:10    暂时不能执行生产任务!
+【要消费的产品数量】:20    【库存量】:10    暂时不能执行生产任务!
+【要消费的产品数量】:50    【库存量】:10    暂时不能执行生产任务!
+【已经生产产品数】:10    【现仓储量为】:20
+【已经生产产品数】:10    【现仓储量为】:30
+【要消费的产品数量】:50    【库存量】:30    暂时不能执行生产任务!
+【已经消费产品数】:20    【现仓储量为】:10
+【要消费的产品数量】:30    【库存量】:10    暂时不能执行生产任务!
+【已经生产产品数】:10    【现仓储量为】:20
+【要消费的产品数量】:50    【库存量】:20    暂时不能执行生产任务!
+【要消费的产品数量】:30    【库存量】:20    暂时不能执行生产任务!
+【已经生产产品数】:10    【现仓储量为】:30
+【已经消费产品数】:30    【现仓储量为】:0
+【要消费的产品数量】:50    【库存量】:0    暂时不能执行生产任务!
+【已经生产产品数】:10    【现仓储量为】:10
+【要消费的产品数量】:50    【库存量】:10    暂时不能执行生产任务!
+【已经生产产品数】:80    【现仓储量为】:90
+【已经消费产品数】:50    【现仓储量为】:40
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-10-06
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/notify/">notify</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/spring%E9%AB%98%E7%BA%A7%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Spring高级依赖注入方式</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/java%E4%B8%ADcomparable%E5%92%8Ccomparator%E6%AF%94%E8%BE%83/">
+            <span class="next-text nav-default">Java中Comparable和Comparator比较</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

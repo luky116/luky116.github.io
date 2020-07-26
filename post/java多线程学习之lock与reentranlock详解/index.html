@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之Lock与ReentranLock详解 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java多线程学习之Lock与ReentranLock详解" />
+<meta property="og:description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/" />
+<meta property="article:published_time" content="2017-11-18T14:09:22+08:00" />
+<meta property="article:modified_time" content="2017-11-18T14:09:22+08:00" />
+<meta itemprop="name" content="Java多线程学习之Lock与ReentranLock详解">
+<meta itemprop="description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了">
+<meta itemprop="datePublished" content="2017-11-18T14:09:22&#43;08:00" />
+<meta itemprop="dateModified" content="2017-11-18T14:09:22&#43;08:00" />
+<meta itemprop="wordCount" content="3048">
+
+
+
+<meta itemprop="keywords" content="ReenTranLock,源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java多线程学习之Lock与ReentranLock详解"/>
+<meta name="twitter:description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之Lock与ReentranLock详解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-18 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1lock-方法分析">1、Lock 方法分析</a></li>
+    <li><a href="#2轮询锁和定时锁">2、轮询锁和定时锁</a></li>
+    <li><a href="#3响应速度和性能的权衡">3、响应速度和性能的权衡</a></li>
+    <li><a href="#4可中断的锁获取操作">4、可中断的锁获取操作</a></li>
+    <li><a href="#5公平性">5、公平性</a></li>
+    <li><a href="#6如何选择synchronized和reentranlock">6、如何选择synchronized和ReentranLock</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>　　<code>synchronized</code> 是内置锁，而<code>Lock</code> 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。</p>
+<p>　　ReenTranLock实现了Lock接口，并提供了与synchronized 相同的互斥性和内存可见性。在获取ReentranLock时，有着与进入同步代码块相同的内存语义，在释放ReentranLock时，有着与退出同步代码块相同的语义。</p>
+<h2 id="1lock-方法分析">1、Lock 方法分析</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Lock</span> <span class="o">{</span>
+    <span class="kt">void</span> <span class="nf">lock</span><span class="o">();</span>
+    <span class="kt">void</span> <span class="nf">lockInterruptibly</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span><span class="o">;</span>
+    <span class="n">Condition</span> <span class="nf">newCondition</span><span class="o">();</span>
+    <span class="kt">boolean</span> <span class="nf">tryLock</span><span class="o">();</span>
+    <span class="kt">boolean</span> <span class="nf">tryLock</span><span class="o">(</span><span class="kt">long</span> <span class="n">time</span><span class="o">,</span> <span class="n">TimeUnit</span> <span class="n">unit</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span><span class="o">;</span>
+    <span class="kt">void</span> <span class="nf">unlock</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol>
+<li><code>lock()</code>：获得Lock锁</li>
+<li><code>lockInterruptibly()</code>：获得锁，可被中断</li>
+<li><code>newCondition()</code>：返回一个条件Condition对象</li>
+<li><code>tryLock()</code>：尝试获得锁</li>
+<li><code>tryLock(long time, TimeUnit unit)</code>：尝试在一定时间内获得锁，期间被阻塞</li>
+<li><code>unlock()</code>：释放锁</li>
+</ol>
+<p>Lock 接口使用的标准形式：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// 创建锁
+</span><span class="c1"></span><span class="n">Lock</span> <span class="n">lock</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReentranLock</span><span class="o">();</span>
+<span class="o">...</span>
+
+<span class="n">lock</span><span class="o">.</span><span class="na">lock</span><span class="o">();</span>
+<span class="k">try</span><span class="o">{</span>
+    <span class="c1">// 进行必要操作
+</span><span class="c1"></span>      <span class="c1">// 捕获异常，并在必要时恢复不变性条件
+</span><span class="c1"></span><span class="o">}</span><span class="k">finally</span><span class="o">{</span>
+  <span class="c1">//释放锁
+</span><span class="c1"></span>  <span class="n">lock</span><span class="o">.</span><span class="na">unlock</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　注意，使用Lock时一定要在finally语句里面释放锁，否则发生异常时可能会导致锁无法被释放，导致程序奔溃。</p>
+<h2 id="2轮询锁和定时锁">2、轮询锁和定时锁</h2>
+<p>　　相比于synchronized内置锁的无条件锁获取模式，Lock提供了<code>tryLock()</code> 实现<strong>可定时和可轮询的锁获取模式</strong>，这也使Lock具有更完善的错误恢复机制。在内置锁中，死锁是一个很严重的问题，造成死锁的原因之一可能是，锁获取顺序不一致导致程序死锁。比如说，线程1持有A对象锁，正在等待获取B对象锁；线程2持有B对象锁，正在等待获取A对象锁。这样，两个线程都会由于获取不到想要的锁而陷入死锁的境地。解决办法可以是，两个线程要么同时获取两个锁，要么一个锁都不获取。Lock 的可定时和可轮询锁就可以很好的满足该条件，从而避免死锁的发生（即操作系统中著名的哲学家进餐问题）。</p>
+<p>　　下面代码要实现统计两个资源的数量总和操作：使用tryLock尝试同时获取两个资源的锁，如果不能同时获取两个资源的锁，则退出重试。如果在规定时间内不能同时获取两对象的锁并完成操作，则返回-1作为失败的标识。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// 资源类
+</span><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Resource</span> <span class="o">{</span>
+    <span class="c1">//资源总和
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kt">int</span> <span class="n">resourceNum</span><span class="o">;</span>
+    <span class="c1">// 显示锁
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="n">Lock</span> <span class="n">lock</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReentrantLock</span><span class="o">();</span>
+
+    <span class="kd">public</span> <span class="nf">Resource</span><span class="o">(</span><span class="kt">int</span> <span class="n">resourceNum</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">resourceNum</span> <span class="o">=</span> <span class="n">resourceNum</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="c1">//返回此资源的总量
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getResourceNum</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="n">resourceNum</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LockTest1</span> <span class="o">{</span>
+      <span class="c1">//传入两个资源类和预期操作时间，在此期间内返回两个资源的数量总和
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getResource</span><span class="o">(</span><span class="n">Resource</span> <span class="n">resourceA</span><span class="o">,</span> <span class="n">Resource</span> <span class="n">resourceB</span><span class="o">,</span> <span class="kt">long</span> <span class="n">timeout</span><span class="o">,</span> <span class="n">TimeUnit</span> <span class="n">unit</span><span class="o">)</span>
+          <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="c1">// 获取当前时间，算出操作截止时间
+</span><span class="c1"></span>        <span class="kt">long</span> <span class="n">stopTime</span> <span class="o">=</span> <span class="n">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">+</span> <span class="n">unit</span><span class="o">.</span><span class="na">toNanos</span><span class="o">(</span><span class="n">timeout</span><span class="o">);</span>
+
+        <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="c1">// 尝试获得资源A的锁
+</span><span class="c1"></span>                <span class="k">if</span> <span class="o">(</span><span class="n">resourceA</span><span class="o">.</span><span class="na">lock</span><span class="o">.</span><span class="na">tryLock</span><span class="o">())</span> <span class="o">{</span>
+                    <span class="k">try</span><span class="o">{</span>
+                        <span class="c1">// 如果获得资源A的锁，尝试获得资源B的锁
+</span><span class="c1"></span>                        <span class="k">if</span><span class="o">(</span><span class="n">resourceB</span><span class="o">.</span><span class="na">lock</span><span class="o">.</span><span class="na">tryLock</span><span class="o">()){</span>
+                            <span class="c1">//同时获得两资源的锁，进行相关操作后返回
+</span><span class="c1"></span>                            <span class="k">return</span> <span class="n">getSum</span><span class="o">(</span><span class="n">resourceA</span><span class="o">,</span> <span class="n">resourceB</span><span class="o">);</span>
+                        <span class="o">}</span>
+                    <span class="o">}</span><span class="k">finally</span> <span class="o">{</span>
+                        <span class="n">resourceB</span><span class="o">.</span><span class="na">lock</span><span class="o">.</span><span class="na">unlock</span><span class="o">();</span>
+                    <span class="o">}</span>
+                <span class="o">}</span>
+            <span class="o">}</span><span class="k">finally</span> <span class="o">{</span>
+                <span class="n">resourceA</span><span class="o">.</span><span class="na">lock</span><span class="o">.</span><span class="na">unlock</span><span class="o">();</span>
+            <span class="o">}</span>
+
+            <span class="c1">// 判断当前是否超时，规定-1为错误标识
+</span><span class="c1"></span>            <span class="k">if</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">&gt;</span> <span class="n">stopTime</span><span class="o">)</span>
+                <span class="k">return</span> <span class="o">-</span><span class="n">1</span><span class="o">;</span>
+
+            <span class="c1">//睡眠1秒，继续尝试获得锁
+</span><span class="c1"></span>            <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="c1">// 获得资源总和
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getSum</span><span class="o">(</span><span class="n">Resource</span> <span class="n">resourceA</span><span class="o">,</span><span class="n">Resource</span> <span class="n">resourceB</span><span class="o">){</span>
+        <span class="k">return</span> <span class="n">resourceA</span><span class="o">.</span><span class="na">getResourceNum</span><span class="o">()+</span><span class="n">resourceB</span><span class="o">.</span><span class="na">getResourceNum</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　对于内置锁，在开始请求后，这个操作将无法在规<strong>定时间内取消</strong>或是<strong>中途中断</strong> ，因此内置锁很难实现带时间限制的操作。</p>
+<h2 id="3响应速度和性能的权衡">3、响应速度和性能的权衡</h2>
+<p>　　在上代码中，每次尝试获取两个锁失败，都会调用 <code>TimeUnit.SECONDS.sleep(1);</code> 让线程休眠一秒后，再去尝试获得两个资源锁。这里涉及到一个性能和响应时间的问题：</p>
+<ol>
+<li>如果每次尝试后都让线程休眠，可能会造成响应迟延的问题。比如，在这次失败进入休眠的瞬间，两个锁的状态刚好变为可用，但线程必须要休眠完成后才能再次尝试。但是，休眠的同时可以不占用CPU时钟周期，可以让其他线程有时间来占用CPU。</li>
+<li>如果不休眠，让线程在一次获取锁失败后立即进行下一轮获取尝试，可以获得很好的响应速度，但是这也会让线程长时间占用CPU时钟周期直到成功获得两个锁。如果该锁在很长时间后才都可用，这会造成CPU资源浪费，服务器性能降低。</li>
+</ol>
+<p>因此，需要在响应速度和服务器性能之间做出权衡。</p>
+<h2 id="4可中断的锁获取操作">4、可中断的锁获取操作</h2>
+<p>　　Lock中的<code>lockInterruptibly()</code> 可以在获得锁的同时保持对中断的响应，但是内置锁synchronized却很难实现这个功能。</p>
+<p>　　如下程序，创建一任务，假设该任务需要执行很长时间才能结束（使用死循环来模拟时长）。现在有两个线程竞争该资源的内置锁，在等待一段时间后，想要终止线程t2的锁获取等待操作，使用<code>t2.interrupt();</code> 尝试中断线程t2。遗憾的是，此时t2根本不会响应这个中断操作，它会继续等待直到获得资源锁。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InterruptedLockTest</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">doCount</span><span class="o">(){</span>
+        <span class="c1">//使用死循环表示此操作要进行很长的一段时间才能结束
+</span><span class="c1"></span>        <span class="k">while</span><span class="o">(</span><span class="kc">true</span><span class="o">){}</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">doCount</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">InterruptedLockTest</span> <span class="n">test</span> <span class="o">=</span> <span class="k">new</span> <span class="n">InterruptedLockTest</span><span class="o">();</span>
+
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">test</span><span class="o">);</span>
+        <span class="n">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">test</span><span class="o">);</span>
+
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+          <span class="c1">//等待两秒，尝试中断线程t2的等待
+</span><span class="c1"></span>        <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">2</span><span class="o">);</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+
+        <span class="c1">//等待1秒，让 t2.interrupt(); 执行生效
+</span><span class="c1"></span>        <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1</span><span class="o">);</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;线程t1是否存活：&#34;</span> <span class="o">+</span> <span class="n">t1</span><span class="o">.</span><span class="na">isAlive</span><span class="o">());</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;线程t2是否存活：&#34;</span> <span class="o">+</span> <span class="n">t2</span><span class="o">.</span><span class="na">isAlive</span><span class="o">());</span>
+    <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　使用Lock的<code>lockInterruptibly()</code> 能够在获取锁请求的同时能保持对中断的响应。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InterruptedLockTest2</span> <span class="kd">implements</span> <span class="n">Runnable</span><span class="o">{</span>
+    <span class="n">Lock</span> <span class="n">lock</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ReentrantLock</span><span class="o">();</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doCount</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="c1">//可中断的锁等待机制，会抛出中断异常
+</span><span class="c1"></span>        <span class="n">lock</span><span class="o">.</span><span class="na">lockInterruptibly</span><span class="o">();</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{}</span>
+        <span class="o">}</span><span class="k">finally</span> <span class="o">{</span>
+            <span class="n">lock</span><span class="o">.</span><span class="na">unlock</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">doCount</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;被中断....&#34;</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+    <span class="n">InterruptedLockTest2</span> <span class="n">test</span> <span class="o">=</span> <span class="k">new</span> <span class="n">InterruptedLockTest2</span><span class="o">();</span>
+
+    <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">test</span><span class="o">);</span>
+    <span class="n">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">test</span><span class="o">);</span>
+
+    <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+
+    <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">2</span><span class="o">);</span>
+    <span class="n">t2</span><span class="o">.</span><span class="na">interrupt</span><span class="o">();</span>
+
+    <span class="c1">//等待1秒，让 t2.interrupt(); 执行生效
+</span><span class="c1"></span>    <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1</span><span class="o">);</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;线程t1是否存活：&#34;</span> <span class="o">+</span> <span class="n">t1</span><span class="o">.</span><span class="na">isAlive</span><span class="o">());</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;线程t2是否存活：&#34;</span> <span class="o">+</span> <span class="n">t2</span><span class="o">.</span><span class="na">isAlive</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="5公平性">5、公平性</h2>
+<p>　　ReentranLock 提供了两种公平性的悬着：创建一个非公平锁（默认）或者创建一个非公平锁。在公平锁中，线程将按照他们发出请求的顺序来获得锁，非公平锁上则允许“插队”；如果一个线程在请求非公平锁时，如果此时该状态刚好变为可用，则该线程可能会直接获得该锁。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// 也可以指定公平性
+</span><span class="c1"></span><span class="kd">public</span> <span class="nf">ReentrantLock</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">fair</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">sync</span> <span class="o">=</span> <span class="n">fair</span> <span class="o">?</span> <span class="k">new</span> <span class="n">FairSync</span><span class="o">()</span> <span class="o">:</span> <span class="k">new</span> <span class="n">NonfairSync</span><span class="o">();</span>
+<span class="o">}</span>
+<span class="c1">//默认创建非公平锁
+</span><span class="c1"></span><span class="kd">public</span> <span class="nf">ReentrantLock</span><span class="o">()</span> <span class="o">{</span>
+      <span class="n">sync</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NonfairSync</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　在公平性的ReentranLock中，如果有一个线程在持有这个锁或是有线程在阻塞队列中等待这个锁，那么新请求的线程会被放入队列中等待。非公平性锁中，只当锁被某个线程占领时，才会把新请求的线程放入阻塞队列中。</p>
+<p>　　在竞争激烈的环境中，公平性锁的性能会比非公平性锁差很多。如果没有特殊的需求，不推荐使用公平锁，因为在公平锁中，恢复一个被挂起的线程与该线程真正开始执行之间存在严重的迟延。假如线程A持有一个锁，线程B请求这个锁，由于这个锁已经被持有，所以B会放入阻塞对类中。如果A释放该锁，B将被唤醒，一次会尝试再次请求该锁。与此同时，如果线程C也请求该锁，那么C很可能在B被完全唤醒之前持有、使用和释放该锁。这样，B既没有延迟使用该锁，C还利用其中间隙完成自己的操作，这是一个双赢的局面。</p>
+<h2 id="6如何选择synchronized和reentranlock">6、如何选择synchronized和ReentranLock</h2>
+<p>　　在Java6中，ReentranLock性能略有胜出synchronized。但是，使用ReentranLock需要在finally语句中手动释放锁，可能会造成一定的编码失误。并且，synchronized使用JVM的内置属性，可提升优化的空间较大。</p>
+<p>　　因此，只有在内置锁无法满足需求的情况下，比如，需要使用：可定时的、可轮询的和可中断的锁获取机制，公平队列。才会考虑使用ReentranLock。否则，优先使用synchronized内置锁。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-11-18
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/reentranlock/">ReenTranLock</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之线程的取消与中断机制</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/">
+            <span class="next-text nav-default">Java多线程学习之线程池源码详解</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

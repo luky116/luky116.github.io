@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之线程的取消与中断机制 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java多线程学习之线程的取消与中断机制" />
+<meta property="og:description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/" />
+<meta property="article:published_time" content="2017-11-18T14:16:39+08:00" />
+<meta property="article:modified_time" content="2017-11-18T14:16:39+08:00" />
+<meta itemprop="name" content="Java多线程学习之线程的取消与中断机制">
+<meta itemprop="description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户">
+<meta itemprop="datePublished" content="2017-11-18T14:16:39&#43;08:00" />
+<meta itemprop="dateModified" content="2017-11-18T14:16:39&#43;08:00" />
+<meta itemprop="wordCount" content="2874">
+
+
+
+<meta itemprop="keywords" content="线程中断,源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java多线程学习之线程的取消与中断机制"/>
+<meta name="twitter:description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之线程的取消与中断机制</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-18 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1使用标志变量取消任务">1、使用“标志”变量取消任务</a></li>
+    <li><a href="#2取消策略">2、取消策略</a></li>
+    <li><a href="#3中断线程">3、中断线程</a></li>
+    <li><a href="#4中断策略">4、中断策略</a></li>
+    <li><a href="#5使用future-来实现取消">5、使用Future 来实现取消</a></li>
+    <li><a href="#6关闭executorservice">6、关闭ExecutorService</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>　　任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户请求取消，或是线程在规定时间内没有结束，或是出现了一些问题迫使线程要提前结束。</p>
+<p>　　强制一个线程或是服务立即停止，可能会造成共享数据状态不一致的问题，比如，两个线程正对一个共享数据进行操作，然后被突然杀死，这样会对数据造成不确定性的影响。Java中没有提供任何机制来安全的终止线程，但它提供了中断，这种协作机制，“提醒”线程可以自己结束自己线程。这种机制提供了更好的灵活性，<strong>因为任务本身的代码比发出取消请求的代码更清楚如何执行停止工作。</strong></p>
+<h2 id="1使用标志变量取消任务">1、使用“标志”变量取消任务</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PrimeGenerator</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="n">primes</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;&gt;();</span>
+    <span class="c1">// 标志变量，设置为volatile，保证可见性
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">volatile</span> <span class="kt">boolean</span> <span class="n">canceled</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">BigInteger</span> <span class="n">p</span> <span class="o">=</span> <span class="n">BigInteger</span><span class="o">.</span><span class="na">ONE</span><span class="o">;</span>
+        <span class="c1">// 依靠标志位判断是否结束线程
+</span><span class="c1"></span>        <span class="k">while</span><span class="o">(!</span><span class="n">canceled</span><span class="o">){</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">nextProbablePrime</span><span class="o">();</span>
+            <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">){</span>
+                <span class="n">primes</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">p</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="c1">// 取消
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cancel</span><span class="o">(){</span><span class="n">canceled</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;}</span>
+    <span class="c1">//返回结果
+</span><span class="c1"></span>    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="nf">get</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="n">primes</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　上述代码设置一个<code>volatile</code> “已请求取消”标志，而任务将定期查看该标志。 PrimeGenerator 将持续的枚举素数，直到标志位被设置为取消结束。PrimeGenerator 每次枚举素数时候都会检查canceled标志位是否被改变。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="nf">aPrimes</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span> <span class="o">{</span>
+        <span class="n">PrimeGenerator</span> <span class="n">generator</span> <span class="o">=</span> <span class="k">new</span> <span class="n">PrimeGenerator</span><span class="o">();</span>
+        <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">generator</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">try</span><span class="o">{</span>
+            <span class="c1">// 睡眠1秒
+</span><span class="c1"></span>            <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1</span><span class="o">);</span>
+        <span class="o">}</span><span class="k">finally</span> <span class="o">{</span>
+            <span class="c1">// 1秒后取消
+</span><span class="c1"></span>            <span class="n">generator</span><span class="o">.</span><span class="na">cancel</span><span class="o">();</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="n">generator</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　调用素数生成器运行1秒后取消，值得注意的是，素数生成器可能不会在1秒后“准时”停止，因为他可能此时刚好在<code>while</code>内执行。取消语句放在finally语句执行，保证该语句一定会被执行。</p>
+<h2 id="2取消策略">2、取消策略</h2>
+<p>　　在设计良好的程序中，一个可取消的任务必须拥有取消策略，这个策略详细定义取消操作的“<strong>How</strong>”、“<strong>When</strong>”、“<strong>What</strong>”，即代码如何（How）请求取消该任务，任务在何时（When）检查是否已经请求了取消，以及在响应时执行那些（What）操作。</p>
+<p>　　在上述代码中，PrimeGenerator采用了简单的取消策略：客户代码通过canceled来请求取消，PrimeGenerator在每次执行搜索前首先检查是否存在取消请求，如果存在则退出。</p>
+<h2 id="3中断线程">3、中断线程</h2>
+<p>　　PrimeGenerator 中取消机制之所以能成功，是因为程序会不间断定期的检查标志位的状态是否被改变。但是，如果程序调用了一个阻塞方法，例如，BlockingQueu.put()那么可能会出现问题，即任务可能永远不会检查取消标志。【<strong>阻塞队列不了解的看看这篇博客：http://www.cnblogs.com/moongeek/p/7832855.html#_label3</strong>】</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// 不推荐的写法
+</span><span class="c1"></span><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BrokenPrimeProducer</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+    <span class="c1">// 阻塞队列
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="n">queue</span><span class="o">;</span>
+    <span class="c1">// 中断位
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">volatile</span> <span class="kt">boolean</span> <span class="n">canceled</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">BrokenPrimeProducer</span><span class="o">(</span><span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="n">queue</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">BigInteger</span> <span class="n">p</span> <span class="o">=</span> <span class="n">BigInteger</span><span class="o">.</span><span class="na">ONE</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">(!</span><span class="n">canceled</span><span class="o">)</span> <span class="o">{</span>
+              <span class="c1">// PUT操作可能会被阻塞，将无法检查 canceled 是否变化，因而无法响应退出
+</span><span class="c1"></span>                <span class="n">queue</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">nextProbablePrime</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">ex</span><span class="o">){}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cancel</span><span class="o">(){</span>
+        <span class="n">canceled</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　如果阻塞队列在 <code>put()</code> 操作被阻塞，此时，即使我们调用cancel() 方法将状态变量改变，进程也无法检查到改变，因为会一直阻塞下去。</p>
+<p>　　每个Thread都有一个boolean类型的中断状态。当中断线程时，改状态会被置为true。Thread中包含的中断方法如下。其中 <code>inturrept()</code> 会将中断状态置为true，而 <code>isInterrupted()</code> 方法会返回当前的中断状态，而 <code>interrupted()</code> 方法则会清除当前状态，并返回它之前的值。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"> <span class="kd">public</span> <span class="kd">class</span> <span class="nc">Thread</span><span class="o">{</span>
+     <span class="kd">public</span> <span class="kt">void</span> <span class="nf">inturrept</span><span class="o">(){......}</span>
+       <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">isInterrupted</span><span class="o">(){......}</span>
+       <span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">interrupted</span><span class="o">(){......}</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　通常情况下，如果一个阻塞方法，如：<code>Object.wait(</code>)、<code>Thread.sleep()</code>和<code>Thread.join()</code> 时，都会去检查中断状态的值，发现中断状态变化时都会提前返回并响应中断：<strong>清除中断状态，并抛出InterruptedException异常</strong> 。</p>
+<p>　　**该注意的是，中断操作并不会真正的中断一个正在运行的线程，而只是发出中断请求，然后由程序在合适的时刻中断自己。**一般设计方法时，都需要捕获到中断异常后对中断请求进行某些操作，不能完全忽视或是屏蔽中断请求。</p>
+<p>　　对上代码进行改进，采用中断进行中断程序执行。代码中有两处可以检测中断：在阻塞的<code>put()</code> 方法中，以及循环开始处的查询中断状态时。其实<code>put()</code> 操作会检测响应异常，在循环开始时可以不进行检测，但这样可以获得更高效的响应性能。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PrimeProducer</span> <span class="kd">extends</span> <span class="n">Thread</span> <span class="o">{</span>
+    <span class="c1">// 阻塞队列
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">final</span> <span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="n">queue</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">PrimeProducer</span><span class="o">(</span><span class="n">BlockingQueue</span><span class="o">&lt;</span><span class="n">BigInteger</span><span class="o">&gt;</span> <span class="n">queue</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">queue</span> <span class="o">=</span> <span class="n">queue</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">(){</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">BigInteger</span> <span class="n">p</span> <span class="o">=</span> <span class="n">BigInteger</span><span class="o">.</span><span class="na">ONE</span><span class="o">;</span>
+            <span class="k">while</span> <span class="o">(!</span><span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">isInterrupted</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">queue</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="na">nextProbablePrime</span><span class="o">());</span>
+            <span class="o">}</span>
+        <span class="o">}</span><span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">ex</span><span class="o">){</span>
+            <span class="c1">// 允许退出线程
+</span><span class="c1"></span>        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">cancel</span><span class="o">(){</span>
+        <span class="c1">// 中断
+</span><span class="c1"></span>        <span class="n">interrupt</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　<strong>中断是实现取消的最合理方式，在取消之外的其他操作中使用中断，都是不合理的。</strong></p>
+<h2 id="4中断策略">4、中断策略</h2>
+<p>　　中断策略解释某个中断请求：当发现中断请求时，应该做哪些工作，以多快的速度来响应中断。任务一般不会在其自己拥有的线程中执行，而是在其他某个服务（比如说，在一个其他线程或是线程池）中执行。对于非线程所有者而言（例如，对线程池来说，任何线程池实现之外的代码），应该保存并传递中断状态，使得真正拥有线程的代码才能对中断做出响应。</p>
+<p>　　<strong>比如说，如果你书写一个库函数，一般会抛出InterruptedException作为中断响应，而不会在库函数时候把中断异常捕获并进行提前处理，而导致调用者被屏蔽中断。因为你不清楚调用者想要对异常进行何种处理，比如说，是接收中断后立即停止任务还是进行相关处理并继续执行任务。中断的处理必须由该任务自己决定，而不是由其他线程决定。</strong></p>
+<p>　　因为在捕获InterruptException 中会同时把中断位恢复，所以，如果想捕获异常后恢复中断位，一般会调用 <code>Thread.currentThread.interrupt()</code> 进行中断位的恢复。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="k">try</span> <span class="o">{</span>
+    <span class="c1">// dosomething();
+</span><span class="c1"></span> <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// 捕获异常后恢复中断位
+</span><span class="c1"></span>   <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">interrupt</span><span class="o">();</span>
+   <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="5使用future-来实现取消">5、使用Future 来实现取消</h2>
+<p>　　关于<code>Future</code> 对象：<code>ExecutorService.submit</code> 方法将返回一个Future 来描述任务。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Future</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="c1">// 是否取消线程的执行
+</span><span class="c1"></span>    <span class="kt">boolean</span> <span class="nf">cancel</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">mayInterruptIfRunning</span><span class="o">);</span>
+    <span class="c1">// 线程是否被取消
+</span><span class="c1"></span>    <span class="kt">boolean</span> <span class="nf">isCancelled</span><span class="o">();</span>
+    <span class="c1">//线程是否执行完毕
+</span><span class="c1"></span>    <span class="kt">boolean</span> <span class="nf">isDone</span><span class="o">();</span>
+      <span class="c1">// 立即获得线程返回的结果
+</span><span class="c1"></span>    <span class="n">V</span> <span class="nf">get</span><span class="o">()</span> <span class="kd">throws</span> <span class="n">InterruptedException</span><span class="o">,</span> <span class="n">ExecutionException</span><span class="o">;</span>
+      <span class="c1">// 延时时间后再获得线程返回的结果
+</span><span class="c1"></span>    <span class="n">V</span> <span class="nf">get</span><span class="o">(</span><span class="kt">long</span> <span class="n">timeout</span><span class="o">,</span> <span class="n">TimeUnit</span> <span class="n">unit</span><span class="o">)</span>
+        <span class="kd">throws</span> <span class="n">InterruptedException</span><span class="o">,</span> <span class="n">ExecutionException</span><span class="o">,</span> <span class="n">TimeoutException</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">ExecutorService</span> <span class="n">service</span> <span class="o">=</span> <span class="n">Executors</span><span class="o">.</span><span class="na">newSingleThreadExecutor</span><span class="o">();</span>
+        <span class="n">Future</span> <span class="n">future</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="na">submit</span><span class="o">(</span><span class="k">new</span> <span class="n">TheradDemo</span><span class="o">());</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+          <span class="c1">// 可能抛出异常
+</span><span class="c1"></span>            <span class="n">future</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">ExecutionException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span><span class="k">finally</span> <span class="o">{</span>
+          <span class="c1">//终止任务的执行
+</span><span class="c1"></span>            <span class="n">future</span><span class="o">.</span><span class="na">cancel</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="o">}</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　Future 中的 <code>cancel(boolean mayInterruptIfRunning)</code> 接受一个布尔参数表示取消操作是否成功。如果<code>Future.get()</code> 抛出异常，如果你不需要得到结果时，就可以通过<code>cancel(boolean)</code> 来取消任务。</p>
+<p>　　对于线程池中的任务，如果想想要取消执行某任务，不宜中断线程池，因为你不知道中断请求到达时正在执行什么任务，所以只能通过<code>cancel(boolean)</code> 来定向取消特定的任务。</p>
+<h2 id="6关闭executorservice">6、关闭ExecutorService</h2>
+<p>　　线程池相关对象<code>ExecutorService</code> 提供了两种关闭的方法：使用 <code>shutdown()</code> 正常关闭，他先把线程池状态设置为<strong>SHUTDOWN</strong> ，禁止再向线程池提交任务，然后把线程池中的任务全部执行完毕，就关闭线程池。这种方法速度较慢，但是更安全。以及使用<code>shutdownNow()</code> 首先关闭正在执行的任务，然后返回所有尚未启动的任务清单。这种方法速度快，但风险也大，因为有的任务可能执行了一般被关闭。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-11-18
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD/">线程中断</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之synchronized总结</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/">
+            <span class="next-text nav-default">Java多线程学习之Lock与ReentranLock详解</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之synchronized总结 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="0、概述 synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为内置锁（Intrinsic Lock） 。内置锁包括" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java多线程学习之synchronized总结" />
+<meta property="og:description" content="0、概述 synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为内置锁（Intrinsic Lock） 。内置锁包括" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/" />
+<meta property="article:published_time" content="2017-11-19T14:14:42+08:00" />
+<meta property="article:modified_time" content="2017-11-19T14:14:42+08:00" />
+<meta itemprop="name" content="Java多线程学习之synchronized总结">
+<meta itemprop="description" content="0、概述 synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为内置锁（Intrinsic Lock） 。内置锁包括">
+<meta itemprop="datePublished" content="2017-11-19T14:14:42&#43;08:00" />
+<meta itemprop="dateModified" content="2017-11-19T14:14:42&#43;08:00" />
+<meta itemprop="wordCount" content="1144">
+
+
+
+<meta itemprop="keywords" content="synchronized,源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java多线程学习之synchronized总结"/>
+<meta name="twitter:description" content="0、概述 synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为内置锁（Intrinsic Lock） 。内置锁包括"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之synchronized总结</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-19 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0概述">0、概述</a></li>
+    <li><a href="#1synchronized的使用">1、synchronized的使用</a></li>
+    <li><a href="#2可重入性">2、可重入性</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0概述">0、概述</h2>
+<p>　　synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为<strong>内置锁（Intrinsic Lock）</strong> 。内置锁包括两部分：一个是作为锁的对象的引用，另一个是由这个锁保护的代码块。需要理解的是，<strong>synchronized的锁都是对象的引用，同一个对象只有一个内置锁，不同的对象有不同的内置锁。</strong></p>
+<p>　　Java 的内置锁是一种互斥锁，即一个对象的锁只能同时被一个线程持有。假设线程A尝试获取线程B持有的锁，线程A会被阻塞，知道B释放该锁，A才能持有该锁。<strong>如果线程B永远不是释放该锁，线程A也将永远等待下去，形成死锁。</strong> 由于线程在等待内置锁的过程中无法被中断，这是synchronized内置锁的一个弊端，该需求可以被显示锁ReentranLock解决，可以参考这篇博客：http://www.cnblogs.com/moongeek/p/7857794.html。</p>
+<p>　　获得一个对象内置锁的唯一途径就是进入由该对象锁保护的代码块，释放锁的唯一途径是跳出该代码块。一般synchronized使用方法如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">synchronized</span><span class="o">(</span><span class="n">lock</span><span class="o">){</span>
+    <span class="c1">// 访问或修改由该锁保护的共享状态
+</span><span class="c1"></span><span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="1synchronized的使用">1、synchronized的使用</h2>
+<p>　　synchronized可以修饰一般方法、static方法、代码块，但是不论synchronized修饰什么，他获取的都是一个对象的内置锁，锁的单位都是对象。</p>
+<p>　　1）synchronized 修饰一般方法，锁是持有该方法的对象的锁，访问同一个类的相同方法时候会互斥。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span>     
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上代码等价于：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span> 
+    <span class="kd">synchronized</span><span class="o">(</span><span class="k">this</span><span class="o">){</span>
+          <span class="c1">// ...
+</span><span class="c1"></span>    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　2）synchronized 修饰代码块，锁是指定的对象的锁，如果是同一个对象的锁，那么会互斥访问。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// 锁为object对象的锁
+</span><span class="c1"></span><span class="kd">synchronized</span><span class="o">(</span><span class="n">object</span><span class="o">){</span>
+  
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　3）synchronized 修饰静态方法，锁是该类Class对象的锁，该类的所有对象访问该类时都会互斥。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span>
+        <span class="c1">// ...
+</span><span class="c1"></span>    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上代码等价于：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Demo</span><span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span>
+        <span class="kd">synchronized</span><span class="o">(</span><span class="n">Demo</span><span class="o">.</span><span class="na">class</span><span class="o">){</span>
+            <span class="c1">// ...
+</span><span class="c1"></span>        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>    
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="2可重入性">2、可重入性</h2>
+<p>　　当某个线程请求一个已经被其他线程持有的锁时，该线程会被阻塞。但是内置锁是可重入的，因此，如果一个内置锁尝试获得已经由他自己持有的锁，那这个请求会立即成功。“重入”意味着获取锁的操作粒度是“线程”而不是”调用“。</p>
+<p>　　重入的实现方法是，为每个所关联一个锁和一个计数值。当计数值为0时，这个锁就被认为是没有被任何线程持有。当线程请求一个未被持有的线程时，JVM记下这个持有者，并且将计数值增1.如果同一个线程再次获得这个锁，计数值将增加，而当线程退出同步代码块时，计数器相应的递减。当计数值为0，这个锁将被释放。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="n">Object</span>  <span class="n">lock</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">saySomething</span><span class="o">(){</span>
+
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">synchronized</span> <span class="kt">void</span> <span class="nf">doSomething</span><span class="o">(){</span>
+        <span class="c1">// 两个函数都是同一个对象锁，可重入
+</span><span class="c1"></span>        <span class="n">saySomething</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">goSomewhere</span><span class="o">(){</span>
+        <span class="c1">// 对象锁不一致，不能重入
+</span><span class="c1"></span>        <span class="kd">synchronized</span> <span class="o">(</span><span class="n">lock</span><span class="o">){</span>
+            <span class="n">saySomething</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-11-19
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/synchronized/">synchronized</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之ThreadLocal源码分析</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/">
+            <span class="next-text nav-default">Java多线程学习之线程的取消与中断机制</span>
+            <span class="next-text nav-mobile">Next</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

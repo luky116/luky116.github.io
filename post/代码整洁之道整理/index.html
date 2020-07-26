@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>《代码整洁之道》整理 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="1、命名篇 避免使用误导性的命名，比如是List类型变量才会命名为accountList；不使用小写的字母L和大写的字母O来命名变量，因为他们" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/%E4%BB%A3%E7%A0%81%E6%95%B4%E6%B4%81%E4%B9%8B%E9%81%93%E6%95%B4%E7%90%86/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="《代码整洁之道》整理" />
+<meta property="og:description" content="1、命名篇 避免使用误导性的命名，比如是List类型变量才会命名为accountList；不使用小写的字母L和大写的字母O来命名变量，因为他们" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/%E4%BB%A3%E7%A0%81%E6%95%B4%E6%B4%81%E4%B9%8B%E9%81%93%E6%95%B4%E7%90%86/" />
+<meta property="article:published_time" content="2019-08-18T14:00:07+08:00" />
+<meta property="article:modified_time" content="2019-08-18T14:00:07+08:00" />
+<meta itemprop="name" content="《代码整洁之道》整理">
+<meta itemprop="description" content="1、命名篇 避免使用误导性的命名，比如是List类型变量才会命名为accountList；不使用小写的字母L和大写的字母O来命名变量，因为他们">
+<meta itemprop="datePublished" content="2019-08-18T14:00:07&#43;08:00" />
+<meta itemprop="dateModified" content="2019-08-18T14:00:07&#43;08:00" />
+<meta itemprop="wordCount" content="1671">
+
+
+
+<meta itemprop="keywords" content="代码规范," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="《代码整洁之道》整理"/>
+<meta name="twitter:description" content="1、命名篇 避免使用误导性的命名，比如是List类型变量才会命名为accountList；不使用小写的字母L和大写的字母O来命名变量，因为他们"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">《代码整洁之道》整理</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2019-08-18 </span>
+        <div class="post-category">
+            <a href="/categories/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/"> 代码规范 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#1命名篇">1、命名篇</a></li>
+    <li><a href="#2函数篇">2、函数篇</a></li>
+    <li><a href="#3注释篇">3、注释篇</a></li>
+    <li><a href="#4格式篇">4、格式篇</a></li>
+    <li><a href="#5对象和数据结构篇">5、对象和数据结构篇</a></li>
+    <li><a href="#6其他">6、其他</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="1命名篇">1、命名篇</h2>
+<ol>
+<li>避免使用误导性的命名，比如是<code>List</code>类型变量才会命名为<code>accountList</code>；不使用小写的字母L和大写的字母O来命名变量，因为他们会和数字1和0混淆</li>
+<li>变量的命名使用有区分意义的词。比如，<code>ProductInfo</code>和<code>ProductData</code>就没区分；<code>Info</code>和<code>Data</code>就像<code>the</code>、<code>a</code>、<code>an</code>一样是混淆的废话；变量名不出现<code>Variable</code>，表名不出现<code>Table</code></li>
+<li>类名不出现<code>Manager</code>、<code>Processor</code>、<code>Data</code>、<code>Info</code>这类类名；类名必须是名词</li>
+<li>使用工厂来新建对象比<code>new</code>对象要好，可以将构造函数<code>private</code>化，比如<code>Complex.fromRealNameNumber(23.0)</code>比<code>new Complex(23.0)</code>要好</li>
+<li>每个概念只使用一个词。比如，<code>fetch</code>、<code>retrive</code>和<code>get</code>表示一个意思，尽量别同时出现多个</li>
+</ol>
+<h2 id="2函数篇">2、函数篇</h2>
+<ol>
+<li>函数应该短小，20行封顶最佳</li>
+<li>函数应该只做一件事情，如果一个函数可以继续拆分，则说明该函数不止做了一件事</li>
+<li><code>switch</code> 语句如果太长，可以考虑使用 <code>多态</code> 来替代</li>
+<li>函数名不要怕长，最好使用描述性的名称，能表达出函数的意义就好</li>
+<li>函数参数：
+<ol>
+<li>函数的参数越少越好，最好别超过三个，三个或三个以上可以封装成一个对象</li>
+<li>对于传入单个参数的函数，一种普遍的作用是使用该参数做别的事，另一种是操作该参数本身。这种情况参数名最好能区分这两种形式，比如<code>String transform(StringBuffer in)</code>，告诉读者期望的输入和输出类型。</li>
+<li>如果需要向函数传入布尔值，可能考虑将函数分为两个函数使用</li>
+</ol>
+</li>
+<li>函数名最好由动词加名词组成，比如<code>write(name)</code>就不如<code>writeFiled(name)</code>好，后者清楚知道<code>name</code>是个<code>filed</code></li>
+<li>函数名要明确描述函数所做的所有事情，避免给调用者带来意外的混乱</li>
+<li>使用异常代替返回错误码。错误码是在要求调用者立即处理错误，异常可以在后面统一处理</li>
+<li>使用了<code>try...catch</code>的代码块最好单独抽离出来一个函数，再调用他，避免把主流程混乱</li>
+<li>消除重复的代码</li>
+</ol>
+<h2 id="3注释篇">3、注释篇</h2>
+<ol>
+<li>
+<p>注释的作用是弥补我们在用代码表达意图时遭遇的失败，所以说，<strong>注释是一种失败！</strong></p>
+</li>
+<li>
+<p>如果遇到需要写注释的情况，可以优先考虑是否能用变量名或方法名来表达，比如下面，第二种表达会更好：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">// 判断员工是否合法，并且年龄大于65岁
+if(employee.flag &amp;&amp; employee.age &gt; 65)
+   
+if(employee.isEligibleForFullBenefits())
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>好的注释使用范围：</p>
+<ol>
+<li>表明法律、作者信息</li>
+<li>提供有用的信息，比如对抽象函数注释、对一个正则表达式期望匹配的格式注释等</li>
+<li>阐释，对一个比较难懂的参数或返回值进行说明</li>
+<li>警示，对一些重要代码进行警示，防止别人修改该代码</li>
+<li><code>// TODO</code>对未完成的工作进行注释</li>
+<li>公共API的Javadoc</li>
+</ol>
+</li>
+<li>
+<p>坏的注释实例：</p>
+<ol>
+<li>
+<p>多余的注释，比如有无注释意图都很明显的代码</p>
+</li>
+<li>
+<p>误导性注释，注释和代码实际行为不符合</p>
+</li>
+<li>
+<p>循规式注释，比如要求所有函数都要有Javadoc注释</p>
+</li>
+<li>
+<p>能用函数或是变量名时，就别用注释</p>
+</li>
+<li>
+<p>括号后后面的注释，本意是好的，但是根本解决方法应该是<strong>缩短函数篇幅</strong></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">while(xxxx){
+  .......
+  if(xxx){
+      ......
+  } // if
+} // while
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>注释掉的不用的代码直接删除，别怕找不回</p>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="4格式篇">4、格式篇</h2>
+<ol>
+<li>
+<p>封包声明、导入声明和每个函数之间使用 <strong>空行</strong> 隔开，提高代码的视觉效果</p>
+</li>
+<li>
+<p>质检关系“亲密”的概念应该相互 <strong>靠近</strong>，而不是空行隔开</p>
+</li>
+<li>
+<p>变量的声明应该在 <strong>靠近</strong> 使用的位置</p>
+</li>
+<li>
+<p>类成员变量应该声明在类的顶部，循环中变量应该在括号内声明</p>
+</li>
+<li>
+<p><strong>相关函数</strong>，比如A函数调用了B函数，则A和B最好放在一起，而且A放在B上面</p>
+</li>
+<li>
+<p>每行代码长度最好不要太长，比如最好80个字符，或是100~120个字符内</p>
+</li>
+</ol>
+<h2 id="5对象和数据结构篇">5、对象和数据结构篇</h2>
+<ol>
+<li>
+<p>类的私有变量如果提供了取值器和赋值器，那么它仍然是 <strong>暴露</strong> 了</p>
+</li>
+<li>
+<p>墨忒尔定律：模块不该去了解它所操作对象的内部情形。就是说，对象不改通过存取器暴露其内部变量。更准确的说，墨忒尔定律认为，类<code>C</code>的方法<code>f</code>只能调用以下对象的<code>方法</code>：</p>
+<ol>
+<li>C</li>
+<li>由f创建的对象</li>
+<li>作为参数传递给f的对象</li>
+<li>C的成员变量的对象</li>
+</ol>
+<p>即，方法不该调用任何函数返回的对象的方法，<strong>只跟朋友对话，不与陌生人对话</strong></p>
+</li>
+</ol>
+<h2 id="6其他">6、其他</h2>
+<ol>
+<li>函数不要返回控制，避免使用时检查</li>
+<li>函数参数不要传递空值</li>
+<li>第三方API如果抛出大量异常，可以考虑封装下再使用</li>
+</ol>
+<p><strong>说明：本文整理了部分书中观点，有些观点个人感觉有点苛刻不太实用，还有些章节直接略过了。想更详细了解请参考原著。</strong></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2019-08-18
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E4%BB%A3%E7%A0%81%E8%A7%84%E8%8C%83/">代码规范</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/0%E5%85%B3%E4%BA%8E%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">关于设计模式</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

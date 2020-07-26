@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>MySQL on Luky116 Blog</title>
-    <link>http://luky116.github.io/tags/mysql/</link>
-    <description>Recent content in MySQL on Luky116 Blog</description>
+    <title>MySQL优化 on Luky116 Blog</title>
+    <link>http://luky116.github.io/tags/mysql%E4%BC%98%E5%8C%96/</link>
+    <description>Recent content in MySQL优化 on Luky116 Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Sat, 10 Aug 2019 14:04:09 +0800</lastBuildDate>
     
-	<atom:link href="http://luky116.github.io/tags/mysql/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://luky116.github.io/tags/mysql%E4%BC%98%E5%8C%96/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>

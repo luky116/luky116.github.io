@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之ThreadLocal源码分析 - Luky116 Blog</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.74.0-DEV with theme even" />
+
+
+<link rel="canonical" href="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.78f8f17bab244b9ee62ad16480c9584d5fc2db06ae20681d1ca225cefd80767c.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Java多线程学习之ThreadLocal源码分析" />
+<meta property="og:description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" />
+<meta property="article:published_time" content="2017-11-20T14:09:22+08:00" />
+<meta property="article:modified_time" content="2017-11-20T14:09:22+08:00" />
+<meta itemprop="name" content="Java多线程学习之ThreadLocal源码分析">
+<meta itemprop="description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互">
+<meta itemprop="datePublished" content="2017-11-20T14:09:22&#43;08:00" />
+<meta itemprop="dateModified" content="2017-11-20T14:09:22&#43;08:00" />
+<meta itemprop="wordCount" content="3861">
+
+
+
+<meta itemprop="keywords" content="ThreadLocal,源码," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Java多线程学习之ThreadLocal源码分析"/>
+<meta name="twitter:description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之ThreadLocal源码分析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-20 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">Contents</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#0概述">0、概述</a></li>
+    <li><a href="#1threadlocal-源码分析">1、ThreadLocal 源码分析</a></li>
+    <li><a href="#2threadlocalmap-源码分析">2、ThreadLocalMap 源码分析</a></li>
+    <li><a href="#3总结">3、总结</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="0概述">0、概述</h2>
+<p>　　ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互不影响，是实现共享资源的轻量级同步。</p>
+<p>　　下面是个ThreadLocal使用的实例，两个任务共享同一个变量，并且两个任务都把该变量设置为了线程私有变量，这样，虽然两个任务都”持有“同一变量，但各自持有该变量的拷贝。因此，当一个线程修改该变量时，不会影响另一线程该变量的值。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LocalTest1</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="o">{</span>
+    <span class="c1">// 一般会把 ThreadLocal 设置为static 。它只是个为线程设置局部变量的入口，多个线程只需要一个入口
+</span><span class="c1"></span>    <span class="kd">private</span> <span class="kd">static</span> <span class="n">ThreadLocal</span><span class="o">&lt;</span><span class="n">Student</span><span class="o">&gt;</span> <span class="n">localStudent</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ThreadLocal</span><span class="o">()</span> <span class="o">{</span>
+        <span class="c1">// 一般会重写初始化方法，一会分析源码时候会解释为什么
+</span><span class="c1"></span>        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">Student</span> <span class="nf">initialValue</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="k">new</span> <span class="n">Student</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">};</span>
+
+    <span class="kd">private</span> <span class="n">Student</span> <span class="n">student</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">String</span> <span class="n">threadName</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">();</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【&#34;</span> <span class="o">+</span> <span class="n">threadName</span> <span class="o">+</span> <span class="s">&#34;】：is running !&#34;</span><span class="o">);</span>
+
+        <span class="n">Random</span> <span class="n">ramdom</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Random</span><span class="o">();</span>
+        <span class="c1">//随机生成一个变量
+</span><span class="c1"></span>        <span class="kt">int</span> <span class="n">age</span> <span class="o">=</span> <span class="n">ramdom</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="n">100</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【&#34;</span> <span class="o">+</span> <span class="n">threadName</span> <span class="o">+</span> <span class="s">&#34;】：set age to :&#34;</span> <span class="o">+</span> <span class="n">age</span><span class="o">);</span>
+        <span class="c1">// 获得线程局部变量，改变属性值
+</span><span class="c1"></span>        <span class="n">Student</span> <span class="n">stu</span> <span class="o">=</span> <span class="n">getStudent</span><span class="o">();</span>
+        <span class="n">stu</span><span class="o">.</span><span class="na">setAge</span><span class="o">(</span><span class="n">age</span><span class="o">);</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【&#34;</span> <span class="o">+</span> <span class="n">threadName</span> <span class="o">+</span> <span class="s">&#34;】：第一次读到的age值为 :&#34;</span> <span class="o">+</span> <span class="n">stu</span><span class="o">.</span><span class="na">getAge</span><span class="o">());</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">2</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;【&#34;</span> <span class="o">+</span> <span class="n">threadName</span> <span class="o">+</span> <span class="s">&#34;】：第二次读到的age值为 :&#34;</span> <span class="o">+</span> <span class="n">stu</span><span class="o">.</span><span class="na">getAge</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="n">Student</span> <span class="nf">getStudent</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">student</span> <span class="o">=</span> <span class="n">localStudent</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+
+        <span class="c1">// 如果不重写初始化方法，则需要判断是否为空，然后手动为ThreadLocal赋值
+</span><span class="c1">//        if(student == null){
+</span><span class="c1">//            student = new Student();
+</span><span class="c1">//            localStudent.set(student);
+</span><span class="c1">//        }
+</span><span class="c1"></span>
+        <span class="k">return</span> <span class="n">student</span><span class="o">;</span>
+    <span class="o">}</span>
+
+ <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">LocalTest1</span> <span class="n">ll</span> <span class="o">=</span> <span class="k">new</span> <span class="n">LocalTest1</span><span class="o">();</span>
+        <span class="n">Thread</span> <span class="n">t1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">ll</span><span class="o">,</span> <span class="s">&#34;线程1&#34;</span><span class="o">);</span>
+        <span class="n">Thread</span> <span class="n">t2</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">ll</span><span class="o">,</span> <span class="s">&#34;线程2&#34;</span><span class="o">);</span>
+
+        <span class="n">t1</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+        <span class="n">t2</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Student</span><span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">age</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Student</span><span class="o">(){</span>
+
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="nf">Student</span><span class="o">(</span><span class="kt">int</span> <span class="n">age</span><span class="o">){</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">age</span> <span class="o">=</span> <span class="n">age</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getAge</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">age</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAge</span><span class="o">(</span><span class="kt">int</span> <span class="n">age</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">age</span> <span class="o">=</span> <span class="n">age</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>运行结果：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">【线程1】：is running !
+【线程2】：is running !
+【线程2】：set age to :45
+【线程1】：set age to :25
+【线程1】：第一次读到的age值为 :25
+【线程2】：第一次读到的age值为 :45
+【线程1】：第二次读到的age值为 :25
+【线程2】：第二次读到的age值为 :45
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="1threadlocal-源码分析">1、ThreadLocal 源码分析</h2>
+<p>　　ThreadLocal 源码有很多方法，但是暴露出来的公共接口只有三个：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">ThreadLocal</span><span class="o">{</span>
+  <span class="kd">public</span> <span class="n">T</span> <span class="nf">get</span><span class="o">()</span> <span class="o">{}</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="n">T</span> <span class="n">value</span><span class="o">)</span> <span class="o">{}</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">remove</span><span class="o">()</span> <span class="o">{}</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　 <code>set(T value)</code> 是设置局部变量的方法，源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="n">T</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+      <span class="c1">// 获得当前线程
+</span><span class="c1"></span>    <span class="n">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">();</span>
+      <span class="c1">// 获得当前线程的 ThreadLocalMap 引用，详细见下
+</span><span class="c1"></span>    <span class="n">ThreadLocalMap</span> <span class="n">map</span> <span class="o">=</span> <span class="n">getMap</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+      <span class="c1">// 如果不为空，则更新局部变量的值
+</span><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">map</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+      <span class="n">map</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+      <span class="c1">//如果不是第一次使用，先进行初始化
+</span><span class="c1"></span>    <span class="k">else</span>
+      <span class="n">createMap</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>getMap(t)</code> 源码如下，每一个Thread变量都自带了一个ThreadLocalMap类型的成员变量，用于保存该线程的成员变量。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="n">ThreadLocalMap</span> <span class="nf">getMap</span><span class="o">(</span><span class="n">Thread</span> <span class="n">t</span><span class="o">)</span> <span class="o">{</span>
+   <span class="c1">//返回该线程Thread的成员变量threadLocals
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="na">threadLocals</span><span class="o">;</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　但是，Thread 默认把threadLocals设置为了null，因此第一次使用局部变量时候需要先初始化。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="n">ThreadLocal</span><span class="o">.</span><span class="na">ThreadLocalMap</span> <span class="n">threadLocals</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　<code>ThreadLocalMap</code> 是定义在<code>ThreadLocal</code> 类里的内部类，它的作用是存储线程的局部变量。<code>ThreadLocalMap</code> 以ThreadLocal的引用作为键，以局部变量作为值，存储在<code>ThreadLocalMap.Entry</code> （一种存储键值的数据结构）里。关于<code>ThreadLocalMap</code> 的源码，后文会详细介绍，这里只要知道大概原理即可。</p>
+<p>　　由此我们可以总结<code>ThreadLocal</code> 的设计思想如下：</p>
+<ol>
+<li><code>ThreadLocal</code> 只是个访问局部变量的入口。</li>
+<li>局部变量的值存在线程<code>Thread</code> 类本地，默认为null，只有通过<code>ThreadLocal</code> 访问时才会进行初始化。</li>
+<li>[ThreadLocalMap 的设计思路在后文介绍<code>ThreadLocalMap</code> 源码时候会分析]</li>
+</ol>
+<p><code>get()</code> 是获得线程本地变量，源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="n">T</span> <span class="nf">get</span><span class="o">()</span> <span class="o">{</span>
+      <span class="c1">//获得当前线程
+</span><span class="c1"></span>    <span class="n">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">();</span>
+      <span class="c1">//得到当前线程的一个threadLocals 变量
+</span><span class="c1"></span>    <span class="n">ThreadLocalMap</span> <span class="n">map</span> <span class="o">=</span> <span class="n">getMap</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">map</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="c1">// 如果不为空，以当前ThreadLocal为主键获得对应的Entry
+</span><span class="c1"></span>      <span class="n">ThreadLocalMap</span><span class="o">.</span><span class="na">Entry</span> <span class="n">e</span> <span class="o">=</span> <span class="n">map</span><span class="o">.</span><span class="na">getEntry</span><span class="o">(</span><span class="k">this</span><span class="o">);</span>
+      <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&#34;unchecked&#34;</span><span class="o">)</span>
+        <span class="n">T</span> <span class="n">result</span> <span class="o">=</span> <span class="o">(</span><span class="n">T</span><span class="o">)</span><span class="n">e</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+      <span class="c1">//如果值为空，则进行初始化
+</span><span class="c1"></span>    <span class="k">return</span> <span class="n">setInitialValue</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>再来看看初始化函数<code>setInitialValue()</code> 所进行的操作：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="n">T</span> <span class="nf">setInitialValue</span><span class="o">()</span> <span class="o">{</span>
+      <span class="c1">//获得初始默认值
+</span><span class="c1"></span>    <span class="n">T</span> <span class="n">value</span> <span class="o">=</span> <span class="n">initialValue</span><span class="o">();</span>
+      <span class="c1">//得到当前线程
+</span><span class="c1"></span>    <span class="n">Thread</span> <span class="n">t</span> <span class="o">=</span> <span class="n">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">();</span>
+      <span class="c1">// 获得该线程的ThreadLocalMap引用
+</span><span class="c1"></span>    <span class="n">ThreadLocalMap</span> <span class="n">map</span> <span class="o">=</span> <span class="n">getMap</span><span class="o">(</span><span class="n">t</span><span class="o">);</span>
+      <span class="c1">//不为空则覆盖
+</span><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">map</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="n">map</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+    <span class="k">else</span>
+          <span class="c1">//若是为空，则进行初始化，键为本ThreadLocal变量，值为默认值
+</span><span class="c1"></span>        <span class="n">createMap</span><span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="c1">// 默认初始化返回null值，这也是为什么需要重写该方法的原因。如果没有重写，第一次get()操作获得的线程本地变量为null，需要进行判断并手动调用set()进行初始化
+</span><span class="c1"></span><span class="kd">protected</span> <span class="n">T</span> <span class="nf">initialValue</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="2threadlocalmap-源码分析">2、ThreadLocalMap 源码分析</h2>
+<p>　　Thread类中包含一个ThreadLocalMap 类型的成员变量threadLocals，这是直接存储线程局部变量的数据结构。ThreadLocal 只是一个入口，通过ThreadLocal操作threadLocals，进行局部变量的查改操作。这也是为什么ThreadLocal 暴露的公有接口才三个的原因吧。同时，由于ThreadLocalMap 中的键是ThreadLocal类，也说明了，如果想为一个线程设置多个本地局部变量，需要设置多个 ThreadLocal。下面来分析下ThreadLocalMap 的源码。</p>
+<p>　　<code>ThreadLocalMap</code> 里有几个核心的属性，和HashMap相似：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// table 默认大小，大小为2的次方，用于hash定位
+</span><span class="c1"></span><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">INITIAL_CAPACITY</span> <span class="o">=</span> <span class="n">16</span><span class="o">;</span>
+<span class="c1">// 存放键值对的数组
+</span><span class="c1"></span><span class="kd">private</span> <span class="n">Entry</span><span class="o">[]</span> <span class="n">table</span><span class="o">;</span>
+<span class="c1">// 扩容的临界值，当table元素大到这个值，会进行扩容
+</span><span class="c1"></span><span class="kd">private</span> <span class="kt">int</span> <span class="n">threshold</span><span class="o">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　在调用ThreadLocal 中的<code>set(T)</code> 方法时，调用了ThreadLocalMap 的<code>set(ThreadLocal, T)</code> 方法，</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="kt">void</span> <span class="nf">set</span><span class="o">(</span><span class="n">ThreadLocal</span><span class="o">&lt;?&gt;</span> <span class="n">key</span><span class="o">,</span> <span class="n">Object</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+     <span class="n">Entry</span><span class="o">[]</span> <span class="n">tab</span> <span class="o">=</span> <span class="n">table</span><span class="o">;</span>
+     <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">tab</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+        <span class="c1">// Hash 寻址，与table数组长度减1（二进制全是1）相与，所以数组长度必须为2的次方，减小hash重复的可能性
+</span><span class="c1"></span>     <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="na">threadLocalHashCode</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">len</span><span class="o">-</span><span class="n">1</span><span class="o">);</span>
+
+       <span class="c1">//从hash值计算出的下标开始遍历
+</span><span class="c1"></span>     <span class="k">for</span> <span class="o">(</span><span class="n">Entry</span> <span class="n">e</span> <span class="o">=</span> <span class="n">tab</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+          <span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">;</span>
+          <span class="n">e</span> <span class="o">=</span> <span class="n">tab</span><span class="o">[</span><span class="n">i</span> <span class="o">=</span> <span class="n">nextIndex</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">len</span><span class="o">)])</span> <span class="o">{</span>
+       <span class="c1">//获得该Entry的键
+</span><span class="c1"></span>       <span class="n">ThreadLocal</span><span class="o">&lt;?&gt;</span> <span class="n">k</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+        <span class="c1">//如果键和传过来的相同，覆盖原值，也说明，一个ThreadLocal变量只能为一个线程保存一个局部变量
+</span><span class="c1"></span>       <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+         <span class="n">e</span><span class="o">.</span><span class="na">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">;</span>
+         <span class="k">return</span><span class="o">;</span>
+       <span class="o">}</span>
+       <span class="c1">// 键为空，则替换该节点
+</span><span class="c1"></span>       <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+         <span class="n">replaceStaleEntry</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">i</span><span class="o">);</span>
+         <span class="k">return</span><span class="o">;</span>
+       <span class="o">}</span>
+     <span class="o">}</span>
+
+     <span class="n">tab</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Entry</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+     <span class="kt">int</span> <span class="n">sz</span> <span class="o">=</span> <span class="o">++</span><span class="n">size</span><span class="o">;</span>
+       <span class="c1">//是否需要扩容
+</span><span class="c1"></span>     <span class="k">if</span> <span class="o">(!</span><span class="n">cleanSomeSlots</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">sz</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="n">sz</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="o">)</span>
+       <span class="n">rehash</span><span class="o">();</span>
+ <span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　为什么说数组长度为2的次方有利于hash计算不重复呢？我们来看下，显然，和一个二进制全是1的数相于，能最大限度的保证原数的所有位数，因而重复几率会变小。<img src="http://images2017.cnblogs.com/blog/834666/201711/834666-20171120153628180-743076057.jpg" alt="img"></p>
+<p>　　可以看出ThreadLocalMap 采用<strong>线性探测再散列</strong>解决Hash冲突的问题。即，如果一次Hash计算出来的数组下标被占用，即hash值重复了，则在该下标的基础上加1测试下一个下标，直到找到空值。比如说，Hash计算出来下标i为6，table[6] 已经有值了，那么就尝试table[7]是否被占用，依次类推，直到找到空值。以上，就是保存线程本地变量的方法。</p>
+<p>　　再来分析下ThreadLocal 中的<code>get()</code> 方法，其中调用了ThreadLocalMap 的<code>map.getEntry(this)</code> 方法，并把本ThreadLocal作为参数传入，返回一个<code>ThreadLocalMap.Entry</code>对象（以后简称Entry），源码如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">private</span> <span class="n">Entry</span> <span class="nf">getEntry</span><span class="o">(</span><span class="n">ThreadLocal</span><span class="o">&lt;?&gt;</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+      <span class="c1">//Hash计算数组下标
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="na">threadLocalHashCode</span> <span class="o">&amp;</span> <span class="o">(</span><span class="n">table</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="n">1</span><span class="o">);</span>
+      <span class="c1">//得到该下标的节点
+</span><span class="c1"></span>    <span class="n">Entry</span> <span class="n">e</span> <span class="o">=</span> <span class="n">table</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+      <span class="c1">//如果该节点存在，并且键和传过来的ThreadLocal对象相同，则返回该节点（说明该节点没有进行Hash冲突处理）
+</span><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">e</span><span class="o">.</span><span class="na">get</span><span class="o">()</span> <span class="o">==</span> <span class="n">key</span><span class="o">)</span>
+      <span class="k">return</span> <span class="n">e</span><span class="o">;</span>
+      <span class="c1">//如果该节点不直接满足需求，可能进行了Hash冲突处理，则另外处理
+</span><span class="c1"></span>    <span class="k">else</span>
+      <span class="k">return</span> <span class="n">getEntryAfterMiss</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">i</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　再来分析下<code>getEntryAfterMiss(ThreadLocal, int , Entry)</code> 的源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">//  if (e == null || e.get() != key)
+</span><span class="c1"></span><span class="kd">private</span> <span class="n">Entry</span> <span class="nf">getEntryAfterMiss</span><span class="o">(</span><span class="n">ThreadLocal</span><span class="o">&lt;?&gt;</span> <span class="n">key</span><span class="o">,</span> <span class="kt">int</span> <span class="n">i</span><span class="o">,</span> <span class="n">Entry</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Entry</span><span class="o">[]</span> <span class="n">tab</span> <span class="o">=</span> <span class="n">table</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">tab</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+    <span class="c1">//从洗标为i开始遍历，直到遇到下一空节点或或是满足需求的节点
+</span><span class="c1"></span>    <span class="k">while</span> <span class="o">(</span><span class="n">e</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">ThreadLocal</span><span class="o">&lt;?&gt;</span> <span class="n">k</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">==</span> <span class="n">key</span><span class="o">)</span>
+            <span class="k">return</span> <span class="n">e</span><span class="o">;</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">k</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+              <span class="c1">//节点不为空，键为空，则清理该节点
+</span><span class="c1"></span>            <span class="n">expungeStaleEntry</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+        <span class="k">else</span>
+              <span class="c1">// i后移
+</span><span class="c1"></span>            <span class="n">i</span> <span class="o">=</span> <span class="n">nextIndex</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">len</span><span class="o">);</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">tab</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>
+    <span class="o">}</span>
+      <span class="c1">//否则返回空值
+</span><span class="c1"></span>    <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>　　以上就是ThreadLocalMap 几个比较关键的源码分析。</p>
+<h2 id="3总结">3、总结</h2>
+<p>　　综上所述可知，ThreadLocal 只是访问Thread本地变量的一个入口，正真存储本地变量的其实是在Thread本地，同时ThreadLocal也作为一个键去Hash找到变量所在的位置。也许你会想，为什么不把ThreadLocalMap设置为&lt; Thread,Variable&gt;类型，把Thread作为主键，而要增加一个中间模块ThreadLocal？我的想法是，一来，这样确实可以满足需求，但是这样无法进行hash查找，如果一个Thread的本地变量过多，通过线性查找会花费大量时间，使用ThreadLocal作为中间键，可以进行Hash查找；二来，其实本地变量的添加、查找和删除需要进行大量的操作，设计者的思路是把这些操作封装在一个ThreadLocal类里，而只暴露了三个常用的接口，如果把ThreadLocal去掉，这些操作可能要写在Thread类里，违背了设计类的“单一性”原则；三来，我们这样相当于为每个本地变量取了个“名字”（即，一个ThreadLocal对应一个本地变量），使用方便。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">Author</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">LastMod</span>
+    <span class="item-content">
+        2017-11-20
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/threadlocal/">ThreadLocal</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">MySQL查询优化 关联查询</span>
+            <span class="prev-text nav-mobile">Prev</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+  <div id="vcomments"></div>
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+  <script type="text/javascript">
+    new Valine({
+        el: '#vcomments' ,
+        appId: 'j5QAIh7qwCQ3D88CtwydJMro-gzGzoHsz',
+        appKey: 'pR4MAooKMareduPVQjdiwNB6',
+        notify:  false ,
+        verify:  false ,
+        avatar:'mm',
+        placeholder: '欢迎留言讨论...',
+        visitor:  false 
+    });
+  </script>
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="http://luky116.github.io/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme -
+    <a class="theme-link" href="https://github.com/Luky116/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy;
+    2020
+    <span class="heart">
+      <i class="iconfont icon-heart"></i>
+    </span>
+    <span class="author">Luky116</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.d7b7ada643c9c1a983026e177f141f7363b4640d619caf01d8831a6718cd44ea.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

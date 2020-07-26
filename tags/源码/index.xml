@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>源码 on Luky116 Blog</title>
+    <link>http://luky116.github.io/tags/%E6%BA%90%E7%A0%81/</link>
+    <description>Recent content in 源码 on Luky116 Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 20 Nov 2017 14:09:22 +0800</lastBuildDate>
+    
+	<atom:link href="http://luky116.github.io/tags/%E6%BA%90%E7%A0%81/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java多线程学习之ThreadLocal源码分析</title>
+      <link>http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</link>
+      <pubDate>Mon, 20 Nov 2017 14:09:22 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/</guid>
+      <description>0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互</description>
+    </item>
+    
+  </channel>
+</rss>

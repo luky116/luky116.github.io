@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>线程中断 on Luky116 Blog</title>
+    <link>http://luky116.github.io/tags/%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD/</link>
+    <description>Recent content in 线程中断 on Luky116 Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 18 Nov 2017 14:16:39 +0800</lastBuildDate>
+    
+	<atom:link href="http://luky116.github.io/tags/%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java多线程学习之线程的取消与中断机制</title>
+      <link>http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/</link>
+      <pubDate>Sat, 18 Nov 2017 14:16:39 +0800</pubDate>
+      
+      <guid>http://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/</guid>
+      <description>任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -154,7 +154,7 @@
 <li>分布式事务支持</li>
 </ol>
 <p>总结来说，Arana项目是作为数据库的一个代理层，来实现分库分表和动态路由等功能的一个Proxy数据库插件。我们由原先直接访问数据库，转变为先访问Arana代理，再由Arana将我们的请求进行加工后，打到数据库服务器上去，如下图：<!-- raw HTML omitted --></p>
-<p><img src="/img/anara1_process2.jpg" alt="image.png"></p>
+<p><img src="/img/anara1_process1.jpg" alt="image.png"></p>
 <p><!-- raw HTML omitted -->Arana 的内部主要有这几个部分组成：</p>
 <ol>
 <li>监听器（Listener）：监听外部请求的一个TCP服务，用来监听和接收外部请求的SQL命令</li>
@@ -163,7 +163,7 @@
 <li>数据源（DataSourceCluster）:实际执行SQL的数据库服务器</li>
 </ol>
 <p>Arana 内部的执行流程如下：</p>
-<!-- raw HTML omitted -->
+<p><img src="/img/anara1_process2.jpg" alt="image.png"></p>
 <h2 id="如何本地启动项目">如何本地启动项目</h2>
 <p>Arana的源码地址在：<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>，为了防止master分支的源码更新太快导致对不上本文的流程，可以拉取这个版本的代码对着本文阅读：<a href="https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295">https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295</a>。<!-- raw HTML omitted -->源码拉取下来后，看到Arana的目录结构：<!-- raw HTML omitted --><img src="img/arana1_project.png" alt="image.png"></p>
 <ul>

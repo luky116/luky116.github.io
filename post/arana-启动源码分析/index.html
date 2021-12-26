@@ -49,7 +49,7 @@
 <meta itemprop="description" content="关于Arana Arana 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。我加入这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包">
 <meta itemprop="datePublished" content="2021-12-16T15:22:17&#43;08:00" />
 <meta itemprop="dateModified" content="2021-12-16T15:22:17&#43;08:00" />
-<meta itemprop="wordCount" content="3578">
+<meta itemprop="wordCount" content="3580">
 
 
 
@@ -153,9 +153,9 @@
 <li>动态配置中心</li>
 <li>分布式事务支持</li>
 </ol>
-<p>总结来说，Arana项目是作为数据库的一个代理层，来实现分库分表和动态路由等功能的一个Proxy数据库插件。我们由原先直接访问数据库，转变为先访问Arana代理，再由Arana将我们的请求进行加工后，打到数据库服务器上去，如下图：<!-- raw HTML omitted --></p>
+<p>总结来说，Arana项目是作为数据库的一个代理层，来实现分库分表和动态路由等功能的一个Proxy数据库插件。我们由原先直接访问数据库，转变为先访问Arana代理，再由Arana将我们的请求进行加工后，打到数据库服务器上去，如下图：​</p>
 <p><img src="/img/anara1_process1.jpg#img-60" alt="image.png"></p>
-<p><!-- raw HTML omitted -->Arana 的内部主要有这几个部分组成：</p>
+<p>​Arana 的内部主要有这几个部分组成：</p>
 <ol>
 <li>监听器（Listener）：监听外部请求的一个TCP服务，用来监听和接收外部请求的SQL命令</li>
 <li>过滤器（Filter）：分为前置过滤器(PreFilter)和后置过滤器(PostFilter)，在执行SQL前，对SQL进行特殊处理；获取到SQL执行结果后，对结果进行加工再返回给请求方</li>
@@ -165,7 +165,8 @@
 <p>Arana 内部的执行流程如下：</p>
 <p><img src="/img/anara1_process2.jpg#img-20" alt="image.png"></p>
 <h2 id="如何本地启动项目">如何本地启动项目</h2>
-<p>Arana的源码地址在：<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>，为了防止master分支的源码更新太快导致对不上本文的流程，可以拉取这个版本的代码对着本文阅读：<a href="https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295">https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295</a>。<!-- raw HTML omitted -->源码拉取下来后，看到Arana的目录结构：</p>
+<p>Arana的源码地址在：<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>，为了防止master分支的源码更新太快导致对不上本文的流程，可以拉取这个版本的代码对着本文阅读：<a href="https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295">https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295</a>。</p>
+<p>​源码拉取下来后，看到Arana的目录结构：</p>
 <p><img src="/img/arana1_project.png#img-60" alt="image.png"></p>
 <ul>
 <li>cmd：Arana的启动入口方法</li>
@@ -176,7 +177,8 @@
 <li>third_party：第三方依赖</li>
 </ul>
 <p>​</p>
-<p>目前有两种方式来启动Arana：<!-- raw HTML omitted -->1、通过docker启动。</p>
+<p>目前有两种方式来启动Arana：</p>
+<p>1、通过docker启动。</p>
 <ol>
 <li>在根目录下执行以下命令，构建Arana的docker镜像</li>
 </ol>
@@ -215,7 +217,9 @@ docker-compose -f docker-compose.yaml up -d mysql</p>
 <!-- raw HTML omitted --><!-- raw HTML omitted --></li>
 </ol>
 <h2 id="项目启动流程">项目启动流程</h2>
-<p>为了了解Arana的启动流程，我们打开cmd/cmd.go文件。可以看到，cmd.go文件使用了cobra库。cobra库是golang开源的命令行库，详情可以参考源码地址：<a href="https://github.com/spf13/cobra">https://github.com/spf13/cobra</a>。startCommand.Run 方法里面的逻辑，就是程序初始化的整个流程。<!-- raw HTML omitted -->在init方法中，我们看到程序启动时接收了一个c参数，并把值赋给了configPath（配置文件的位置）变量。上面我们配置main函数的启动参数<code>start -c docker/conf/config.yaml</code>，可以找到配置文件所在的位置。在配置文件中可以看到Listener、Executor和DataSourceCluster的相关配置（此时Filter功能尚未实现，所以没有Filter的配置）。<!-- raw HTML omitted -->startCommand中Run方法中，第一步是加载配置文件，组装成一个Configuration对象：</p>
+<p>为了了解Arana的启动流程，我们打开cmd/cmd.go文件。可以看到，cmd.go文件使用了cobra库。cobra库是golang开源的命令行库，详情可以参考源码地址：<a href="https://github.com/spf13/cobra">https://github.com/spf13/cobra</a>。startCommand.Run 方法里面的逻辑，就是程序初始化的整个流程。</p>
+<p>在init方法中，我们看到程序启动时接收了一个c参数，并把值赋给了configPath（配置文件的位置）变量。上面我们配置main函数的启动参数<code>start -c docker/conf/config.yaml</code>，可以找到配置文件所在的位置。在配置文件中可以看到Listener、Executor和DataSourceCluster的相关配置（此时Filter功能尚未实现，所以没有Filter的配置）。</p>
+<p>startCommand中Run方法中，第一步是加载配置文件，组装成一个Configuration对象：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt">1
@@ -517,7 +521,8 @@ docker-compose -f docker-compose.yaml up -d mysql</p>
     
 </code></pre></td></tr></table>
 </div>
-</div><p>至此，数据库数据源的初始化就完成了。<!-- raw HTML omitted -->接下来是初始化监听器Listener，我们进入 mysql.NewListener(listenerConf) 方法中，可以看到其实就是启动了一个服务监听一个TCP服务的端口：</p>
+</div><p>至此，数据库数据源的初始化就完成了。</p>
+<p>接下来是初始化监听器Listener，我们进入 mysql.NewListener(listenerConf) 方法中，可以看到其实就是启动了一个服务监听一个TCP服务的端口：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code><span class="lnt"> 1
@@ -695,7 +700,7 @@ docker-compose -f docker-compose.yaml up -d mysql</p>
 
 </code></pre></td></tr></table>
 </div>
-</div><p>至此，Arana的启动和处理流程的源码都梳理完了。从目前来看，Arana做的事情就是透传SQL，没有做其他的事情，比如Filtrer功能都还没支持。从这个简单的框架可以很好的了解Arana的原理，正是通过阅读源码了解Arana的好机会！<!-- raw HTML omitted -->​</p>
+</div><p>至此，Arana的启动和处理流程的源码都梳理完了。从目前来看，Arana做的事情就是透传SQL，没有做其他的事情，比如Filtrer功能都还没支持。从这个简单的框架可以很好的了解Arana的原理，正是通过阅读源码了解Arana的好机会！</p>
 <p>​</p>
 
     </div>

@@ -35,7 +35,7 @@
 
 
 
-<link href="/sass/main.min.ab4a4438471772747c8a3fe5a754e3cfd80d4312f3c9fef4b642c5430b946125.css" rel="stylesheet">
+<link href="/sass/main.min.9c88c209d3b38116e115c5fae7370bee66813a0e2f4d1d7a2e15eab7e8d2d60b.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 
 
@@ -154,7 +154,7 @@
 <li>分布式事务支持</li>
 </ol>
 <p>总结来说，Arana项目是作为数据库的一个代理层，来实现分库分表和动态路由等功能的一个Proxy数据库插件。我们由原先直接访问数据库，转变为先访问Arana代理，再由Arana将我们的请求进行加工后，打到数据库服务器上去，如下图：<!-- raw HTML omitted --></p>
-<p><img src="/img/anara1_process1.jpg" alt="image.png"></p>
+<p><img src="/img/anara1_process1.jpg#img-60" alt="image.png"></p>
 <p><!-- raw HTML omitted -->Arana 的内部主要有这几个部分组成：</p>
 <ol>
 <li>监听器（Listener）：监听外部请求的一个TCP服务，用来监听和接收外部请求的SQL命令</li>
@@ -163,7 +163,7 @@
 <li>数据源（DataSourceCluster）:实际执行SQL的数据库服务器</li>
 </ol>
 <p>Arana 内部的执行流程如下：</p>
-<p><img src="/img/anara1_process2.jpg#img-half" alt="image.png"></p>
+<p><img src="/img/anara1_process2.jpg#img-20" alt="image.png"></p>
 <h2 id="如何本地启动项目">如何本地启动项目</h2>
 <p>Arana的源码地址在：<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>，为了防止master分支的源码更新太快导致对不上本文的流程，可以拉取这个版本的代码对着本文阅读：<a href="https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295">https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295</a>。<!-- raw HTML omitted -->源码拉取下来后，看到Arana的目录结构：<!-- raw HTML omitted --><img src="img/arana1_project.png" alt="image.png"></p>
 <ul>
@@ -206,7 +206,7 @@ docker-compose -f docker-compose.yaml up -d mysql</p>
 <blockquote>
 <p>start -c docker/conf/config.yaml</p>
 </blockquote>
-<p><img src="/img/arana1_mainconfig.png" alt="image.png"></p>
+<p><img src="/img/arana1_mainconfig.png#img-60" alt="image.png"></p>
 <ol start="3">
 <li>将 docker/conf/config.yaml 文件的dsn配置的域名由arana-mysql改为127.0.0.1</li>
 <li>启动 cmd/cmd.go文件的main函数，即可启动服务</li>

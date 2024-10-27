@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>golang学习-类型转换 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="" /><meta name="description" content="基本类型之间转换 在go中，基本类型有以下这些： 整型类型：uint8、uint16、uint32、uint64、int8、int16、int3" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="http://localhost:1313/post/golang%E5%AD%A6%E4%B9%A0-%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="http://localhost:1313/post/golang%E5%AD%A6%E4%B9%A0-%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="golang学习-类型转换">
+  <meta property="og:description" content="基本类型之间转换 在go中，基本类型有以下这些： 整型类型：uint8、uint16、uint32、uint64、int8、int16、int3">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2021-05-25T08:58:41+08:00">
+    <meta property="article:modified_time" content="2021-05-25T08:58:41+08:00">
+    <meta property="article:tag" content="Golang">
+
+  <meta itemprop="name" content="golang学习-类型转换">
+  <meta itemprop="description" content="基本类型之间转换 在go中，基本类型有以下这些： 整型类型：uint8、uint16、uint32、uint64、int8、int16、int3">
+  <meta itemprop="datePublished" content="2021-05-25T08:58:41+08:00">
+  <meta itemprop="dateModified" content="2021-05-25T08:58:41+08:00">
+  <meta itemprop="wordCount" content="1521">
+  <meta itemprop="keywords" content="Golang">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="golang学习-类型转换">
+  <meta name="twitter:description" content="基本类型之间转换 在go中，基本类型有以下这些： 整型类型：uint8、uint16、uint32、uint64、int8、int16、int3">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">golang学习-类型转换</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-05-25 </span>
+        <div class="post-category">
+            <a href="/categories/golang/"> golang </a>
+            </div>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#基本类型之间转换">基本类型之间转换</a></li>
+            <li><a href="#整型和浮点类型转换">整型和浮点类型转换</a></li>
+            <li><a href="#高精度数字-转-低精度数字">高精度数字 转 低精度数字：</a></li>
+            <li><a href="#string和byte数组互转">string和byte数组互转</a></li>
+            <li><a href="#string类型与数字bool类型互转">string类型与数字、bool类型互转</a></li>
+            <li><a href="#interface-类型转换">interface{} 类型转换</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <h3 id="基本类型之间转换">基本类型之间转换</h3>
+<p>在go中，基本类型有以下这些：</p>
+<ul>
+<li>
+<p>整型类型：uint8、uint16、uint32、uint64、int8、int16、int32、int64</p>
+</li>
+<li>
+<p>浮点类型：float32、float64、complex64、complex128</p>
+</li>
+<li>
+<p>其他数字类型：byte、rune、uint、int、uintptr</p>
+</li>
+<li>
+<p>布尔类型：true、false</p>
+</li>
+<li>
+<p>字符串：一串固定长度的字符连接起来的字符序列，Go 语言的字符串的字节使用 UTF-8 编码标识 Unicode 文本。</p>
+</li>
+</ul>
+<p>不同的基本类型之间可以互相转换，转换的语法为：</p>
+
+<pre class="no-line-numbers language-go ">
+<code>type_name(expression)</code>
+</pre>
+<h3 id="整型和浮点类型转换">整型和浮点类型转换</h3>
+
+<pre class="line-numbers language-golang ">
+<code>func main() {
+	var a int64 = 100
+	var b float64 = 10.8
+
+	fmt.Println(&#34;a的值为：&#34;, a, &#34;b的值为：&#34;, b)
+
+	b = float64(a)
+	fmt.Println(&#34;a的值为：&#34;, a, &#34;b的值为：&#34;, b)
+}</code>
+</pre>
+<p>输出结果为：</p>
+
+<pre class="line-numbers language- ">
+<code>a的值为： 100 b的值为： 10.8
+a的值为： 100 b的值为： 100</code>
+</pre>
+<h3 id="高精度数字-转-低精度数字">高精度数字 转 低精度数字：</h3>
+
+<pre class="line-numbers language-go ">
+<code>func main() {
+	var a int64 = 6666
+	var b int8 = 12
+	fmt.Println(&#34;a的值为：&#34;, a, &#34;b的值为：&#34;, b)
+	
+  // b精度溢出，出现精度损失
+	b = int8(a)
+	fmt.Println(&#34;a的值为：&#34;, a, &#34;b的值为：&#34;, b)
+}</code>
+</pre>
+<p>输出结果为：</p>
+
+<pre class="line-numbers language- ">
+<code>a的值为： 6666 b的值为： 12
+a的值为： 6666 b的值为： 10</code>
+</pre>
+<p><code>int8</code>类型的范围是 -128 到 127，所以会出现精度溢出，但是golang并不会编译报错</p>
+<h3 id="string和byte数组互转">string和byte数组互转</h3>
+<p>string转byte数组方式：</p>
+
+<pre class="no-line-numbers language-golang ">
+<code>[]byte(string)</code>
+</pre>
+<p>byte数组转string方式：</p>
+
+<pre class="no-line-numbers language-golang ">
+<code>string([]byte)</code>
+</pre>
+<p>例如：</p>
+
+<pre class="line-numbers language-golang ">
+<code>func main() {
+	var aa string = &#34;hello, world&#34;
+	var bb []byte = []byte(aa)
+	var cc = string(bb)
+	
+	fmt.Println(&#34;aa = &#34;, aa)
+	fmt.Println(&#34;bb = &#34;, bb)
+	fmt.Println(&#34;cc = &#34;, cc)
+}</code>
+</pre>
+<p>输出为：</p>
+
+<pre class="line-numbers language- ">
+<code>aa =  hello, world
+bb =  [104 101 108 108 111 44 32 119 111 114 108 100]
+cc =  hello, world</code>
+</pre>
+<h3 id="string类型与数字bool类型互转">string类型与数字、bool类型互转</h3>
+<p>使用<code>fmt.Springf</code>完成数字和string的转换，比如：</p>
+
+<pre class="line-numbers language-golang ">
+<code>func main() {
+	var aa int32 = 168
+	var bb float32 = 125.676
+	fmt.Println(&#34;aa的值为：&#34;, aa, &#34;bb的值为：&#34;, bb)
+	
+	// 整型转string
+	var as = fmt.Sprintf(&#34;%d&#34;, aa)
+	// 浮点型转string
+	var bs = fmt.Sprintf(&#34;%f&#34;, bb)
+	fmt.Println(&#34;as的值为：&#34;, as, &#34;bs的值为：&#34;, bs)
+}</code>
+</pre>
+<p>输出为：</p>
+
+<pre class="line-numbers language- ">
+<code>aa的值为： 168 bb的值为： 125.676
+as的值为： 168 bs的值为： 125.676003</code>
+</pre>
+<p>也可以使用<code>strconv</code>工具类来进行转换，例如：</p>
+<p>string 转 float64：</p>
+
+<pre class="no-line-numbers language-golang ">
+<code>flo64, err := strconv.ParseFloat(&#34;1234.5323&#34;, 10)</code>
+</pre>
+<p>string 转 int64：</p>
+
+<pre class="line-numbers language-golang ">
+<code>// 参数1是被转换的字符串，
+// 参数2是数字字符串的进制，2到32进制
+// 参数3 返回结果的bit大小，0，8，16，32，64分别表示int int8 int16 int32 int64
+in64, err := strconv.ParseInt(&#34;1234.5323&#34;, 10, 32)</code>
+</pre>
+<p>int64 转 string</p>
+
+<pre class="no-line-numbers language-golang ">
+<code>str := strconv.FormatInt(168, 10)</code>
+</pre>
+<p>float64 转 string</p>
+
+<pre class="line-numbers language-golang ">
+<code>// 第1个参数是你要转换的值
+// 第2个参数是表示转换后的格式
+// 第3个参数是控制精度的，详细看图片
+// 第4个参数是指这个传进去的精度是64的
+str2 := strconv.FormatFloat(555.666, &#39;e&#39;, 10, 64)</code>
+</pre>
+<p>bool 转string</p>
+
+<pre class="line-numbers language-golang ">
+<code>// 返回“true”
+boolStr :=strconv.FormatBool(true)</code>
+</pre>
+<p>string转bool</p>
+
+<pre class="line-numbers language-golang ">
+<code>// 传入 &#34;1&#34;, &#34;t&#34;, &#34;T&#34;, &#34;true&#34;, &#34;TRUE&#34;, &#34;True&#34; ，返回true,nil
+// 传入 &#34;0&#34;, &#34;f&#34;, &#34;F&#34;, &#34;false&#34;, &#34;FALSE&#34;, &#34;False&#34;，饭false,nil
+// 否则返回 false, syntaxError(&#34;ParseBool&#34;, str)
+bol := strconv.ParseBool(&#34;true&#34;)</code>
+</pre>
+<p>注意，golang中<strong>不支持隐式的类型转换</strong>。比如，</p>
+
+<pre class="line-numbers language-golang ">
+<code>func main() {
+	var aa int64 = 100
+	var bb float64 = 12.3
+	
+	// 编译报错
+	// var cc float64 = aa * bb
+	
+	// 将aa转成float64再相加
+	var cc float64 = float64(aa) * bb
+	
+	fmt.Println(cc)
+}</code>
+</pre>
+<h3 id="interface-类型转换">interface{} 类型转换</h3>
+<p>interface{}类型转换成具体类型的语法：</p>
+
+<pre class="no-line-numbers language-golang ">
+<code>interfaceVar.(具体类型)</code>
+</pre>
+<p>一般使用断言来实现，比如：</p>
+
+<pre class="line-numbers language-golang ">
+<code>value, ok := aa.(string)
+if !ok {
+    fmt.Println(&#34;It&#39;s not ok for type string&#34;)
+    return
+}
+fmt.Println(&#34;The value is &#34;, value)</code>
+</pre>
+<p>也可以使用switch&hellip;case类判断，例如：</p>
+
+<pre class="line-numbers language-golang ">
+<code>func main() {
+  var t interface{} = 10.6
+  switch i := t.(type) {
+  case float32:
+    fmt.Printf(&#34;Type is %T , Value is%v\n&#34;, i, i)
+  case float64:
+    fmt.Printf(&#34;Type is %T , Value is%v\n&#34;, i, i)
+  case int:
+    fmt.Printf(&#34;Type is %T , Value is%v\n&#34;, i, i)
+  case bool:
+    fmt.Printf(&#34;Type is %T , Value is%v\n&#34;, i, i)
+  case string:
+    fmt.Printf(&#34;Type is %T , Value is%v\n&#34;, i, i)
+  default:
+    fmt.Println(&#34;Other Type&#34;)
+  }
+}</code>
+</pre>
+<p>具体的类型可以隐式转换成interface{}，比如，具体类型的变量可以传参给 interface{} 类型的参数</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content"></span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2021-05-25
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/golang/">golang</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/arana-%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Arana 启动源码分析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+            <span class="next-text nav-default">Mockito 快速入门</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a> 
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

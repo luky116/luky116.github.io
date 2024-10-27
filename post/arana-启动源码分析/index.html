@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Arana 启动源码分析 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="关于Arana Arana(https://github.com/dubbogo/arana) 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。刚接触这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/arana-%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/arana-%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Arana 启动源码分析">
+  <meta property="og:description" content="关于Arana Arana(https://github.com/dubbogo/arana) 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。刚接触这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2021-12-16T15:22:17+08:00">
+    <meta property="article:modified_time" content="2021-12-16T15:22:17+08:00">
+    <meta property="article:tag" content="Arana">
+
+  <meta itemprop="name" content="Arana 启动源码分析">
+  <meta itemprop="description" content="关于Arana Arana(https://github.com/dubbogo/arana) 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。刚接触这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包">
+  <meta itemprop="datePublished" content="2021-12-16T15:22:17+08:00">
+  <meta itemprop="dateModified" content="2021-12-16T15:22:17+08:00">
+  <meta itemprop="wordCount" content="3239">
+  <meta itemprop="keywords" content="Arana">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Arana 启动源码分析">
+  <meta name="twitter:description" content="关于Arana Arana(https://github.com/dubbogo/arana) 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。刚接触这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Arana 启动源码分析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-12-16 </span>
+        <div class="post-category">
+            <a href="/categories/arana/"> Arana </a>
+            <a href="/categories/%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/"> 源码系列 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#关于arana">关于Arana</a></li>
+        <li><a href="#如何本地启动项目">如何本地启动项目</a></li>
+        <li><a href="#项目启动流程">项目启动流程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <h2 id="关于arana">关于Arana</h2>
+<p>Arana(<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>) 项目刚启动不到两个月，各个功能都还在规划和刚开始开发的阶段。刚接触这个项目也不久，还在熟悉代码中。这个项目0.1版本的规划包括：</p>
+<ol>
+<li>SQL 透传</li>
+<li>SQL 语法解析</li>
+<li>分片算法</li>
+<li>sharding功能</li>
+<li>动态配置中心</li>
+<li>分布式事务支持</li>
+</ol>
+<p>总结来说，Arana项目是作为数据库的一个代理层，来实现分库分表和动态路由等功能的一个Proxy数据库插件。我们由原先直接访问数据库，转变为先访问Arana代理，再由Arana将我们的请求进行加工后，打到数据库服务器上去，如下图：​</p>
+<p><img src="/img/arana/anara1_process1.jpg#img-60" alt="image.png"></p>
+<p>​Arana 的内部主要有这几个部分组成：</p>
+<ol>
+<li>监听器（Listener）：监听外部请求的一个TCP服务，用来监听和接收外部请求的SQL命令</li>
+<li>过滤器（Filter）：分为前置过滤器(PreFilter)和后置过滤器(PostFilter)，在执行SQL前，对SQL进行特殊处理；获取到SQL执行结果后，对结果进行加工再返回给请求方</li>
+<li>执行器（Executor）：负责将SQL命令打到合适的目标数据库服务器上</li>
+<li>数据源（DataSourceCluster）:实际执行SQL的数据库服务器</li>
+</ol>
+<p>Arana 内部的执行流程如下：</p>
+<p><img src="/img/arana/anara1_process2.jpg#img-20" alt="image.png"></p>
+<h2 id="如何本地启动项目">如何本地启动项目</h2>
+<p>Arana的源码地址在：<a href="https://github.com/dubbogo/arana">https://github.com/dubbogo/arana</a>，为了防止master分支的源码更新太快导致对不上本文的流程，可以拉取这个版本的代码对着本文阅读：<a href="https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295">https://github.com/dubbogo/arana/tree/eedc576fdcea8de70910f43e0a8bf21dbb9c9295</a>。</p>
+<p>​源码拉取下来后，看到Arana的目录结构：</p>
+<p><img src="/img/arana/arana1_project.png#img-60" alt="image.png"></p>
+<ul>
+<li>cmd：Arana的启动入口方法</li>
+<li>dist：编译后的文件</li>
+<li>docker：docker相关的配置</li>
+<li>pkg：Arana的业务逻辑</li>
+<li>test：存放继承测试文件</li>
+<li>third_party：第三方依赖</li>
+</ul>
+<p>​</p>
+<p>目前有两种方式来启动Arana：</p>
+<p>1、通过docker启动。</p>
+<ol>
+<li>在根目录下执行以下命令，构建Arana的docker镜像</li>
+</ol>
+<blockquote>
+<p>make build &amp;&amp; make build-docker</p>
+</blockquote>
+<ol start="2">
+<li>进入docker/目录，执行如下命令启动arana的docker镜像</li>
+</ol>
+<blockquote>
+<p>cd docker/
+docker-compose -f docker-compose.yaml up -d arana</p>
+</blockquote>
+<ol start="3">
+<li>执行test/integration_test.go里的集成测试，即可看到结果输出</li>
+</ol>
+<p>2、通过main函数启动，方便调试代码</p>
+<ol>
+<li>进入docker/目录，在根目录下执行以下命令，启动MySQL的docker镜像</li>
+</ol>
+<blockquote>
+<p>cd docker/
+docker-compose -f docker-compose.yaml up -d mysql</p>
+</blockquote>
+<ol start="2">
+<li>配置cmd/cmd.go中main函数的启动参数</li>
+</ol>
+<blockquote>
+<p>start -c docker/conf/config.yaml</p>
+</blockquote>
+<p><img src="/img/arana/arana1_mainconfig.png#img-60" alt="image.png"></p>
+<ol start="3">
+<li>将 docker/conf/config.yaml 文件的dsn配置的域名由arana-mysql改为127.0.0.1</li>
+<li>启动 cmd/cmd.go文件的main函数，即可启动服务</li>
+<li>执行test/integration_test.go里的集成测试，即可看到结果输出
+<a name="fRQRH"></a></li>
+</ol>
+<h2 id="项目启动流程">项目启动流程</h2>
+<p>为了了解Arana的启动流程，我们打开cmd/cmd.go文件。可以看到，cmd.go文件使用了cobra库。cobra库是golang开源的命令行库，详情可以参考源码地址：<a href="https://github.com/spf13/cobra">https://github.com/spf13/cobra</a>。startCommand.Run 方法里面的逻辑，就是程序初始化的整个流程。</p>
+<p>在init方法中，我们看到程序启动时接收了一个c参数，并把值赋给了configPath（配置文件的位置）变量。上面我们配置main函数的启动参数<code>start -c docker/conf/config.yaml</code>，可以找到配置文件所在的位置。在配置文件中可以看到Listener、Executor和DataSourceCluster的相关配置（此时Filter功能尚未实现，所以没有Filter的配置）。</p>
+<p>startCommand中Run方法中，第一步是加载配置文件，组装成一个Configuration对象：</p>
+
+<pre class="no-line-numbers language-go ">
+<code>conf := config.Load(configPath)</code>
+</pre>
+<p>初始化Filter的逻辑先忽略，先看下初始化Executor的流程。从配置文件可以看到，一个Executor可以绑定多个数据源（DataSource）：</p>
+
+<pre class="line-numbers language-yaml ">
+<code>executors:
+  - name: redirect
+    mode: singledb
+    # 一个Executor可以绑定多个dataSource
+    data_sources:
+      - master: employees</code>
+</pre>
+<p>一个Executor同时可以绑定多个前置过滤器和后置过滤器：</p>
+
+<pre class="line-numbers language-go ">
+<code>for _, executorConf := range conf.Executors {
+    executor := executor.NewRedirectExecutor(executorConf)
+
+    for i := 0; i &lt; len(executorConf.Filters); i&#43;&#43; {
+        filterName := executorConf.Filters[i]
+        f := filter.GetFilter(filterName)
+        if f != nil {
+            preFilter, ok := f.(proto.PreFilter)
+            if ok {
+                // 一个Executor绑定多个前置过滤器
+                executor.AddPreFilter(preFilter)
+            }
+            postFilter, ok := f.(proto.PostFilter)
+            if ok {
+                // 一个Executor绑定多个后置过滤器
+                executor.AddPostFilter(postFilter)
+            }
+        }
+    }
+    executors[executorConf.Name] = executor
+}</code>
+</pre>
+<p>接下来是初始化数据源（DataSource）的流程，这里是将数据源Factory方法作为InitDataSourceManager的一个参数：</p>
+
+<pre class="line-numbers language-go ">
+<code>resource.InitDataSourceManager(conf.DataSources, func(config json.RawMessage) pools.Factory {
+    collector, err := mysql.NewConnector(config)
+    if err != nil {
+        panic(err)
+    }
+    return collector.NewBackendConnection
+})</code>
+</pre>
+<p>进入到InitDataSourceManager方法，看到调用 据源Factory 传的参数是 dataSourceConfig.Conf：</p>
+
+<pre class="line-numbers language-go ">
+<code>// factory(dataSourceConfig.Conf) 看到传参
+initResourcePool := func(dataSourceConfig *config.DataSource) *pools.ResourcePool {
+    resourcePool := pools.NewResourcePool(factory(dataSourceConfig.Conf), dataSourceConfig.Capacity,
+                                          dataSourceConfig.MaxCapacity, dataSourceConfig.IdleTimeout, 1, nil)
+    return resourcePool
+}</code>
+</pre>
+<p>打开配置文件，可以看到这个参数对应的是conf.dsn配置：</p>
+
+<pre class="line-numbers language-yaml ">
+<code>data_source_cluster:
+  - role: master
+    type: mysql
+    name: employees
+    capacity: 10
+    max_capacity: 20
+    idle_timeout: 60s
+    # factory接收的是这个参数
+    conf:
+      dsn: root:123456@tcp(arana-mysql:3306)/employees?timeout=1s&amp;readTimeout=1s&amp;writeTimeout=1s&amp;parseTime=true&amp;loc=Local&amp;charset=utf8mb4,utf8</code>
+</pre>
+<p>回到cmd.go文件，进入 mysql.NewConnector(config) 方法中，看下是如何初始化Collector�的：</p>
+
+<pre class="line-numbers language-go ">
+<code>func NewConnector(config json.RawMessage) (*Connector, error) {
+	v := &amp;struct {
+  	# 从配置文件可以看到dsn的值
+		DSN string `json:&#34;dsn&#34;`
+	}{}
+	if err := json.Unmarshal(config, v); err != nil {
+		log.Errorf(&#34;unmarshal mysql Listener config failed, %s&#34;, err)
+		return nil, err
+	}
+	// ParseDSN 解析MySQL的连接信息，包括host、port、username、db、password、编码方式等等
+	cfg, err := ParseDSN(v.DSN)
+	if err != nil {
+		return nil, err
+	}
+	return &amp;Connector{cfg}, nil
+}</code>
+</pre>
+<p>得到Connector对象后，cmd.go中返回了 collector.NewBackendConnection 方法，我们进到这个方法里面：</p>
+
+<pre class="line-numbers language-go ">
+<code>func (c *Connector) NewBackendConnection(ctx context.Context) (pools.Resource, error) {
+	conn := &amp;BackendConnection{conf: c.conf}
+	// 本地启动TCP的监听MySQL的端口服务
+	err := conn.connect()
+	return conn, err
+}</code>
+</pre>
+<p>再打开��conn.connect() 方法，就可以看到真正连接MySQL服务器的逻辑</p>
+
+<pre class="line-numbers language-go ">
+<code>func (conn *BackendConnection) connect() error {
+	//  省略部分代码 ......
+    
+	// 这里连接MySQL服务器
+	netConn, err := net.Dial(typ, conn.conf.Addr)
+	if err != nil {
+		return err
+	}
+	tcpConn := netConn.(*net.TCPConn)
+	// SetNoDelay controls whether the operating system should delay packet transmission
+	// in hopes of sending fewer packets (Nagle&#39;s algorithm).
+	// The default is true (no delay),
+	// meaning that Content is sent as soon as possible after a Write.
+	tcpConn.SetNoDelay(true)
+	tcpConn.SetKeepAlive(true)
+	conn.c = newConn(tcpConn)
+	// 等待TCP握手成功，即建立和MySQL的连接，即可返回
+	return conn.clientHandshake()
+}</code>
+</pre>
+<p>再次回到 InitDataSourceManager方法中，我们看下 collector.NewBackendConnection 方法是如何被调用的：</p>
+
+<pre class="line-numbers language-go ">
+<code>func InitDataSourceManager(dataSources []*config.DataSource, factory func(config json.RawMessage) pools.Factory) {
+    //  省略部分代码 ......
+    
+    // 对数据源分进行了分类，放到不同的连接池map总存储:
+    // master：主库
+    // slave：从库
+    // meta：目前暂未用到，未来会用来存储分布式事务相关的配置数据
+    for i := 0; i &lt; len(dataSources); i&#43;&#43; {
+		switch dataSources[i].Role {
+		case config.Master:
+			resourcePool := initResourcePool(dataSources[i])
+			masterResourcePool[dataSources[i].Name] = resourcePool
+		case config.Slave:
+			resourcePool := initResourcePool(dataSources[i])
+			slaveResourcePool[dataSources[i].Name] = resourcePool
+		case config.Meta:
+			resourcePool := initResourcePool(dataSources[i])
+			metaResourcePool[dataSources[i].Name] = resourcePool
+		default:
+			panic(fmt.Errorf(&#34;unsupported data source type: %d&#34;, dataSources[i].Role))
+		}
+	}
+}
+    </code>
+</pre>
+<p>至此，数据库数据源的初始化就完成了。</p>
+<p>接下来是初始化监听器Listener，我们进入 mysql.NewListener(listenerConf) 方法中，可以看到其实就是启动了一个服务监听一个TCP服务的端口：</p>
+
+<pre class="line-numbers language-go ">
+<code>func NewListener(conf *config.Listener) (proto.Listener, error) {
+	// 省略部分代码......
+
+	// 定义一个连接对象，监听指定的端口
+	l, err := net.Listen(&#34;tcp&#34;, fmt.Sprintf(&#34;%s:%d&#34;, conf.SocketAddress.Address, conf.SocketAddress.Port))
+	if err != nil {
+		log.Errorf(&#34;listen %s:%d error, %s&#34;, conf.SocketAddress.Address, conf.SocketAddress.Port, err)
+		return nil, err
+	}
+
+	listener := &amp;Listener{
+		conf:     cfg,
+		listener: l,
+		stmts:    make(map[uint32]*proto.Stmt, 0),
+	}
+	return listener, nil
+}</code>
+</pre>
+<p>接下来是给每个Listener指定一个执行器Executor：</p>
+
+<pre class="line-numbers language-go ">
+<code>// 指定执行器
+listener.SetExecutor(executor)
+// 将监听器暂存起来
+propeller.AddListener(listener)</code>
+</pre>
+<p>�接下来调用 propeller.Start() 启动所有的监听器，监听外部服务。进入Start方法，发现是调用了listener.Listener() 方法。打开这个方法：</p>
+
+<pre class="line-numbers language-go ">
+<code>func (l *Listener) Listen() {
+	log.Infof(&#34;start mysql Listener %s&#34;, l.listener.Addr())
+	for {
+        // 接收外部的请求
+		conn, err := l.listener.Accept()
+		if err != nil {
+			return
+		}
+
+		connectionID := l.connectionID
+		l.connectionID&#43;&#43;
+		
+        // 调用handle方法处理请求并返回给调用方
+		go l.handle(conn, connectionID)
+	}
+}</code>
+</pre>
+<p>�进入handle方法，调用了ExecuteCommand方法执行SQL，并返回处理结果。ExecuteCommand方法的执行细节有机会单独出一篇文章解析下。</p>
+
+<pre class="line-numbers language-go ">
+<code>func (l *Listener) handle(conn net.Conn, connectionID uint32) {
+	// 省略部分代码......
+
+    // 建立连接
+	err := l.handshake(c)
+	if err != nil {
+		werr := c.writeErrorPacketFromError(err)
+		if werr != nil {
+			log.Errorf(&#34;Cannot write error packet to %s: %v&#34;, c, werr)
+			return
+		}
+		return
+	}
+
+	// 省略部分代码......
+    
+	for {
+		c.sequence = 0
+        // 读取请求的数据（SQL）
+		data, err := c.readEphemeralPacket()
+		if err != nil {
+			c.recycleReadPacket()
+			return
+		}
+
+		ctx := &amp;proto.Context{
+			Context:      context.Background(),
+			ConnectionID: l.connectionID,
+			Data:         data,
+		}
+        // 执行SQL，并返回执行结果
+		err = l.ExecuteCommand(c, ctx)
+		if err != nil {
+			return
+		}
+	}
+}</code>
+</pre>
+<p>至此，Arana的启动和处理流程的源码都梳理完了。从目前来看，Arana做的事情就是透传SQL，没有做其他的事情，比如Filtrer功能都还没支持。从这个简单的框架可以很好的了解Arana的原理，正是通过阅读源码了解Arana的好机会！</p>
+<p>​</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2021-12-16
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/arana/">Arana</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+            <span class="next-text nav-default">Mockito 快速入门</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

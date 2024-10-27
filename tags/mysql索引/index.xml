@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MySQL索引 on 三月的博客</title>
+    <link>https://luky116.github.io/tags/mysql%E7%B4%A2%E5%BC%95/</link>
+    <description>Recent content in MySQL索引 on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 30 Aug 2017 14:43:00 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/tags/mysql%E7%B4%A2%E5%BC%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MySQL索引</title>
+      <link>https://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</link>
+      <pubDate>Wed, 30 Aug 2017 14:43:00 +0800</pubDate>
+      <guid>https://luky116.github.io/post/mysql%E7%B4%A2%E5%BC%95/</guid>
+      <description>1、为什么会有索引 当数据保存在磁盘介质上时，它是作为数据库存放的，每条数据是作为一个整体存储的。磁盘存放数据的数据结构类似于链表，即，每个节</description>
+    </item>
+  </channel>
+</rss>

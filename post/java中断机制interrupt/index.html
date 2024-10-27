@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java中断机制(interrupt)) - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6interrupt/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java中断机制(interrupt))">
+  <meta property="og:description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-09-29T14:43:00+08:00">
+    <meta property="article:modified_time" content="2017-09-29T14:43:00+08:00">
+    <meta property="article:tag" content="Java中断">
+
+  <meta itemprop="name" content="Java中断机制(interrupt))">
+  <meta itemprop="description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T">
+  <meta itemprop="datePublished" content="2017-09-29T14:43:00+08:00">
+  <meta itemprop="dateModified" content="2017-09-29T14:43:00+08:00">
+  <meta itemprop="wordCount" content="1910">
+  <meta itemprop="keywords" content="Java中断">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java中断机制(interrupt))">
+  <meta name="twitter:description" content="中断线程 在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，T">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java中断机制(interrupt))</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-09-29 </span>
+        <div class="post-category">
+            <a href="/categories/java%E6%BA%90%E7%A0%81/"> Java源码 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents"></nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <p><strong>中断线程</strong></p>
+<p>在 run() 方法中，如果语句执行到了最会一句，或是遇到 return 方法，或是方法中出现了没有被捕获的异常，run() 方法将会执行结束。在java中，Thread中的interrupt() 方法被调用时，线程中断状态将被置位，由于线程在运行期间，会不断的检测这个状态位，以判断程序是否被中断。</p>
+<p><strong>检测线程是否被中断</strong></p>
+<p>在实际开发中，要判断中断状态位是否被置位，首先使用静态方法 Thread.currentThread() 方法来获取当前线程，在调用 interrupted() 方法来判断中断位的状态。如下：</p>
+
+<pre class="no-line-numbers language-java ">
+<code>while (!Thread.currentThread().interrupted() &amp;&amp; more work to do) {}</code>
+</pre>
+<p><strong>interrupted 和 isInterrupted 区别</strong></p>
+<p>interrupted 是一个静态方法，他检测当前线程是否中断，并且会清除当前线程的中断位。isInterrupted 是一个实例方法，检测线程中断位，不会清除状态位。</p>
+<p><strong>如何中断线程</strong></p>
+<p>如果线程被Object.wait, Thread.join和Thread.sleep三种方法之一阻塞，那么，它将接收到一个中断异常（InterruptedException），从而提早地终结被阻塞状态。interrupt 不会中断一个正在运行的线程。</p>
+<p>要注意的是，中断线程不等于终止线程，interrupt 只是只是改变了线程的状态位，来引起线程的注意或是唤醒沉睡的线程。但是当线程注意到（捕获到InterruptedException异常或是检测到状态位的改变），可以自行决定如何处理该线程，比如，可以让线程捕获异常后继续执行，或是中断线程。</p>
+<p>在实际操作中，一般会把线程中断当做线程结束的条件，格式如下：</p>
+
+<pre class="line-numbers language-java ">
+<code>@Override
+public void run() {
+    while(!Thread.currentThread().isInterrupted() ){
+        try{
+            //处理正常的逻辑
+            Thread.sleep(100);
+        }catch (InterruptedException e){
+            //被中断后的进入
+
+            //由于抛出异常后会把状态位改变，所以这里应该手动改变状态位
+            Thread.currentThread().interrupt();
+        }finally{
+            // 线程结束前的后续操作
+        }
+    }
+}</code>
+</pre>
+<p>一般不会在捕获的异常中不进行任何操作，这样可能会处理不当中断，比如：</p>
+
+<pre class="line-numbers language-java ">
+<code>@Override
+public void run() {
+    try{
+        Thread.sleep(100);
+    }catch (InterruptedException e){ }
+}</code>
+</pre>
+<p>选择抛出异常，也是很好的选择：</p>
+
+<pre class="line-numbers language-java ">
+<code>void mySubTask() throws InterruptedException {
+           ...
+        sleep(delay);
+           ...
+}</code>
+</pre>
+<p><strong>如何中断一个线程</strong></p>
+<p><strong>实例一：</strong></p>
+
+<pre class="line-numbers language-java ">
+<code>public class Example1 implements Runnable{
+    private float d;
+    @Override
+    public void run() {
+        while(true){
+            for(int i=0;i&lt;10000000;i&#43;&#43;){
+                d = (float) (d &#43; (Math.PI &#43; Math.E) / d);
+            }
+            System.out.println(&#34;I&#39;m counting......&#34;);
+            //转让调度器使用权
+            Thread.yield();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Example1 example1 = new Example1();
+        Thread t1 = new Thread(example1);
+        t1.start();
+
+        Thread.sleep(100);
+
+        System.out.println(&#34;开始中断线程。。。。。。&#34;);
+        t1.interrupt();
+    }
+}</code>
+</pre>
+<p>输出：</p>
+
+<pre class="line-numbers language- ">
+<code>I&#39;m counting......
+开始中断线程。。。。。。
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......</code>
+</pre>
+<p>可以看出来，线程被调用interrupt方法后，并没有被中断，任然在运行，所以说，interrupt 方法并不能是线程终止运行。</p>
+<p>要是线程中断运行，有三种方法，抛出Interrupt异常，使用 Thread.interrupted() 不断检查中断状态位，使用信号量进行控制。</p>
+<p><strong>方法一：信号量法</strong></p>
+
+<pre class="line-numbers language-java ">
+<code>class Example2 implements Runnable{
+
+    public static boolean isLive = true;
+    float d;
+    @Override
+    public void run() {
+        while(isLive){
+            for(int i=0;i&lt;10000000;i&#43;&#43;){
+                d = (float) (d &#43; (Math.PI &#43; Math.E) / d);
+            }
+            System.out.println(&#34;I&#39;m counting......&#34;);
+            //转让调度器使用权
+            Thread.yield();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Example2 e2 = new Example2();
+        Thread t1 = new Thread(e2);
+        t1.start();
+
+        Thread.sleep(100);
+
+        System.out.println(&#34;开始中断线程。。。。。。&#34;);
+
+        //设置改变信号量
+        e2.isLive = false;
+    }
+}</code>
+</pre>
+<p>输出结果：</p>
+
+<pre class="line-numbers language- ">
+<code>I&#39;m counting......
+开始中断线程。。。。。。
+I&#39;m counting......</code>
+</pre>
+<p><strong>方法二：抛出异常法</strong></p>
+
+<pre class="line-numbers language-java ">
+<code>public class Example1 implements Runnable{
+
+        private double d = 0.0;
+        public void run() {
+            //死循环执行打印&#34;I am running!&#34; 和做消耗时间的浮点计算
+            try {
+                while (true) {
+                    System.out.println(&#34;I am running!&#34;);
+                    for (int i = 0; i &lt; 900000; i&#43;&#43;) {
+                        d =  d &#43; (Math.PI &#43; Math.E) / d;
+                    }
+                    //休眠一断时间,中断时会抛出InterruptedException
+                    Thread.sleep(50);
+                }
+            } catch (InterruptedException e) {
+                System.out.println(&#34;ATask.run() interrupted!&#34;);
+            }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Example1 example1 = new Example1();
+        Thread t1 = new Thread(example1);
+        t1.start();
+
+        Thread.sleep(100);
+
+        System.out.println(&#34;开始中断线程。。。。。。&#34;);
+        t1.interrupt();
+    }
+}</code>
+</pre>
+<p>输出结果</p>
+
+<pre class="line-numbers language- ">
+<code>I am running!
+I am running!
+开始中断线程。。。。。。
+ATask.run() interrupted!</code>
+</pre>
+<p><strong>方法三：*<em>Thread.interrupted()监听*</em></strong></p>
+
+<pre class="line-numbers language-java ">
+<code>class Example3 implements Runnable {
+    @Override
+    public void run() {
+        while (!Thread.currentThread().interrupted()) {
+            try {
+                Thread.sleep(100);
+                System.out.println(&#34;I&#39;m counting......&#34;);
+            } catch (InterruptedException e) {
+                //设置状态位
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        Example3 e = new Example3();
+        Thread t1 = new Thread(e);
+        t1.start();
+
+        Thread.sleep(800);
+
+        System.out.println(&#34;开始中断线程。。。。。。&#34;);
+
+        t1.interrupt();
+
+    }
+}</code>
+</pre>
+<p>输出为：</p>
+
+<pre class="line-numbers language- ">
+<code>I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+I&#39;m counting......
+开始中断线程。。。。。。</code>
+</pre>
+<p><strong>被遗弃的stop和suspend</strong></p>
+<p>早起的Java版本提供了stop方法来终止一个线程，以及suspend来阻塞一个线程直到另一个线程调用resume来唤醒线程。stop和suspend这两个方法都试图控制给定线程的想行为。</p>
+<p>stop 方法试图终止一个线程的执行，包括未执完的run方法，其本身是很不安全的。比如说，当一个线程试图从一个账户转账到另一个账户，一个线程已经把钱取出来了，但是此正好被stop终止了线程，但是钱却没有转到另一个账户。这样的突然终止导致银行对象出于不稳定的状态。虽然此时锁被释放了，但是他的不稳定状态却不能被其他线程看到，这是很危险的。</p>
+<p>suspend 方法用来挂起一个锁，虽然不会破坏对象，但是有可能导致死锁。假设如果用suspend方法挂起一个拥有锁的线程，那么，该锁在恢复之前是不可用的。如果此时，调用suspend方法的线程试图获取同一个锁，那么，此时就会出现死锁。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-09-29
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java%E4%B8%AD%E6%96%AD/">Java中断</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E4%B8%ADcomparable%E5%92%8Ccomparator%E6%AF%94%E8%BE%83/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java中Comparable和Comparator比较</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
+            <span class="next-text nav-default">垃圾回收和内存分配策略</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

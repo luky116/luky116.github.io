@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Guava 快速入门 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Guava 快速入门">
+  <meta property="og:description" content="Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-06-05T17:00:17+08:00">
+    <meta property="article:modified_time" content="2020-06-05T17:00:17+08:00">
+    <meta property="article:tag" content="Guava">
+
+  <meta itemprop="name" content="Guava 快速入门">
+  <meta itemprop="description" content="Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符">
+  <meta itemprop="datePublished" content="2020-06-05T17:00:17+08:00">
+  <meta itemprop="dateModified" content="2020-06-05T17:00:17+08:00">
+  <meta itemprop="wordCount" content="4698">
+  <meta itemprop="keywords" content="Guava">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Guava 快速入门">
+  <meta name="twitter:description" content="Guava工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Guava 快速入门</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-06-05 </span>
+        <div class="post-category">
+            <a href="/categories/guava/"> Guava </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1基本工具base-utils">1、基本工具（Base utils）</a>
+          <ul>
+            <li><a href="#1-optional">1. Optional</a></li>
+            <li><a href="#2-先决条件-preconditions">2. 先决条件 Preconditions</a></li>
+            <li><a href="#3-连接器-joiner">3. 连接器 Joiner</a></li>
+            <li><a href="#4--拆分器-splitter">4.  拆分器 Splitter</a></li>
+            <li><a href="#5-字符串处理-strings">5. 字符串处理 Strings</a></li>
+          </ul>
+        </li>
+        <li><a href="#2集合工具collections">2、集合工具（Collections）</a>
+          <ul>
+            <li><a href="#1-不可变集合">1. 不可变集合</a></li>
+            <li><a href="#2-multiset">2. Multiset</a></li>
+            <li><a href="#3-multimap">3. Multimap</a></li>
+            <li><a href="#4-bimap">4. BiMap</a></li>
+            <li><a href="#5-table">5. Table</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <blockquote>
+<p><strong>Guava</strong>工程包含了若干被Google的 Java项目广泛依赖 的核心库，例如：<strong>集合 [collections] 、缓存 [caching] 、原生类型支持 [primitives support] 、并发库 [concurrency libraries] 、通用注解 [common annotations] 、字符串处理 [string processing] 、I/O</strong> 等等。</p>
+</blockquote>
+<p><strong>Guava</strong> 是Java的工具集，提供了一些常用的便利的操作工具类，减少因为 空指针、异步操作等引起的问题BUG，提高开发效率。</p>
+<p>本文主要介绍了Guava常用的工具方法，快速入门Guava。</p>
+<h2 id="1基本工具base-utils">1、基本工具（Base utils）</h2>
+<h3 id="1-optional">1. Optional</h3>
+<p><strong>null</strong> 值出现在代码中，有如下缺点：</p>
+<ol>
+<li>语义模糊，引起歧义。例如，Map.get(key)返回Null时，可能表示map中的值是null，亦或map中没有key对应的值。</li>
+<li>在应用层面可能造成混乱，出现令人意外的错误。</li>
+</ol>
+<p>为了尽量避免程序中的<strong>null</strong>值，guava提供了<strong>Optional</strong>对数据进行封装。如果值为空则立即抛出异常，并且提供了<strong>Absent</strong>和<strong>Present</strong>两个子类分别表示<strong>值缺失</strong>和<strong>值存在</strong>的情形，来增强<strong>null</strong>的语义。</p>
+<p>常用方法如下：</p>
+<ol>
+<li>
+<p><strong>isPresent()</strong>：如果Optional包含非null的引用（引用存在），返回true</p>
+</li>
+<li>
+<p><strong>get()</strong> ：如果Optional为NULL将触发异常</p>
+
+<pre class="line-numbers language-java ">
+<code>public static void test(){
+  Optional&lt;Integer&gt; possible = Optional.fromNullable(5);  //创建允许null值的Optional
+  if(possible.isPresent()){//包含的引用非null的（引用存在），返回true
+   System.out.println(possible.get());
+  }else{
+    System.out.println(&#34;possible is null&#34;);
+  }
+}</code>
+</pre>
+</li>
+<li>
+<p><strong>or(defaultvalue)</strong> ：包含的引用缺失(null)，返回默认的值，否则返回本身</p>
+</li>
+<li>
+<p><strong>orNull()</strong>：包含的引用缺失，返回null</p>
+</li>
+<li>
+<p><strong>asSet()</strong>：如果引用存在，返回只有单一元素的集合；若为NULl返回空集合</p>
+</li>
+</ol>
+<h3 id="2-先决条件-preconditions">2. 先决条件 Preconditions</h3>
+<p>Preconditions 提供了判断条件是否合法的静态方法，如果不符合要求会抛出异常。类似断言。</p>
+<table>
+<thead>
+<tr>
+<th>方法声明（不包括额外参数）</th>
+<th>描述</th>
+<th>检查失败时抛出的异常</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>checkArgument(boolean)</td>
+<td>检查boolean是否为true，用来检查传递给方法的参数</td>
+<td>IllegalArgumentException</td>
+</tr>
+<tr>
+<td>checkNotNull(T)</td>
+<td>检查value是否为null，该方法直接返回value，因此可以内嵌使用checkNotNull</td>
+<td>NullPointerException</td>
+</tr>
+<tr>
+<td>checkState(boolean)</td>
+<td>用来检查对象的某些状态。</td>
+<td>IllegalStateException</td>
+</tr>
+<tr>
+<td>checkElementIndex(int index, int size)</td>
+<td>检查index作为<strong>索引值</strong>对某个列表、字符串或数组是否有效。index&gt;=0 &amp;&amp; index&lt;size</td>
+<td>IndexOutOfBoundsException</td>
+</tr>
+<tr>
+<td>checkPositionIndex(int index, int size)</td>
+<td>检查index作为<strong>位置值</strong>对某个列表、字符串或数组是否有效。index&gt;=0 &amp;&amp; index&lt;=size</td>
+<td>IndexOutOfBoundsException</td>
+</tr>
+<tr>
+<td>checkPositionIndexes(int start, int end, int size)</td>
+<td>检查[start, end]表示的位置范围对某个列表、字符串或数组是否有效</td>
+<td>IndexOutOfBoundsException</td>
+</tr>
+</tbody>
+</table>
+<p>每个判断方法都有三个多态方法：</p>
+<ul>
+<li>
+<p>没有额外参数：抛出的异常中没有错误消息；</p>
+</li>
+<li>
+<p>有一个Object对象作为额外参数：抛出的异常使用Object.toString() 作为错误消息；</p>
+</li>
+<li>
+<p>有一个String对象作为额外参数，并且有一组任意数量的附加Object对象：这个变种处理异常消息的方式有点类似printf，但考虑GWT的兼容性和效率，只支持%s指示符。例如：</p>
+
+<pre class="line-numbers language-java ">
+<code>checkArgument(i &gt;= 0);
+checkArgument(i &gt;= 0, &#34;Argument was expected nonnegative&#34;);
+checkArgument(i &lt; j, &#34;Expected i &lt; j, but %s &gt; %s&#34;, i, j);</code>
+</pre>
+</li>
+</ul>
+<h3 id="3-连接器-joiner">3. 连接器 Joiner</h3>
+<p>用分隔符将多个**字符串（或数组元素）**连接成一个字符串。</p>
+<p>常用方法如下：</p>
+<ol>
+<li><strong>on(String)</strong>：静态工厂方法，生成一个新的 <strong>Joiner</strong> 对象，参数为连接符</li>
+<li><strong>skipNulls()</strong>：如果元素为空，则跳过</li>
+<li><strong>useForNull(String)</strong>：如果元素为空，则用这个字符串代替</li>
+<li><strong>join(数组/链表)</strong>：要连接的数组/链表</li>
+<li><strong>appendTo(String,数组/链表)</strong>：在第一个参数后面新加上 拼接后的字符串</li>
+<li><strong>withKeyValueSeparator(String)</strong>：得到 <strong>MapJoiner</strong>，连接Map的键、值</li>
+</ol>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test(){
+  List&lt;String&gt; list1 = Arrays.asList(&#34;aa&#34;, &#34;bb&#34;, &#34;cc&#34;);
+  System.out.println(Joiner.on(&#34;-&#34;).join(list1));
+  
+  List&lt;String&gt; list2 = Arrays.asList(&#34;aa&#34;, &#34;bb&#34;, &#34;cc&#34;, null, &#34;dd&#34;);
+  System.out.println(Joiner.on(&#34;-&#34;).skipNulls().join(list2));
+  System.out.println(Joiner.on(&#34;-&#34;).useForNull(&#34;nulla&#34;).join(list2));
+  
+  Map map = ImmutableMap.of(&#34;k1&#34;, &#34;v1&#34;, &#34;k2&#34;, &#34;v2&#34;);
+  System.out.println(Joiner.on(&#34;-&#34;).withKeyValueSeparator(&#34;=&#34;).join(map));
+}</code>
+</pre>
+<p>输出：</p>
+
+<pre class="line-numbers language- ">
+<code>aa-bb-cc
+aa-bb-cc-dd
+aa-bb-cc-null-dd
+k1=v1-k2=v2</code>
+</pre>
+<p><strong>注意</strong>：joiner实例总是<strong>不可变</strong>的。用来定义joiner目标语义的配置方法总会返回一个新的joiner实例。这使得joiner实例都是<strong>线程安全</strong>的，你可以将其定义为static final常量。</p>
+<h3 id="4--拆分器-splitter">4.  拆分器 Splitter</h3>
+<p><strong>Splitter</strong> 能将一个字符串按照分隔符生成字符串集合，是 <strong>Joiner</strong>的反向操作。</p>
+<p>常用方法如下：</p>
+<ol>
+<li>
+<p><strong>on(String)</strong>：静态工厂方法，生成一个新的 <strong>Splitter</strong> 对象，参数为连接符</p>
+</li>
+<li>
+<p><strong>trimResults()</strong>：结果去除子串中的空格</p>
+</li>
+<li>
+<p><strong>omitEmptyStrings()</strong>：去除null的子串</p>
+</li>
+<li>
+<p><strong>split(String)</strong>：拆分字符串</p>
+</li>
+<li>
+<p><strong>withKeyValueSeparator(String)</strong>：得到 <strong>MapSplitter</strong>，拆分成Map的键、值。注意，这个对被拆分字符串格式有严格要求，否则会抛出异常</p>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test1(){
+  String string = &#34; ,a,b,&#34;;
+  System.out.println(Splitter.on(&#34;,&#34;).split(string));
+  System.out.println(Splitter.on(&#34;,&#34;).trimResults().split(string));
+  System.out.println(Splitter.on(&#34;,&#34;).omitEmptyStrings().split(string));
+  System.out.println(Splitter.on(&#34;,&#34;).trimResults().omitEmptyStrings().split(string));
+
+  // 根据长度拆分
+  string = &#34;12345678&#34;;
+  System.out.println(Splitter.fixedLength(2).split(string));
+
+  // 拆分成Map
+  System.out.println(Splitter.on(&#34;#&#34;).withKeyValueSeparator(&#34;:&#34;).split(&#34;1:2#3:4&#34;));
+}</code>
+</pre>
+<p>输出如下：</p>
+
+<pre class="line-numbers language- ">
+<code>[ , a, b, ]
+[, a, b, ]
+[ , a, b]
+[a, b]
+[12, 34, 56, 78]
+{1=2, 3=4}</code>
+</pre>
+</li>
+</ol>
+<h3 id="5-字符串处理-strings">5. 字符串处理 Strings</h3>
+<p><strong>Strings</strong> 类主要提供了对字符串的一些操作。主要方法如下：</p>
+<ol>
+<li>
+<p>nullToEmpty(String string) ：null字符串转空字符串</p>
+</li>
+<li>
+<p>emptyToNull(String string)：空字符串转null字符串</p>
+</li>
+<li>
+<p>isNullOrEmpty(String string)：判断字符串为null或空字符串</p>
+</li>
+<li>
+<p>padStart(String string, int minLength, char padChar)：如果string的长度小于minLeng，在string前添加padChar，直到字符串长度为minLeng。</p>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test(){
+  String aa = &#34;12345&#34;;
+
+  // A12345
+  System.out.println(Strings.padStart(aa, 6, &#39;A&#39;));
+  // 12345
+  System.out.println(Strings.padStart(aa, 5, &#39;A&#39;));
+}</code>
+</pre>
+</li>
+<li>
+<p>String padEnd(String string, int minLength, char padChar)：和padStart类似，不过是在尾部添加新字符串</p>
+</li>
+<li>
+<p>commonPrefix(CharSequence a, CharSequence b)：返回共同的前缀</p>
+</li>
+<li>
+<p>commonSuffix(CharSequence a, CharSequence b)：返回共同的后缀</p>
+</li>
+</ol>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test2(){
+  String aa = &#34;abc123def&#34;;
+  String bb = &#34;abc789def&#34;;
+
+  System.out.println(Strings.commonPrefix(aa, bb));
+  System.out.println(Strings.commonSuffix(aa, bb));
+}</code>
+</pre>
+<p>输出如下：</p>
+
+<pre class="line-numbers language- ">
+<code>abc
+def</code>
+</pre>
+<h2 id="2集合工具collections">2、集合工具（Collections）</h2>
+<h3 id="1-不可变集合">1. 不可变集合</h3>
+<p>不可变集合，即创建后就<strong>只可读，不可修改</strong>的集合。为什么要使用不可变集合呢？主要有如下优点（<strong>摘自官方文档</strong>）：</p>
+<ul>
+<li>当对象被不可信的库调用时，不可变形式是安全的；</li>
+<li>不可变对象被多个线程调用时，不存在竞态条件问题</li>
+<li>不可变集合不需要考虑变化，因此可以节省时间和空间。所有不可变的集合都比它们的可变形式有更好的内存利用率（分析和测试细节）；</li>
+<li>不可变对象因为有固定不变，可以作为常量来安全使用。</li>
+</ul>
+<p>JDK也提供了Collections.unmodifiableXXX方法把集合包装为不可变形式，但我们认为不够好：</p>
+<ul>
+<li>
+<p>笨重而且累赘：不能舒适地用在所有想做防御性拷贝的场景；</p>
+</li>
+<li>
+<p>不安全：要保证没人通过原集合的引用进行修改，返回的集合才是事实上不可变的；</p>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test3(){
+  List&lt;Integer&gt; list = Lists.newArrayList(1,2,3);
+  List&lt;Integer&gt; list1 = Collections.unmodifiableList(list);
+
+  // [1, 2, 3]
+  System.out.println(list);
+  // [1, 2, 3]
+  System.out.println(list1);
+  // list修改，list1也会被修改
+  list.add(4);
+  // [1, 2, 3, 4]
+  System.out.println(list1);
+}</code>
+</pre>
+</li>
+<li>
+<p>低效：包装过的集合仍然保有可变集合的开销，比如并发修改的检查、散列表的额外空间，等等。</p>
+</li>
+</ul>
+<p><strong>注意：所有Guava不可变集合的实现都不接受null值。因为谷歌内部调查代码发现，只有5%的情况需要在集合中允许null元素。如果要存储null值，请使用JDK的Collections.unmodifiable方法</strong></p>
+<p>创建不可变集合的几个方法：</p>
+<ul>
+<li>
+<p><strong>copyOf</strong> 方法，如ImmutableSet.copyOf(set);</p>
+</li>
+<li>
+<p><strong>of</strong>方法，如ImmutableSet.of(“a”, “b”, “c”)或 ImmutableMap.of(“a”, 1, “b”, 2);</p>
+</li>
+<li>
+<p><strong>Builder</strong>工具，如</p>
+
+<pre class="line-numbers language-java ">
+<code>public static final ImmutableSet&lt;Color&gt; GOOGLE_COLORS =
+        ImmutableSet.&lt;Color&gt;builder()
+            .addAll(WEBSAFE_COLORS)
+            .add(new Color(0, 191, 255))
+            .build();</code>
+</pre>
+</li>
+</ul>
+<p><strong>copyOf</strong> 是很智能和高效的，在特定会避免线性拷贝。下期有机会来分析下它的实现原理。</p>
+<p>关联可变集合和不可变集合</p>
+<table>
+<thead>
+<tr>
+<th>可变集合接口</th>
+<th>属于JDK还是Guava</th>
+<th>不可变版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Collection</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableCollection.html"><code>ImmutableCollection</code></a></td>
+</tr>
+<tr>
+<td>List</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableList.html"><code>ImmutableList</code></a></td>
+</tr>
+<tr>
+<td>Set</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableSet.html"><code>ImmutableSet</code></a></td>
+</tr>
+<tr>
+<td>SortedSet/NavigableSet</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableSortedSet.html"><code>ImmutableSortedSet</code></a></td>
+</tr>
+<tr>
+<td>Map</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableMap.html"><code>ImmutableMap</code></a></td>
+</tr>
+<tr>
+<td>SortedMap</td>
+<td>JDK</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableSortedMap.html"><code>ImmutableSortedMap</code></a></td>
+</tr>
+<tr>
+<td><a href="http://code.google.com/p/guava-libraries/wiki/NewCollectionTypesExplained#Multiset">Multiset</a></td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableMultiset.html"><code>ImmutableMultiset</code></a></td>
+</tr>
+<tr>
+<td>SortedMultiset</td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release12/javadoc/com/google/common/collect/ImmutableSortedMultiset.html"><code>ImmutableSortedMultiset</code></a></td>
+</tr>
+<tr>
+<td><a href="http://code.google.com/p/guava-libraries/wiki/NewCollectionTypesExplained#Multimap">Multimap</a></td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableMultimap.html"><code>ImmutableMultimap</code></a></td>
+</tr>
+<tr>
+<td>ListMultimap</td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableListMultimap.html"><code>ImmutableListMultimap</code></a></td>
+</tr>
+<tr>
+<td>SetMultimap</td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableSetMultimap.html"><code>ImmutableSetMultimap</code></a></td>
+</tr>
+<tr>
+<td><a href="http://code.google.com/p/guava-libraries/wiki/NewCollectionTypesExplained#BiMap">BiMap</a></td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableBiMap.html"><code>ImmutableBiMap</code></a></td>
+</tr>
+<tr>
+<td><a href="http://code.google.com/p/guava-libraries/wiki/NewCollectionTypesExplained#ClassToInstanceMap">ClassToInstanceMap</a></td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableClassToInstanceMap.html"><code>ImmutableClassToInstanceMap</code></a></td>
+</tr>
+<tr>
+<td><a href="http://code.google.com/p/guava-libraries/wiki/NewCollectionTypesExplained#Table">Table</a></td>
+<td>Guava</td>
+<td><a href="http://docs.guava-libraries.googlecode.com/git-history/release/javadoc/com/google/common/collect/ImmutableTable.html"><code>ImmutableTable</code></a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-multiset">2. Multiset</h3>
+<p>定义摘自维基百科：</p>
+<blockquote>
+<p>”集合[set]概念的延伸，它的元素可以重复出现…与集合[set]相同而与元组[tuple]相反的是，Multiset元素的顺序是无关紧要的：Multiset {a, a, b}和{a, b, a}是相等的”</p>
+</blockquote>
+<p><strong>Multiset</strong>继承自JDK中的Collection接口，而不是Set接口，所以可以包含重复元素。可以从以下角度理解：</p>
+<ul>
+<li>没有元素顺序限制的ArrayList<E></li>
+<li>Map&lt;E, Integer&gt;，键为元素，值为计数</li>
+</ul>
+<p>Multiset提供像无序的ArrayList的基本操作：</p>
+<ul>
+<li>add(E)添加单个给定元素</li>
+<li>iterator()返回一个迭代器，包含Multiset的所有元素（包括重复的元素）</li>
+<li>size()返回所有元素的总个数（包括重复的元素）</li>
+</ul>
+<p>当把Multiset看作Map&lt;E, Integer&gt;时，它也提供了Map的查询操作：</p>
+<ul>
+<li>count(Object)返回给定元素的计数。</li>
+<li>entrySet()返回Set&lt;Multiset.Entry<E>&gt;，和Map的entrySet类似。</li>
+<li>elementSet()返回所有不重复元素的Set<E>，和Map的keySet()类似。</li>
+</ul>
+<p>常用方法如下：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>count(E)</td>
+<td>给定元素在Multiset中的计数</td>
+</tr>
+<tr>
+<td>elementSet()</td>
+<td>Multiset中不重复元素的集合，类型为Set<E></td>
+</tr>
+<tr>
+<td>entrySet()</td>
+<td>和Map的entrySet类似，返回Set&lt;Multiset.Entry<E>&gt;，<br />其中包含的Entry支持getElement()和getCount()方法</td>
+</tr>
+<tr>
+<td>add(E, int)</td>
+<td>增加给定元素在Multiset中的计数</td>
+</tr>
+<tr>
+<td>remove(E, int)</td>
+<td>减少给定元素在Multiset中的计数</td>
+</tr>
+<tr>
+<td>setCount(E, int)</td>
+<td>设置给定元素在Multiset中的计数，不可以为负数</td>
+</tr>
+<tr>
+<td>size()</td>
+<td>返回集合元素的总个数（包括重复的元素）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>应用</strong>：统计一个词在文档中出现了多少次。</p>
+<ol>
+<li>
+<p>传统的做法是这样的</p>
+
+<pre class="line-numbers language-java ">
+<code>Map&lt;String, Integer&gt; counts = new HashMap&lt;String, Integer&gt;();
+for (String word : words) {
+    Integer count = counts.get(word);
+    if (count == null) {
+        counts.put(word, 1);
+    } else {
+        counts.put(word, count &#43; 1);
+    }
+}</code>
+</pre>
+</li>
+<li>
+<p>使用<strong>Multiset</strong>操作：</p>
+
+<pre class="line-numbers language-java ">
+<code>Multiset&lt;String&gt; multiset = HashMultiset.create();
+for (String word : words) {
+    multiset.add(word);
+}
+int count = multiset.count(&#34;today&#34;);</code>
+</pre>
+</li>
+</ol>
+<h3 id="3-multimap">3. Multimap</h3>
+<p>通俗来讲，<strong>Multimap</strong> 是<strong>一键对多值</strong>的<strong>HashMap</strong>，类似于 <strong>Map&lt;K, List<V>&gt;</strong> 的数据结构。</p>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test2() {
+  Multimap&lt;String, String&gt; multimap = ArrayListMultimap.create();
+  multimap.put(&#34;name&#34;, &#34;Jack&#34;);
+  multimap.put(&#34;name&#34;, &#34;Jack&#34;);
+  multimap.put(&#34;name&#34;, &#34;Tom&#34;);
+  multimap.put(&#34;age&#34;, &#34;10&#34;);
+  multimap.put(&#34;age&#34;, &#34;12&#34;);
+  System.out.println(multimap);
+  System.out.println(multimap.get(&#34;name&#34;).size());
+}</code>
+</pre>
+<p>输出：</p>
+
+<pre class="line-numbers language- ">
+<code>{name=[Jack, Jack, Tom], age=[10, 12]}
+3</code>
+</pre>
+<p>常用操作如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>方法签名</strong></th>
+<th><strong>描述</strong></th>
+<th><strong>等价于</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>put(K, V)</td>
+<td>添加键到单个值的映射</td>
+<td>multimap.get(key).add(value)</td>
+</tr>
+<tr>
+<td>putAll(K, Iterable)</td>
+<td>依次添加键到多个值的映射</td>
+<td>Iterables.addAll(multimap.get(key), values)</td>
+</tr>
+<tr>
+<td>remove(K, V)</td>
+<td>移除键到值的映射；如果有这样的键值并成功移除，返回true。</td>
+<td>multimap.get(key).remove(value)</td>
+</tr>
+<tr>
+<td>removeAll(K)</td>
+<td>清除键对应的所有值，返回的集合包含所有之前映射到K的值，但修改这个集合就不会影响Multimap了。</td>
+<td>multimap.get(key).clear()</td>
+</tr>
+<tr>
+<td>replaceValues(K, Iterable)</td>
+<td>清除键对应的所有值，并重新把key关联到Iterable中的每个元素。返回的集合包含所有之前映射到K的值。</td>
+<td>multimap.get(key).clear(); Iterables.addAll(multimap.get(key), values)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>主要操作</strong>：</p>
+<ul>
+<li>asMap：为Multimap&lt;K, V&gt;提供Map&lt;K,Collection<V>&gt;形式的视图</li>
+<li>entries：返回所有”键-单个值映射”，包括重复键。Collection&lt;Map.Entry&lt;K, V&raquo;类型</li>
+<li>keySet：返回所有不同的键，Set<K>类型</li>
+<li>keys：用Multiset表示Multimap中的所有键，每个键重复出现的次数等于它映射的值的个数。可以从这个Multiset中移除元素，但不能做添加操作；移除操作会反映到底层的Multimap</li>
+<li>values：用一个”扁平”的Collection<V>包含Multimap中的所有值，包括重复键</li>
+</ul>
+<h3 id="4-bimap">4. BiMap</h3>
+<p>一般的<strong>Map</strong>只提供”<strong>键-值</strong>“的映射，而<strong>BiMap</strong>则同时提供了”<strong>键-值</strong>“和”<strong>值-键</strong>“的映射关系。常用方法：</p>
+<ul>
+<li>
+<p>put(K key, V value)：添加新的键、值。如果值和已有键重复，会抛出异常</p>
+</li>
+<li>
+<p>forcePut(K key, V value)：添加新的键、值。如果值和已有键重复，会覆盖原来的键、值</p>
+</li>
+<li>
+<p>inverse()：得到**”值-键“<strong>的</strong>BitMap**对象</p>
+</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>@Test
+public void test4(){
+  BiMap&lt;String,String&gt; biMap= HashBiMap.create();
+  biMap.put(&#34;sina&#34;,&#34;sina.com&#34;);
+  biMap.put(&#34;qq&#34;,&#34;qq.com&#34;);
+  biMap.put(&#34;sina&#34;,&#34;sina.cn&#34;); //会覆盖原来的value
+  System.out.println(biMap.inverse().get(&#34;qq.com&#34;));
+
+  //biMap.put(&#34;tecent&#34;,&#34;qq.com&#34;); //抛出异常
+  biMap.forcePut(&#34;tecent&#34;,&#34;qq.com&#34;); //强制替换key
+  System.out.println(biMap.get(&#34;qq&#34;)); //通过value找key
+  System.out.println(biMap.inverse().get(&#34;qq.com&#34;));
+  System.out.println(biMap.inverse().get(&#34;sina.com&#34;));
+  System.out.println(biMap.inverse().inverse()==biMap);
+}</code>
+</pre>
+<p>输出：</p>
+
+<pre class="line-numbers language- ">
+<code>qq
+null
+tecent
+null
+true</code>
+</pre>
+<h3 id="5-table">5. Table</h3>
+<p><strong>Table</strong>类似多个索引的表，类似 <strong>Map&lt;R, Map&lt;C, V&raquo;</strong> 的数据结构。它有两个支持所有类型的键：”<strong>行</strong>”和”<strong>列</strong>”，可以通过以下方法获取多个视图：</p>
+<ul>
+<li>rowMap()：用Map&lt;R, Map&lt;C, V&raquo;表现Table&lt;R, C, V&gt;。同样的， **rowKeySet()**返回”行”的集合Set<R>。</li>
+<li>row(r)：用Map&lt;C, V&gt;返回给定”行”的所有列，对这个map进行的写操作也将写入Table中。</li>
+<li>cellSet()：用元素类型为Table.Cell的Set表现Table&lt;R, C, V&gt;。Cell类似于Map.Entry，但它是用<strong>行和列</strong>两个键区分的。</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2020-06-05
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/guava/">Guava</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Mockito 快速入门</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F13---%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F-/">
+            <span class="next-text nav-default">23种设计模式(13) - 责任链模式</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

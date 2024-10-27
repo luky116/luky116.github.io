@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Mockito 快速入门 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Mockito 快速入门">
+  <meta property="og:description" content="Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2020-07-25T16:27:22+08:00">
+    <meta property="article:modified_time" content="2020-07-25T16:27:22+08:00">
+    <meta property="article:tag" content="Mockito">
+    <meta property="article:tag" content="单元测试">
+
+  <meta itemprop="name" content="Mockito 快速入门">
+  <meta itemprop="description" content="Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1">
+  <meta itemprop="datePublished" content="2020-07-25T16:27:22+08:00">
+  <meta itemprop="dateModified" content="2020-07-25T16:27:22+08:00">
+  <meta itemprop="wordCount" content="2991">
+  <meta itemprop="keywords" content="Mockito,单元测试">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Mockito 快速入门">
+  <meta name="twitter:description" content="Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Mockito 快速入门</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-07-25 </span>
+        <div class="post-category">
+            <a href="/categories/mockito/"> Mockito </a>
+            <a href="/categories/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/"> 单元测试 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1如何使用mockito">1、如何使用Mockito</a>
+          <ul>
+            <li><a href="#mockitojunitrunner-注解">MockitoJUnitRunner 注解</a></li>
+            <li><a href="#mockitoannotations-方式">MockitoAnnotations 方式</a></li>
+            <li><a href="#rule-注解">@Rule 注解</a></li>
+          </ul>
+        </li>
+        <li><a href="#2什么是mock测试">2、什么是Mock测试</a></li>
+        <li><a href="#3stub测试桩-介绍">3、Stub(测试桩) 介绍</a>
+          <ul>
+            <li><a href="#设置每次调用返回不同的值httpswwwcnblogscommoongeekp13377174html3897819772">设置每次调用返回不同的值<a href="https://www.cnblogs.com/moongeek/p/13377174.html#3897819772">#</a></a></li>
+            <li><a href="#参数匹配器httpswwwcnblogscommoongeekp13377174html3367088091">参数匹配器<a href="https://www.cnblogs.com/moongeek/p/13377174.html#3367088091">#</a></a></li>
+            <li><a href="#设置执行真实的方法">设置执行真实的方法</a></li>
+            <li><a href="#重置mock对象">重置Mock对象</a></li>
+            <li><a href="#do系列方法的运用">do系列方法的运用</a></li>
+          </ul>
+        </li>
+        <li><a href="#4spy-介绍">4、Spy 介绍</a></li>
+        <li><a href="#5断言httpswwwcnblogscommoongeekp13377174html1115199021">5、断言<a href="https://www.cnblogs.com/moongeek/p/13377174.html#1115199021">#</a></a></li>
+        <li><a href="#6验证函数的调用次数">6、验证函数的调用次数</a></li>
+        <li><a href="#7验证方法的执行顺序">7、验证方法的执行顺序</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <p>Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。</p>
+<h2 id="1如何使用mockito">1、如何使用Mockito</h2>
+<p>引入mavne依赖</p>
+
+<pre class="line-numbers language-XML ">
+<code>Copy&lt;dependency&gt;
+  &lt;groupId&gt;org.mockito&lt;/groupId&gt;
+  &lt;artifactId&gt;mockito-core&lt;/artifactId&gt;
+  &lt;version&gt;2.23.4&lt;/version&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+
+&lt;dependency&gt;
+  &lt;groupId&gt;junit&lt;/groupId&gt;
+  &lt;artifactId&gt;junit&lt;/artifactId&gt;
+  &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;</code>
+</pre>
+<p>有三种方法可以配置使用 <code>Mockito</code> ：</p>
+<h3 id="mockitojunitrunner-注解">MockitoJUnitRunner 注解</h3>
+<p>接下来主要用这种方法来介绍</p>
+
+<pre class="line-numbers language-java ">
+<code>Copyimport org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mock;
+
+// 测试类加上 @RunWith(MockitoJUnitRunner.class) 注解
+@RunWith(MockitoJUnitRunner.class)
+public class MockByRunnerTest {
+    @Mock
+    private AccountDao accountDao;
+}</code>
+</pre>
+<h3 id="mockitoannotations-方式">MockitoAnnotations 方式</h3>
+
+<pre class="line-numbers language-java ">
+<code>Copyimport org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.junit.Before;
+
+public class MockByAnnotationTest {
+    @Mock
+    private AccountDao accountDao;
+    
+    @Before
+    public void init(){
+      	// 初始化
+        MockitoAnnotations.initMocks(this);
+    }
+}</code>
+</pre>
+<h3 id="rule-注解">@Rule 注解</h3>
+
+<pre class="line-numbers language-java ">
+<code>Copyimport org.junit.Rule;
+import org.mockito.Mock;
+
+public class MockByRuleTest {
+  	// 初始化
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
+    
+    @Mock
+    AccountDao accountDao;
+}</code>
+</pre>
+<h2 id="2什么是mock测试">2、什么是Mock测试</h2>
+<p>mock测试就是在测试过程中，对于某些不容易构造或者不容易获取的对象，用一个虚拟的对象来创建以便测试的测试方法。</p>
+<p>比如一个类A，有B、C、D等多个复杂类的成员变量。如果我们测试时候通过<code>new A()</code>的方式来创建A对象，就需要同时手动创建B、C、D三个对象，并和A关联，提高了测试的复杂性。Mock可以自动生成一个虚拟的A对象，就是帮我们省去了这些复杂的创建流程。</p>
+<p>Mockito提供了两种Mock的方式:</p>
+
+<pre class="line-numbers language-java ">
+<code>Copyimport org.mockito.Mock;
+import static org.mockito.Mockito.mock;
+
+@RunWith(MockitoJUnitRunner.class)
+public class MockByRunnerTest2 {
+    // 使用@Mock注解
+    @Mock
+    private AccountDao accountDao;
+    
+    @Test
+    public void test1() {
+        Account account = accountDao.findById(1);
+      	// 返回null
+        System.out.println(account;
+        // 输出 class com.sanyue.learn.mockito.mockitodemo.domain.Account$MockitoMock$1675715420
+        System.out.println(account.getClass());          
+    }
+    
+    public void test2() {
+        // 使用mock方法
+        AccountDao accountDao = mock(AccountDao.class, Mockito.RETURNS_SMART_NULLS);
+        Account account = accountDao.findById(1);
+        // 返回null
+      	System.out.println(accoun;
+    }
+}</code>
+</pre>
+<p>Mock生成的是一个代理对象，默认情况下，执行对象的所有的方法都返回该方法的返回类型的默认值，不会真正去执行该对象的方法。既然这样，那我们在测试中如何使用这个mock出来的对象，来执行方法进行测试呢？这就需要使用到Mockito的Stub(测试桩)来设置Mock对象方法的返回值了。</p>
+<h2 id="3stub测试桩-介绍">3、Stub(测试桩) 介绍</h2>
+<p>上面介绍了Mock生成的对象，其实是一个代理对象，不会真正去执行类里面的方法。为了便于我们测试，我们需要用到Stub来设置我们期望的方法返回值，可以理解为<strong>创建测试用例</strong>。</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy// 你可以mock具体的类型,不仅只是接口
+LinkedList mockedList = mock(LinkedList.class);
+
+// 开始设置测试桩
+// 当get(0)被调用时，返回&#34;first&#34;
+when(mockedList.get(0)).thenReturn(&#34;first&#34;);
+
+// 方法get(1)被调用时，抛异常。
+when(mockedList.get(1)).thenThrow(new RuntimeException());
+
+// 输出 &#34;first&#34;
+System.out.println(mockedList.get(0));
+
+// 抛出异常
+System.out.println(mockedList.get(1));
+
+// 输出 null，因为get(999)的调用没有被设置过
+System.out.println(mockedList.get(999));</code>
+</pre>
+<p>由上面例子可以看到，Stub就是人为指定 <strong>当使用该参数调用该方法时，方法返回什么值</strong>。下面介绍一些其他的Stud方式：</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy // 使用doReturn语句和when语句一样的效果
+ doReturn(1).when(mockedList).get(1);
+ // 输出 1
+ System.out.println(mockedList.get(1));
+
+ // 使用doNothing来设置void返回值的方法
+ doNothing().when(mockedList).clear();
+ // 设置执行clear方法抛出异常
+ doThrow(new RuntimeException()).when(mockedList).clear();
+ mockedList.clear();
+ // 以下断言表示，mockedList的clear方法被调用了1次
+ verify(mockedList, times(1)).clear();</code>
+</pre>
+<h3 id="设置每次调用返回不同的值httpswwwcnblogscommoongeekp13377174html3897819772">设置每次调用返回不同的值<a href="https://www.cnblogs.com/moongeek/p/13377174.html#3897819772">#</a></h3>
+<p>如果希望每次调用的返回值都不一样可以这样设置：</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy// 第1次调用返回2，第2次返回2，以后再调用返回3
+when(mockedList.size()).thenReturn(1, 2, 3);
+// 等价写法
+// when(mockedList.size()).thenReturn(1).thenReturn(2).thenReturn(3).thenReturn(4);
+// 1
+System.out.println(mockedList.size());
+// 2
+System.out.println(mockedList.size());
+// 3
+System.out.println(mockedList.size());
+// 超过3次后调用，也返回3
+System.out.println(mockedList.size());</code>
+</pre>
+<p>也可以通过<code>thenAnswer</code>方式来设置不同调用次数返回不同的值：</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy// 设置返回值是 参数值*10
+when(list.get(anyInt())).thenAnswer(new Answer(){
+    @Override
+    public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+      int arguments = invocationOnMock.getArgument(0);
+      return 10*arguments;
+    }
+});</code>
+</pre>
+<h3 id="参数匹配器httpswwwcnblogscommoongeekp13377174html3367088091">参数匹配器<a href="https://www.cnblogs.com/moongeek/p/13377174.html#3367088091">#</a></h3>
+<p>设置用<strong>参数匹配器</strong>根据不同<strong>类型参数</strong>，返回不同的值：</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy public class TestService {
+   // 定义一个方法
+   public String say(String param1, Integer param2, String param3) {
+     return &#34;hello&#34;;
+   }
+ }
+
+@Test
+public void test3(){
+  TestService testService = mock(TestService.class);
+
+  // anyString() 表示任何字符串参数，anyInt() 表示任何int类型参数
+  when(testService.say(anyString(), anyInt(), anyString())).thenReturn(&#34;world&#34;);
+  // 输出 world
+  System.out.println(testService.say(&#34;x&#34;, 1, &#34;x&#34;));
+  // 如果参数列表包含参数匹配器，则必能出现具体参数值，要使用eq() 方法代替
+  // when(testService.say(anyString(), 1, anyString())).thenReturn(&#34;world2&#34;);
+  when(testService.say(anyString(), eq(1), anyString())).thenReturn(&#34;world2&#34;);
+  // 输出 world2
+  System.out.println(testService.say(&#34;x&#34;, 1, &#34;x&#34;));
+}</code>
+</pre>
+<h3 id="设置执行真实的方法">设置执行真实的方法</h3>
+<p>可以使用<code>thenCallRealMethod</code>来设置执行对象真正的方法</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy List list = mock(LinkedList.class);
+ when(list.size()).thenCallRealMethod();</code>
+</pre>
+<h3 id="重置mock对象">重置Mock对象</h3>
+<p>使用<code>reset</code>方法可以重置Mock对象Stub的设置</p>
+
+<pre class="line-numbers language-java ">
+<code>CopyList mock = mock(List.class);
+when(mock.size()).thenReturn(10);
+mock.add(1);
+reset(mock);</code>
+</pre>
+<h3 id="do系列方法的运用">do系列方法的运用</h3>
+<p>当你调用<code>doThrow()</code>, <code>doAnswer()</code>, <code>doNothing()</code>, <code>doReturn()</code> and <code>doCallRealMethod()</code> 这些函数时可以在适当的位置调用<code>when()</code>函数. 当你需要下面这些功能时这是必须的:</p>
+<ul>
+<li>测试void函数</li>
+<li>在受监控的对象上测试函数</li>
+<li>不知一次的测试为同一个函数，在测试过程中改变mock对象的行为，比如为<code>Spy</code>对象进行<code>Stub</code></li>
+</ul>
+<p>像<code>anyObject()</code>, <code>eq()</code>这样的匹配器函数不会返回匹配器。它们会在内部将匹配器记录到一个栈当中，并且返回一个假的值，通常为null。<code>这样的实现是由于被Java编译器强加的静态类型安全</code>。结果就是你不能在验证或者测试桩函数之外使用<code>anyObject()</code>, <code>eq()</code>函数。</p>
+<p>如果一个方法没有被Stub设置，会返回该方法返回类型的默认值，比如int类型返回0，boolean返回false，对象类型返回null。</p>
+<p>需要记住的是 <strong>mock对象会覆盖整个被mock的对象，因此没有stub的方法只能返回默认值，并且类的方法不会真正的执行。</strong></p>
+<h2 id="4spy-介绍">4、Spy 介绍</h2>
+<p><code>Mock</code>出来的对象（<strong>代理对象</strong>），默认不会去真正执行类的方法。而用<code>Spy</code>声明的对象（<strong>真实对象</strong>），则会默认执行真正的方法。</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy/** 
+* 也可以使用@Spy注解方式初始化spy对象
+* @Spy
+* List&lt;Integer&gt; list = new ArrayList&lt;&gt;();
+**/
+List&lt;Integer&gt; realList = new ArrayList&lt;&gt;();
+List&lt;Integer&gt; list = spy(realList);
+list.add(1);
+list.add(2);
+
+// 分别输出1和2，说明真正执行了add和get方法
+System.out.println(list.get(0));
+System.out.println(list.get(1));
+
+// 进行部分mock
+when(list.isEmpty()).thenReturn(true);
+// 输出true，说明isEmpty方法被mock了
+System.out.println(list.isEmpty());
+// 分别输出1和2，说明get方法不受mock影响
+System.out.println(list.get(0));
+System.out.println(list.get(1));</code>
+</pre>
+<p>需要注意的是，如果为<code>Spy</code>出来的对象进行<code>Stub</code>，有时候不能使用<code>when</code>，因为<code>Spy</code>对象调用方法时，会调用真实的方法。比如以下例子：</p>
+
+<pre class="line-numbers language-java ">
+<code>CopyList list = new LinkedList();
+List spy = spy(list);
+
+// 不可能 : 因为当调用spy.get(0)时会调用真实对象的get(0)函数,此时会发生IndexOutOfBoundsException异常，因为真实List对象是空的
+when(spy.get(0)).thenReturn(&#34;foo&#34;);
+System.out.println(spy.get(0));
+
+// 你需要使用doReturn()来打桩
+doReturn(&#34;foo&#34;).when(spy).get(0);
+System.out.println(spy.get(0));</code>
+</pre>
+<p><code>Spy</code>和<code>Mock</code>的相同点和区别：</p>
+<ol>
+<li>得到的对象同样可以进行“监管”，即验证和打桩。</li>
+<li>如果不对spy对象的methodA打桩，那么调用spy对象的methodA时，会调用真实方法。</li>
+<li>如果不对mock对象的methodA打桩，将doNothing，且返回默认值（null,0,false）。</li>
+</ol>
+<h2 id="5断言httpswwwcnblogscommoongeekp13377174html1115199021">5、断言<a href="https://www.cnblogs.com/moongeek/p/13377174.html#1115199021">#</a></h2>
+<p><code>Mockito</code>中断言的使用和<code>Junit</code>的一样，这里举几个例子，不详细描述：</p>
+
+<pre class="line-numbers language-java ">
+<code>CopyList&lt;Integer&gt; list = mock(List.class);
+        
+// 断言list.get(0)值等于1
+assertThat(list.get(0), equalTo(1));
+
+// 断言大于50
+assertThat(list.get(0), greaterThan(20));
+// 断言小于等于50
+assertThat(list.get(0), lessThanOrEqualTo(50));
+
+// 断言 必须大于20 并且 小于等于50（所有条件成立）
+assertThat(list.get(0), allOf(greaterThan(20), lessThanOrEqualTo(50)));
+// 断言 必须大于20 或 小于等于50（其中至少一个条件成立）
+assertThat(list.get(0), oneOf(greaterThan(20), lessThanOrEqualTo(50)));
+
+// 断言任何条件都成立
+assertThat(list.get(0), anything());
+// 断言等于1
+assertThat(list.get(0), is(1));
+// 断言不等于-1
+assertThat(list.get(0), not(-1));
+// 断言返回的字符串包含1
+assertThat(list.get(0), containsString(&#34;1&#34;));
+// 断言返回的字符串以1开头
+assertThat(list.get(0), startsWith(&#34;1&#34;));
+// 断言该异常属于RuntimeException
+assertThat(e, instanceOf(RuntimeException.class));</code>
+</pre>
+<p>可以这样断言异常</p>
+
+<pre class="line-numbers language-java ">
+<code>Copytry {
+	list.clear();
+	// 如果执行到这一步，返回失败
+	fail();
+} catch (Exception e) {
+	assertThat(e, instanceOf(RuntimeException.class));
+}</code>
+</pre>
+<h2 id="6验证函数的调用次数">6、验证函数的调用次数</h2>
+<p><code>Mockito</code>可以对函数的执行过程进行断言，通过断言函数的执行次数，要对方法执行逻辑进行判断。</p>
+
+<pre class="line-numbers language-java ">
+<code>CopyList&lt;Integer&gt; mockedList = mock(List.class);
+ mockedList.add(&#34;once&#34;);
+ mockedList.add(&#34;twice&#34;);
+ mockedList.add(&#34;twice&#34;);
+ mockedList.add(&#34;three times&#34;);
+ mockedList.add(&#34;three times&#34;);
+ mockedList.add(&#34;three times&#34;);
+
+ // 下面的两个验证函数效果一样,期望mockedList的add(&#34;once&#34;)方法执行了1次
+ verify(mockedList).add(&#34;once&#34;);
+ verify(mockedList, times(1)).add(&#34;once&#34;);
+
+ // 验证具体的执行次数，分别希望是2次和3次
+ verify(mockedList, times(2)).add(&#34;twice&#34;);
+ verify(mockedList, times(3)).add(&#34;three times&#34;);
+
+ // 使用never()进行验证,never相当于times(0)，即没有执行过
+ verify(mockedList, never()).add(&#34;never happened&#34;);
+
+ // 使用atLeast()至少执行次数/atMost()最多执行次数
+ verify(mockedList, atLeastOnce()).add(&#34;three times&#34;);
+ verify(mockedList, atLeast(2)).add(&#34;five times&#34;);
+ verify(mockedList, atMost(5)).add(&#34;three times&#34;);</code>
+</pre>
+<h2 id="7验证方法的执行顺序">7、验证方法的执行顺序</h2>
+<p>可以使用<code>InOrder</code>来对方法的执行顺序进行验证</p>
+
+<pre class="line-numbers language-java ">
+<code>Copy // 进行mock
+List singleMock = mock(List.class);
+singleMock.add(&#34;was added first&#34;);
+singleMock.add(&#34;was added second&#34;);
+
+// 为该mock对象创建一个inOrder对象
+InOrder inOrder = inOrder(singleMock);
+
+// 确保add函数首先执行的是add(&#34;was added first&#34;),然后才是add(&#34;was added second&#34;)
+inOrder.verify(singleMock).add(&#34;was added first&#34;);
+inOrder.verify(singleMock).add(&#34;was added second&#34;);</code>
+</pre>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2020-07-25
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/mockito/">Mockito</a>
+          <a href="/tags/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/">单元测试</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/arana-%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Arana 启动源码分析</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/guava%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/">
+            <span class="next-text nav-default">Guava 快速入门</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

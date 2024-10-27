@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MySQL范式 on 三月的博客</title>
+    <link>https://luky116.github.io/tags/mysql%E8%8C%83%E5%BC%8F/</link>
+    <description>Recent content in MySQL范式 on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Tue, 29 Aug 2017 14:43:00 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/tags/mysql%E8%8C%83%E5%BC%8F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>数据库三范式</title>
+      <link>https://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</link>
+      <pubDate>Tue, 29 Aug 2017 14:43:00 +0800</pubDate>
+      <guid>https://luky116.github.io/post/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%89%E8%8C%83%E5%BC%8F/</guid>
+      <description>1、前言 数据库关系模式可分为第一范式（1NF），第二范式（2NF），第三范式（3NF）和Boyce-Codd范式（BCNF）。这几个规范要求</description>
+    </item>
+  </channel>
+</rss>

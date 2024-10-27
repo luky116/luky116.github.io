@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之线程池源码详解 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="0、使用线程池的必要性 在生产环境中，如果为每个任务分配一个线程，会造成许多问题： **线程生命周期的开销非常高。**线程的创建和销毁都要付出代" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java多线程学习之线程池源码详解">
+  <meta property="og:description" content="0、使用线程池的必要性 在生产环境中，如果为每个任务分配一个线程，会造成许多问题： **线程生命周期的开销非常高。**线程的创建和销毁都要付出代">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-11-14T14:09:22+08:00">
+    <meta property="article:modified_time" content="2017-11-14T14:09:22+08:00">
+    <meta property="article:tag" content="Java线程池">
+    <meta property="article:tag" content="源码">
+
+  <meta itemprop="name" content="Java多线程学习之线程池源码详解">
+  <meta itemprop="description" content="0、使用线程池的必要性 在生产环境中，如果为每个任务分配一个线程，会造成许多问题： **线程生命周期的开销非常高。**线程的创建和销毁都要付出代">
+  <meta itemprop="datePublished" content="2017-11-14T14:09:22+08:00">
+  <meta itemprop="dateModified" content="2017-11-14T14:09:22+08:00">
+  <meta itemprop="wordCount" content="4373">
+  <meta itemprop="keywords" content="Java线程池,源码">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java多线程学习之线程池源码详解">
+  <meta name="twitter:description" content="0、使用线程池的必要性 在生产环境中，如果为每个任务分配一个线程，会造成许多问题： **线程生命周期的开销非常高。**线程的创建和销毁都要付出代">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之线程池源码详解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-14 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            <a href="/categories/java%E6%BA%90%E7%A0%81/"> Java源码 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#0使用线程池的必要性">0、使用线程池的必要性</a></li>
+        <li><a href="#1-java中的threadpoolexecutor类">1、 Java中的ThreadPoolExecutor类</a></li>
+        <li><a href="#2线程池的状态">2、线程池的状态</a></li>
+        <li><a href="#3任务缓存之阻塞队列">3、任务缓存之阻塞队列</a></li>
+        <li><a href="#4四大线程池详解">4、四大线程池详解</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <h2 id="0使用线程池的必要性">0、使用线程池的必要性</h2>
+<p>　　在生产环境中，如果为每个任务分配一个线程，会造成许多问题：</p>
+<ol>
+<li>**线程生命周期的开销非常高。**线程的创建和销毁都要付出代价。比如，线程的创建需要时间，延迟处理请求。如果请求的到达率非常高并且请求的处理过程都是轻量级的，那么为每个请求创建线程会消耗大量计算机资源。</li>
+<li><strong>资源消耗。</strong> 活跃的线程会消耗系统资源，尤其是内存。如果可运行的线程数量多于处理器数量，那么有些线程会闲置。闲置的线程会占用内存，给垃圾回收器带来压力，大量线程在竞争CPU时，还会产生其他的性能开销。</li>
+<li><strong>稳定性。</strong> 如果线程数量过大，可能会造成OutOfMemory异常。</li>
+</ol>
+<h2 id="1-java中的threadpoolexecutor类">1、 Java中的ThreadPoolExecutor类</h2>
+<p>　　<code>java.uitl.concurrent.ThreadPoolExecutor</code>类是线程池中最核心的类，因此如果要深入理解Java中的线程池，必须深入理解这个类。我们来看一下ThreadPoolExecutor类的源码。ThreadPoolExecutor类中提供了四个构造方法：</p>
+
+<pre class="line-numbers language-java ">
+<code>public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             Executors.defaultThreadFactory(), defaultHandler);
+    }
+
+ public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
+                              ThreadFactory threadFactory) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             threadFactory, defaultHandler);
+    }
+
+ public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
+                              RejectedExecutionHandler handler) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             Executors.defaultThreadFactory(), handler);
+    }
+
+ public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue&lt;Runnable&gt; workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler) {
+        if (corePoolSize &lt; 0 ||
+            maximumPoolSize &lt;= 0 ||
+            maximumPoolSize &lt; corePoolSize ||
+            keepAliveTime &lt; 0)
+            throw new IllegalArgumentException();
+        if (workQueue == null || threadFactory == null || handler == null)
+            throw new NullPointerException();
+        this.corePoolSize = corePoolSize;
+        this.maximumPoolSize = maximumPoolSize;
+        this.workQueue = workQueue;
+        this.keepAliveTime = unit.toNanos(keepAliveTime);
+        this.threadFactory = threadFactory;
+        this.handler = handler;
+    }</code>
+</pre>
+<p>参数介绍：</p>
+<ul>
+<li>corePoolSize：核心池大小。在创建线程池后，默认情况下，线程池中没有任何线程，而是等待任务到来材创建线程去执行任务。也可以提前调用<code>prestartAllCoreT hreads()</code>或者<code>prestartCoreThread()</code>方法提前创建corePoolSize个线程或是一个线程。默认情况下，线程池在创建后线程数量为0，当有任务提交时，会创建线程，当线程达到corePoolSize个后，新提交的的任务会放到缓存队列中存放。</li>
+<li>maximumPoolSize：线程池的最大线程数量，表示在线程池中最多可以创建多少个线程。当缓存队列已满时候，新提交的任务会创建新的线程执行，直到线程池中达到maximumPoolSize个线程。</li>
+<li>keepAliveTime：表示线程没有任务执行时最多存活时间。默认情况下，只有当线程池的线程数量大于corePoolSize个时才会生效，就是说多余corePoolSize个的其他线程存活时间会受限，也可以调用<code>allowCoreThreadTimeOut(true)</code>方法设置线程池中所有的线程存活时间限制。</li>
+<li>unit：存活时间的单位，有如下单位：</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>TimeUnit.DAYS;               //天
+TimeUnit.HOURS;             //小时
+TimeUnit.MINUTES;           //分钟
+TimeUnit.SECONDS;           //秒
+TimeUnit.MILLISECONDS;      //毫秒
+TimeUnit.MICROSECONDS;      //微妙
+TimeUnit.NANOSECONDS;       //纳秒</code>
+</pre>
+<ul>
+<li>workQueue：阻塞队列，用于暂时存放任务，有如下几种：</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>ArrayBlockingQueue;
+LinkedBlockingQueue;
+SynchronousQueue;</code>
+</pre>
+<ul>
+<li>threadFactory：线程工厂，指定创建线程的策略。</li>
+<li>handler：当任务无法被及时处理和存放时候，进行处理的策略。比如说，线程池已满并且阻塞队列已满，新提交的任务需要被进行其他处理。有如下的处理方案：</li>
+</ul>
+<ol>
+<li>
+<p><strong>“终止(Abort)”</strong> 策略</p>
+<ol>
+<li><code>ThreadPoolExecutor.AbortPolicy</code> ：默认的饱和策略，该策略抛出未检查的RejectedExecutionException 异常，调用者需要处理此异常。</li>
+<li><code>ThreadPoolExecutor.DiscardPolicy</code> ：也是丢弃任务，但是不抛出异常。</li>
+<li><code>ThreadPoolExecutor.DiscardOldestPolicy</code>：丢弃下一个即将被执行的任务，然后尝试重新提交此任务。如果工作队列设一个优先队列，那么将会抛弃(Discard) 优先级最高的任务，显然，这是很不合理的。</li>
+</ol>
+</li>
+<li>
+<p>**“调用者运行(Caller-Runs)”**策略</p>
+</li>
+<li>
+<ol>
+<li><code>ThreadPoolExecutor.CallerRunsPolicy</code> ：该策略既不会抛弃任务，也不会抛出异常，而是将任务回退到调用者，有调用者线程来执行此线程。由于调用者线程执行该任务需要一定的时间，所以在该期间内，调用者线程无法接受其他的任务，为线程池中的线程争取执行时间。在WEB 服务器中，此期间到达的请求会被保存在TCP层的队列中而不是在应用程序的队列中。如果持续过载，TCP层队列被堆满，他会开始抛弃请求。这样，如果服务器过载，压力会向外蔓延：从线程池的消息队列到应用程序再到TCP层，最终到达客户端，导致服务器在高负载情况下性能的缓慢降低。</li>
+</ol>
+</li>
+</ol>
+<h2 id="2线程池的状态">2、线程池的状态</h2>
+<p>　　在ThreadPoolExecutor 中定义了一组变量，表示线程池的状态：</p>
+
+<pre class="line-numbers language-java ">
+<code>// 29
+private static final int COUNT_BITS = Integer.SIZE - 3;
+// 由28个1二进制组成的数字
+private static final int CAPACITY   = (1 &lt;&lt; COUNT_BITS) - 1;
+
+// runState is stored in the high-order bits
+private static final int RUNNING    = -1 &lt;&lt; COUNT_BITS;
+private static final int SHUTDOWN   =  0 &lt;&lt; COUNT_BITS;
+private static final int STOP       =  1 &lt;&lt; COUNT_BITS;
+private static final int TIDYING    =  2 &lt;&lt; COUNT_BITS;
+private static final int TERMINATED =  3 &lt;&lt; COUNT_BITS;
+
+// Packing and unpacking ctl
+private static int runStateOf(int c)     { return c &amp; ~CAPACITY; }</code>
+</pre>
+<ol>
+<li>当线程池被创建后，线程池处于 <strong>RUNNING</strong> 状态；</li>
+<li>如果调用了shutdown()方法，则线程池处于<strong>SHUTDOWN</strong>状态，此时线程池不能够接受新的任务，它会等待所有任务执行完毕；</li>
+<li>如果调用了shutdownNow()方法，则线程池处于<strong>STOP</strong>状态，此时线程池不能接受新的任务，并且会去尝试终止正在执行的任务；</li>
+<li>当线程池处于SHUTDOWN或STOP状态，并且所有工作线程已经销毁，任务缓存队列已经清空或执行结束后，线程池被设置为<strong>TERMINATED</strong>状态。</li>
+</ol>
+<h2 id="3任务缓存之阻塞队列">3、任务缓存之阻塞队列</h2>
+<p>　　如果新请求的到达速率超过了线程池的处理速率，则新到达的请求会暂存在线程池管理的Runnable等待队列workQueue中，工作队列为BlockingQueue 类型的阻塞队列。</p>
+<p>　　阻塞队列的操作可分为如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>抛异常响应</th>
+<th>特值响应</th>
+<th>阻塞响应</th>
+<th>超时响应</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>插入</strong></td>
+<td><code>add(o)</code></td>
+<td><code>offer(o)</code></td>
+<td><code>put(o)</code></td>
+<td><code>offer(o,timeout,timeunit)</code></td>
+</tr>
+<tr>
+<td><strong>移除</strong></td>
+<td><code>remove(o)</code></td>
+<td><code>poll(o)</code></td>
+<td><code>take(o)</code></td>
+<td><code>poll(timeout,timeunit)</code></td>
+</tr>
+<tr>
+<td><strong>检查</strong></td>
+<td><code>element(o)</code></td>
+<td><code>peek(o)</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>抛异常响应：如果该操作不能立即满足，则抛出异常。</li>
+<li>特值响应：如果该操作不能立即执行，则返回一个特值，如 false或null响应。</li>
+<li>阻塞响应：如果该操作不能立即执行，则会阻塞等待直到满足执行条件。</li>
+<li>超时响应：如果该操作不能立即执行，则等待一定时间，在该时间内满足条件则执行，否则返回一个特值相应是否执行成功。</li>
+</ul>
+<p>BlockingQueue 的实现类：</p>
+<ol>
+<li><strong>ArrayBlockingQueue</strong> ：是一个有界队列，内部存储结构是数组。在开始使用时需要指定队列大小，且在使用过程中不能对大小进行修改。</li>
+<li><strong>LinkedBlockingQueue</strong> ：内部使用链表作为存储结构，可以指定大小作为有界队列，如果没指定大小，则默认为 Integer.MAX_VALUE 大小的“无界”队列。</li>
+<li><strong>PriorityBlockingQueue</strong> ：是一个无界的并发队列，对队列中的元素按照一定的规则进行排序，在线程池中按照线程的优先级进行排序。</li>
+<li><strong>SynchronousQueue</strong> ：其实不是一个真正的队列，而是一种在线程之间进行移交的机制。要将一个元素放入synchronousQueue 队列中，必须有另一个线程正在等待接受这个元素。如果没有线程等待，并且线程池当前大小小于线程池的最大值，那么ThreadPoolExecutror将创建一个新线程来执行此任务。</li>
+<li><strong>DelayQueue</strong> ：对元素进行持有直到一个特定的延迟到期。注入其中的元素必须实现 java.util.concurrent.Delayed 接口。</li>
+</ol>
+<p>阻塞同步的方式：</p>
+<p>　　阻塞队列实现阻塞同步的方式很简单，使用了<code>ReentranLock</code> 的多条件进行阻塞控制，如ArrayBlockingQueue 源码中：</p>
+
+<pre class="line-numbers language-java ">
+<code>// 构造函数
+public ArrayBlockingQueue(int capacity, boolean fair) {
+    if (capacity &lt;= 0)
+      throw new IllegalArgumentException();
+    this.items = new Object[capacity];
+    lock = new ReentrantLock(fair);
+  // 空条件、满条件
+    notEmpty = lock.newCondition();
+    notFull =  lock.newCondition();
+ }
+//插入函数
+public void put(E e) throws InterruptedException {
+        checkNotNull(e);
+        final ReentrantLock lock = this.lock;
+         // 可中断的锁
+        lock.lockInterruptibly();
+        try {
+            while (count == items.length)
+                notFull.await();
+            enqueue(e);
+        } finally {
+          // 解锁
+            lock.unlock();
+        }
+    }</code>
+</pre>
+<p>阻塞队列的选择策略：</p>
+<p>　　只有当任务相互独立时，为线程池或工作队列设置界线才是合理的。如果任务之间存在依赖性，那么有界的线程池或队列可能会导致“饥饿”死锁问题。可以选择<code>newCachedThreadPool</code>。</p>
+<h2 id="4四大线程池详解">4、四大线程池详解</h2>
+<p>　　 Java类库提供了灵活的线程池及一些配置，可以通过<code>Executors</code> 中的静态工厂方法进行创建：</p>
+<p><strong>1.newFixedThreadPool</strong></p>
+<ul>
+<li><strong>简介</strong></li>
+</ul>
+<p>　<strong>newFixedThreadPool将创建一个固定长度的线程池，每当提交一个任务，创建一个线程，直到达到线程池的最大数量，这时线程池的规模不再变化，如果某个线程中途应为Exception 异常结束，线程池会再补一个线程加入线程池。</strong></p>
+<ul>
+<li><strong>源码分析</strong></li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>public static ExecutorService newFixedThreadPool(int nThreads) {
+        return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue&lt;Runnable&gt;());
+    }
+
+     public static ExecutorService newFixedThreadPool(int nThreads, ThreadFactory threadFactory){
+        return new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue&lt;Runnable&gt;(),
+                                      threadFactory);
+    }</code>
+</pre>
+<p>　　<strong>可以看到，newFixedThreadPool 的 核心池大小和线程池最大大小一致，就是说，该线程池大小在接受任务时，就逐步创建线程到最大值。</strong></p>
+<p>　　线程的存活时间设置为为0毫秒，说明核心池的线程池不会超时而终止，所以核心池的线程数量一旦创建，除非异常终止，不会因为超时等问题而自动停止。看<code>allowCoreThreadTimeOut(boolean)</code> 源码：</p>
+
+<pre class="line-numbers language-java ">
+<code>public void allowCoreThreadTimeOut(boolean value) {
+           // 如果keepAliveTime 为0或小于0，则不能设置核心池自动死亡
+        if (value &amp;&amp; keepAliveTime &lt;= 0)
+            throw new IllegalArgumentException(&#34;Core threads must have nonzero keep alive times&#34;);
+        if (value != allowCoreThreadTimeOut) {
+            allowCoreThreadTimeOut = value;
+            if (value)
+                interruptIdleWorkers();
+        }
+    }</code>
+</pre>
+<ul>
+<li>分析</li>
+</ul>
+<p>　　使用了无界的LinkedBlockingQueue 阻塞队列，如果任务请求速度大于线程处理速度，可能会导致阻塞队列中堆积了大量待处理的任务，占用大量内存，导致性能下降或是奔溃。</p>
+<p><strong>2.</strong> <strong>newCachedThreadPool</strong></p>
+<ul>
+<li><strong>简介</strong></li>
+</ul>
+<p>　　<strong>newCachedThreadPool 将创建一个可缓存的线程池，如果线程池的当前规模超过了处理需求时，将回收空闲线程，而当需求增加时，则可以添加新的线程，线程池的规模没有限制。</strong></p>
+<ul>
+<li><strong>源码分析</strong></li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>public static ExecutorService newCachedThreadPool() {
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      60L, TimeUnit.SECONDS,
+                                      new SynchronousQueue&lt;Runnable&gt;());
+    }
+
+  public static ExecutorService newCachedThreadPool(ThreadFactory threadFactory) {
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                                      60L, TimeUnit.SECONDS,
+                                      new SynchronousQueue&lt;Runnable&gt;(),
+                                      threadFactory);
+    }</code>
+</pre>
+<p>　　<strong>核心池大小设置为0，线程池的最大大小设置为“无穷大”，说明该线程池没有处于核心池的线程，即，所有线程池的所有线程都是会超时死亡的。线程空闲存活时间为60秒，意味着如果线程空闲60秒就会被杀死。阻塞队列使用了SynchronousQueue队列 ，提交的任务不会暂存到队列中，而是又改队移交到线程直接执行。</strong></p>
+<ul>
+<li>分析</li>
+</ul>
+<p>　　它提供比固定大小的线程池更好的排队性能、如果任务请求过于频繁，导致任务提交速度大于线程请求速度，可能会使应用程序创建大量的线程导致性能下降甚至奔溃。所以，如果限制当前任务的数量足以满足资源管理的需求，优先选择有界队列。</p>
+<p><strong>3. newSingleThreadExecutor</strong></p>
+<ul>
+<li><strong>简介</strong></li>
+</ul>
+<p>　newSingleThreadExecutor 是一个单线程的 Executor，它创建单个工作者线程来执行任务，如果该线程异常结束，将创建一个新的线程来代替它。newSingleThreadExecutor 能确保任务依照队列中的顺序来串行执行（例如，FIFO，LIFO，优先级等）。</p>
+<ul>
+<li>源码分析</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>public static ExecutorService newSingleThreadExecutor() {
+        return new FinalizableDelegatedExecutorService
+            (new ThreadPoolExecutor(1, 1,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue&lt;Runnable&gt;()));
+    }
+
+     public static ExecutorService newSingleThreadExecutor(ThreadFactory threadFactory){
+        return new FinalizableDelegatedExecutorService
+            (new ThreadPoolExecutor(1, 1,
+                                    0L, TimeUnit.MILLISECONDS,
+                                    new LinkedBlockingQueue&lt;Runnable&gt;(),
+                                    threadFactory));
+    }</code>
+</pre>
+<p>　　核心池和线程池最大大小皆为1，说明该线程池只能容纳一个线程，0毫秒的存活时间，说明该线程不会自动死亡。使用无边界的LinkedBlockingQueue阻塞队列，无法及时处理的任务可能会无限制的堆积在该阻塞队列中，可能造成内存泄漏。</p>
+<p><strong>4.</strong> <strong>newScheduledThreadPool</strong></p>
+<ul>
+<li>简介</li>
+</ul>
+<p>　newScheduledThreadPool 创建一个固定长度的线程池，而且以延迟或定时的方式来执行任务，类似Timmer。</p>
+<ul>
+<li>源码分析</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
+      return new ScheduledThreadPoolExecutor(corePoolSize);
+}
+public static ScheduledExecutorService newScheduledThreadPool(
+    int corePoolSize, ThreadFactory threadFactory) {
+    return new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
+}
+// 使用了 DelayedWorkQueue 阻塞队列
+public ScheduledThreadPoolExecutor(int corePoolSize,
+                                   ThreadFactory threadFactory) {
+        super(corePoolSize, Integer.MAX_VALUE, 0, NANOSECONDS,
+              new DelayedWorkQueue(), threadFactory);
+    }</code>
+</pre>
+<p>　　可以看到 newScheduledThreadPool 返回了一个 ScheduledExecutorService 对象，和之前三个返回的 ExecutorService 不一样。使用了DelayedWorkQueue作为阻塞队列，定时执行。ScheduledThreadPoolExecutor 方法：</p>
+
+<pre class="line-numbers language-java ">
+<code>// 延迟执行，只会执行一次
+public ScheduledFuture&lt;?&gt; schedule(Runnable command,
+                                       long delay, TimeUnit unit);
+// 延期定时执行，重复执行多次
+public ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command,
+                                                  long initialDelay,
+                                                  long period,
+                                                  TimeUnit unit);</code>
+</pre>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-11-14
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/java%E7%BA%BF%E7%A8%8B%E6%B1%A0/">Java线程池</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之Lock与ReentranLock详解</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/mybatis%E4%B8%80%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E5%92%8C%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BC%93%E5%AD%98/">
+            <span class="next-text nav-default">MyBatis一、二级缓存和自定义缓存</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

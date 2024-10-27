@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>依赖注入 on 三月的博客</title>
+    <link>https://luky116.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/</link>
+    <description>Recent content in 依赖注入 on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Wed, 11 Oct 2017 14:29:03 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring高级依赖注入方式</title>
+      <link>https://luky116.github.io/post/spring%E9%AB%98%E7%BA%A7%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F/</link>
+      <pubDate>Wed, 11 Oct 2017 14:29:03 +0800</pubDate>
+      <guid>https://luky116.github.io/post/spring%E9%AB%98%E7%BA%A7%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F/</guid>
+      <description>1、处理自动装配的歧义性 1.1 标记首选的bean 使用@Primary 来说明一个bean是首选的。 @Component @Primary public class GuoRongCD implements CompactDisc {} 或是 @Bean @Primary public MediaPlayer getAnotherCDplay(CompactDisc aa){ CDPlayer k = new CDPlayer(); k.setCompactDisc(aa); return k;</description>
+    </item>
+    <item>
+      <title>Spring依赖注入的方式</title>
+      <link>https://luky116.github.io/post/spring%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E7%9A%84%E6%96%B9%E5%BC%8F/</link>
+      <pubDate>Wed, 11 Oct 2017 14:29:03 +0800</pubDate>
+      <guid>https://luky116.github.io/post/spring%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E7%9A%84%E6%96%B9%E5%BC%8F/</guid>
+      <description>1、依赖注入（DI） 的重要性 如果直接在代码里面实例化一个对象，会使代码的耦合度大，使代码难以测试，难以复用，难以理解。通过DI，对象的依赖关</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java虚拟机的类加载机制 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java虚拟机的类加载机制">
+  <meta property="og:description" content="关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-09-15T14:43:00+08:00">
+    <meta property="article:modified_time" content="2017-09-15T14:43:00+08:00">
+    <meta property="article:tag" content="JVM类加载">
+
+  <meta itemprop="name" content="Java虚拟机的类加载机制">
+  <meta itemprop="description" content="关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java">
+  <meta itemprop="datePublished" content="2017-09-15T14:43:00+08:00">
+  <meta itemprop="dateModified" content="2017-09-15T14:43:00+08:00">
+  <meta itemprop="wordCount" content="1779">
+  <meta itemprop="keywords" content="JVM类加载">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java虚拟机的类加载机制">
+  <meta name="twitter:description" content="关于类加载机制： ​ 虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java虚拟机的类加载机制</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-09-15 </span>
+        <div class="post-category">
+            <a href="/categories/jvm/"> JVM </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1初始化-时机">1、初始化 时机</a></li>
+        <li><a href="#2加载">2、加载</a></li>
+        <li><a href="#3验证">3、验证</a></li>
+        <li><a href="#4准备">4、准备</a></li>
+        <li><a href="#5解析">5、解析</a></li>
+        <li><a href="#6初始化init">6、初始化<init></a></li>
+        <li><a href="#7类加载机制">7、类加载机制</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <p><strong>关于类加载机制：</strong></p>
+<p>​	虚拟机把描述类的数据从Class 文件加载到内存，并对数据进行效验、转换解析和初始化，最终 形成可以被虚拟机直接使用的Java 类型，就是虚拟机的类加载机制。</p>
+<h2 id="1初始化-时机">1、初始化 时机</h2>
+<p>1、遇到 new 、getstatic 、putstatic 、invokestatic 这四个字节码指令时。触发这四条指令的场景：</p>
+<ul>
+<li>使用new 实例化对象时</li>
+<li>读取或设置一个类的静态字段（被final修饰，已在编译期把结果放入常量池的不算（即 常量不算，static final 修饰））</li>
+<li>调用一个类的静态方法</li>
+</ul>
+<p>2、使用反射调用时，先进行初始化</p>
+<p>3、初始化一个类时，若其父类未被初始化，则先初始化其父类。</p>
+<p>4、当虚拟机启动时，用户需要指定一个要执行的主类（main() 函数所在的类），虚拟机会先初始化它。</p>
+<p>5、jdk 7.0 中，动态语言的支持</p>
+<p><strong>以上称为主动引用，被动引用不会引起初始化：</strong></p>
+<p>现有如下两个类：</p>
+
+<pre class="line-numbers language-java ">
+<code>class SuperClass{
+    static {
+        System.out.println(&#34;SuperClass init !!!&#34;);
+    }
+    public static int value = 123;
+}
+
+class SubClass extends SuperClass{
+    static {
+        System.out.println(&#34;SubClass init !!!&#34;);
+    }
+  
+   public static final String HELLO_WORLG = &#34;hello world !&#34;;
+}</code>
+</pre>
+<ul>
+<li>测试一：</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>  public static void main(String[] args) {
+  	System.out.println(SubClass.value);
+  }</code>
+</pre>
+<p>运行结果</p>
+
+<pre class="line-numbers language-java ">
+<code>  SuperClass init !!!
+  123</code>
+</pre>
+<ul>
+<li>
+<p>对于静态变量，只有直接定义这个变量的类才会进行初始化，如子类调用父类的静态变量，只有父类会进行初始化，子类不会自动进行初始化。</p>
+</li>
+<li>
+<p>测试二：</p>
+</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>  public static void main(String[] args) {
+    System.out.println(SubClass.HELLO_WORLG);
+  }</code>
+</pre>
+<p>运行结果：</p>
+
+<pre class="no-line-numbers language-java ">
+<code>  hello world !</code>
+</pre>
+<ul>
+<li>常量在在编译期通过常量传播优化，将“hello world !“存储到了常量池中，也就是说，”SubClass.HELLO_WORLG“并没有通过SubClass类符号进行引用，二者并没有任何联系。所以不会导致该类初始化。</li>
+</ul>
+<h2 id="2加载">2、加载</h2>
+<ul>
+<li>通过类的权限定名来获取此类的二进制字节流</li>
+<li>把字节流代表的静态数据结构转化为方法区的运行时数据结构</li>
+<li>在方法区中生成一个代表这个类的Class 对象</li>
+</ul>
+<h2 id="3验证">3、验证</h2>
+<p>​	确保class文件的字节流中的信息是安全的，至少不会危害虚拟机自身的安全。只有通过了这阶段的验证，字节流才会进入内存的方法区进行存储。</p>
+<h2 id="4准备">4、准备</h2>
+<ul>
+<li>
+<p>为<strong>类变量</strong>分配内存并设置初始零值，这些变量的内存在方法区中进行分配。</p>
+</li>
+<li>
+<p>常量会设置最终值，如：</p>
+</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>  public static int value = 123;
+  public static final int con = 234;</code>
+</pre>
+<p>准备期过后，会把value置为0，con的值置为234。</p>
+<h2 id="5解析">5、解析</h2>
+<p>​	将常量池中的<strong>符号引用</strong>替换为<strong>直接引用</strong>。这一阶段会根据需要发生在初始化之前或之后，包含类或接口解析、字段解析、方法解析。</p>
+<p>​	<strong>符号引用</strong>是无关虚拟机实现的内存布局。<strong>直接引用</strong>是和虚拟机实现内存布局相关的，符号引用必须在运行期转换获得真正的内存入口地址。</p>
+<h2 id="6初始化init">6、初始化<init></h2>
+<p>​	开始真正执行类中定义的 Java 代码，初始化阶段是执行类构造器<init>() 方法的过程</p>
+<ul>
+<li><init>() 是编译期收集类中所有的<strong>类变量的赋值动作</strong>和<strong>静态语句块中（static{}）的语句</strong>结合而成的。静态语句块只能访问惊天语句块之前的变量，定义在其之后的变量，只能赋值，不能访问</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>  static {
+          i = 0;                       //可以给变量赋值编译通过
+          System.out.println(i);      //使用变量编译不通过
+      }
+      
+  static int i;</code>
+</pre>
+<ul>
+<li><init>() 方法和构造函数不同。子类不会显示的调用父类的init() 方法，但是虚拟机会保证子类init() 方法被调用之前，父类的init() 会被先调用。</li>
+</ul>
+
+<pre class="line-numbers language-java ">
+<code>  public class InitDemo_2 {
+      public static void main(String[] args) {
+          System.out.println(SubClass1.B);
+      }
+  }
+
+  class SuperClass1{
+     public static int A = 1;
+      static {
+          A = 2;
+      }
+  }
+  class SubClass1 extends SuperClass1{
+      public static int B = A;
+  }</code>
+</pre>
+<p>运行结果：</p>
+
+<pre class="no-line-numbers language-java ">
+<code>  2</code>
+</pre>
+<ul>
+<li>接口中不会有静态语句块，但是接口中可以有赋值语句，因此接口也会生成<init>() ，但是，执行接口的<init>() 不需要先执行父类的<init>() ，除非父类的变量被执行，才会调用父类的<init>() 。</li>
+<li><init>() 方法只会被执行一次</li>
+</ul>
+<h2 id="7类加载机制">7、类加载机制</h2>
+<p>三种类加载器</p>
+<ul>
+<li>启动类加载器（Bootstrap ClassLoader）</li>
+</ul>
+<pre><code>​	负责加载 JAVA_HOME/lib 目录下，或被-XbootclassPath 参数指定的路径下的类库。
+</code></pre>
+<ul>
+<li>
+<p>拓展类加载器（Extension ClassLoader）</p>
+<p>​	负责加载 JAVA_HOME/lib/ext 目录下或者被 java.ext.dirs 系统变量所指定的路径中的所有类库。</p>
+</li>
+<li>
+<p>应用程序类加载器（Application ClassLoader）</p>
+<p>​	是ClassLoader.getSystemClassLoasder() 方法的返回值，负责加载用户类路径上所指定的类库。</p>
+</li>
+</ul>
+<p>双亲委派模型</p>
+<ul>
+<li>
+<p>类加载器通过组合的方式建立的父子关系，称为双亲委派模型。</p>
+</li>
+<li>
+<p>类需要有加载他的类加载器和类本身一起确定其在虚拟机中的唯一性。</p>
+</li>
+<li>
+<p>工作流程</p>
+<p>​	一个类加载器收到了类加载加载的请求，他首先不会尝试自己加载这个类而是把这个请求委派给父类加载器来完成。只有父类无法完成这个请求时，子加载器才会尝试自己去加载。</p>
+</li>
+<li>
+<p>作用</p>
+<p>​	Java 类随着他的类加载器一起具备了一种带优越级的层级关系，所有的加载请求都会传送到顶层的启动类加载器中，保证了Java 的稳定运行。</p>
+</li>
+</ul>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-09-15
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/jvm%E7%B1%BB%E5%8A%A0%E8%BD%BD/">JVM类加载</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%92%8C%E5%86%85%E5%AD%98%E5%88%86%E9%85%8D%E7%AD%96%E7%95%A5/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">垃圾回收和内存分配策略</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/mysql%E7%B4%A2%E5%BC%95/">
+            <span class="next-text nav-default">MySQL索引</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

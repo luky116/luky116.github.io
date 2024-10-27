@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>单元测试 on 三月的博客</title>
+    <link>https://luky116.github.io/categories/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/</link>
+    <description>Recent content in 单元测试 on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 25 Jul 2020 16:27:22 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/categories/%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Mockito 快速入门</title>
+      <link>https://luky116.github.io/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</link>
+      <pubDate>Sat, 25 Jul 2020 16:27:22 +0800</pubDate>
+      <guid>https://luky116.github.io/post/2020-07-25.-mockito-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/</guid>
+      <description>Mockito是一个模拟测试框架，可以让你用优雅，简洁的接口写出漂亮的单元测试。Mockito可以让单元测试易于可读，产生简洁的校验错误。 1</description>
+    </item>
+  </channel>
+</rss>

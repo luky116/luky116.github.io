@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之Lock与ReentranLock详解 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java多线程学习之Lock与ReentranLock详解">
+  <meta property="og:description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-11-18T14:09:22+08:00">
+    <meta property="article:modified_time" content="2017-11-18T14:09:22+08:00">
+    <meta property="article:tag" content="ReenTranLock">
+    <meta property="article:tag" content="源码">
+
+  <meta itemprop="name" content="Java多线程学习之Lock与ReentranLock详解">
+  <meta itemprop="description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了">
+  <meta itemprop="datePublished" content="2017-11-18T14:09:22+08:00">
+  <meta itemprop="dateModified" content="2017-11-18T14:09:22+08:00">
+  <meta itemprop="wordCount" content="2898">
+  <meta itemprop="keywords" content="ReenTranLock,源码">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java多线程学习之Lock与ReentranLock详解">
+  <meta name="twitter:description" content="synchronized 是内置锁，而Lock 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。 ReenTranLock实现了">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之Lock与ReentranLock详解</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-18 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1lock-方法分析">1、Lock 方法分析</a></li>
+        <li><a href="#2轮询锁和定时锁">2、轮询锁和定时锁</a></li>
+        <li><a href="#3响应速度和性能的权衡">3、响应速度和性能的权衡</a></li>
+        <li><a href="#4可中断的锁获取操作">4、可中断的锁获取操作</a></li>
+        <li><a href="#5公平性">5、公平性</a></li>
+        <li><a href="#6如何选择synchronized和reentranlock">6、如何选择synchronized和ReentranLock</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <p>　　<code>synchronized</code> 是内置锁，而<code>Lock</code> 接口定义的是显示锁，Lock 提供了一种可重入的、可轮询的、定时的以及可中断的锁获取操作。</p>
+<p>　　ReenTranLock实现了Lock接口，并提供了与synchronized 相同的互斥性和内存可见性。在获取ReentranLock时，有着与进入同步代码块相同的内存语义，在释放ReentranLock时，有着与退出同步代码块相同的语义。</p>
+<h2 id="1lock-方法分析">1、Lock 方法分析</h2>
+
+<pre class="line-numbers language-java ">
+<code>public interface Lock {
+    void lock();
+    void lockInterruptibly() throws InterruptedException;
+    Condition newCondition();
+    boolean tryLock();
+    boolean tryLock(long time, TimeUnit unit) throws InterruptedException;
+    void unlock();
+}</code>
+</pre>
+<ol>
+<li><code>lock()</code>：获得Lock锁</li>
+<li><code>lockInterruptibly()</code>：获得锁，可被中断</li>
+<li><code>newCondition()</code>：返回一个条件Condition对象</li>
+<li><code>tryLock()</code>：尝试获得锁</li>
+<li><code>tryLock(long time, TimeUnit unit)</code>：尝试在一定时间内获得锁，期间被阻塞</li>
+<li><code>unlock()</code>：释放锁</li>
+</ol>
+<p>Lock 接口使用的标准形式：</p>
+
+<pre class="line-numbers language-java ">
+<code>// 创建锁
+Lock lock = new ReentranLock();
+...
+
+lock.lock();
+try{
+    // 进行必要操作
+      // 捕获异常，并在必要时恢复不变性条件
+}finally{
+  //释放锁
+  lock.unlock();
+}</code>
+</pre>
+<p>　　注意，使用Lock时一定要在finally语句里面释放锁，否则发生异常时可能会导致锁无法被释放，导致程序奔溃。</p>
+<h2 id="2轮询锁和定时锁">2、轮询锁和定时锁</h2>
+<p>　　相比于synchronized内置锁的无条件锁获取模式，Lock提供了<code>tryLock()</code> 实现<strong>可定时和可轮询的锁获取模式</strong>，这也使Lock具有更完善的错误恢复机制。在内置锁中，死锁是一个很严重的问题，造成死锁的原因之一可能是，锁获取顺序不一致导致程序死锁。比如说，线程1持有A对象锁，正在等待获取B对象锁；线程2持有B对象锁，正在等待获取A对象锁。这样，两个线程都会由于获取不到想要的锁而陷入死锁的境地。解决办法可以是，两个线程要么同时获取两个锁，要么一个锁都不获取。Lock 的可定时和可轮询锁就可以很好的满足该条件，从而避免死锁的发生（即操作系统中著名的哲学家进餐问题）。</p>
+<p>　　下面代码要实现统计两个资源的数量总和操作：使用tryLock尝试同时获取两个资源的锁，如果不能同时获取两个资源的锁，则退出重试。如果在规定时间内不能同时获取两对象的锁并完成操作，则返回-1作为失败的标识。</p>
+
+<pre class="line-numbers language-java ">
+<code>// 资源类
+public class Resource {
+    //资源总和
+    private int resourceNum;
+    // 显示锁
+    public Lock lock = new ReentrantLock();
+
+    public Resource(int resourceNum){
+        this.resourceNum = resourceNum;
+    }
+    //返回此资源的总量
+    public int getResourceNum(){
+        return resourceNum;
+    }
+}</code>
+</pre>
+
+<pre class="line-numbers language-java ">
+<code>public class LockTest1 {
+      //传入两个资源类和预期操作时间，在此期间内返回两个资源的数量总和
+    public int getResource(Resource resourceA, Resource resourceB, long timeout, TimeUnit unit)
+          throws InterruptedException {
+        // 获取当前时间，算出操作截止时间
+        long stopTime = System.nanoTime() &#43; unit.toNanos(timeout);
+
+        while(true){
+            try {
+                // 尝试获得资源A的锁
+                if (resourceA.lock.tryLock()) {
+                    try{
+                        // 如果获得资源A的锁，尝试获得资源B的锁
+                        if(resourceB.lock.tryLock()){
+                            //同时获得两资源的锁，进行相关操作后返回
+                            return getSum(resourceA, resourceB);
+                        }
+                    }finally {
+                        resourceB.lock.unlock();
+                    }
+                }
+            }finally {
+                resourceA.lock.unlock();
+            }
+
+            // 判断当前是否超时，规定-1为错误标识
+            if(System.nanoTime() &gt; stopTime)
+                return -1;
+
+            //睡眠1秒，继续尝试获得锁
+            TimeUnit.SECONDS.sleep(1);
+        }
+    }
+
+    // 获得资源总和
+    public int getSum(Resource resourceA,Resource resourceB){
+        return resourceA.getResourceNum()&#43;resourceB.getResourceNum();
+    }
+}</code>
+</pre>
+<p>　　对于内置锁，在开始请求后，这个操作将无法在规<strong>定时间内取消</strong>或是<strong>中途中断</strong> ，因此内置锁很难实现带时间限制的操作。</p>
+<h2 id="3响应速度和性能的权衡">3、响应速度和性能的权衡</h2>
+<p>　　在上代码中，每次尝试获取两个锁失败，都会调用 <code>TimeUnit.SECONDS.sleep(1);</code> 让线程休眠一秒后，再去尝试获得两个资源锁。这里涉及到一个性能和响应时间的问题：</p>
+<ol>
+<li>如果每次尝试后都让线程休眠，可能会造成响应迟延的问题。比如，在这次失败进入休眠的瞬间，两个锁的状态刚好变为可用，但线程必须要休眠完成后才能再次尝试。但是，休眠的同时可以不占用CPU时钟周期，可以让其他线程有时间来占用CPU。</li>
+<li>如果不休眠，让线程在一次获取锁失败后立即进行下一轮获取尝试，可以获得很好的响应速度，但是这也会让线程长时间占用CPU时钟周期直到成功获得两个锁。如果该锁在很长时间后才都可用，这会造成CPU资源浪费，服务器性能降低。</li>
+</ol>
+<p>因此，需要在响应速度和服务器性能之间做出权衡。</p>
+<h2 id="4可中断的锁获取操作">4、可中断的锁获取操作</h2>
+<p>　　Lock中的<code>lockInterruptibly()</code> 可以在获得锁的同时保持对中断的响应，但是内置锁synchronized却很难实现这个功能。</p>
+<p>　　如下程序，创建一任务，假设该任务需要执行很长时间才能结束（使用死循环来模拟时长）。现在有两个线程竞争该资源的内置锁，在等待一段时间后，想要终止线程t2的锁获取等待操作，使用<code>t2.interrupt();</code> 尝试中断线程t2。遗憾的是，此时t2根本不会响应这个中断操作，它会继续等待直到获得资源锁。</p>
+
+<pre class="line-numbers language-java ">
+<code>public class InterruptedLockTest implements Runnable{
+    public synchronized void doCount(){
+        //使用死循环表示此操作要进行很长的一段时间才能结束
+        while(true){}
+    }
+
+    @Override
+    public void run() {
+        doCount();
+    }
+}</code>
+</pre>
+
+<pre class="line-numbers language-java ">
+<code>public static void main(String[] args) throws InterruptedException {
+        InterruptedLockTest test = new InterruptedLockTest();
+
+        Thread t1 = new Thread(test);
+        Thread t2 = new Thread(test);
+
+        t1.start();
+        t2.start();
+
+          //等待两秒，尝试中断线程t2的等待
+        TimeUnit.SECONDS.sleep(2);
+        t2.interrupt();
+
+        //等待1秒，让 t2.interrupt(); 执行生效
+        TimeUnit.SECONDS.sleep(1);
+        System.out.println(&#34;线程t1是否存活：&#34; &#43; t1.isAlive());
+        System.out.println(&#34;线程t2是否存活：&#34; &#43; t2.isAlive());
+    }</code>
+</pre>
+<p>　　使用Lock的<code>lockInterruptibly()</code> 能够在获取锁请求的同时能保持对中断的响应。</p>
+
+<pre class="line-numbers language-java ">
+<code>public class InterruptedLockTest2 implements Runnable{
+    Lock lock = new ReentrantLock();
+
+    public void doCount() throws InterruptedException {
+        //可中断的锁等待机制，会抛出中断异常
+        lock.lockInterruptibly();
+        try {
+            while (true) {}
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void run() {
+        try {
+            doCount();
+        } catch (InterruptedException e) {
+            System.out.println(&#34;被中断....&#34;);
+        }
+    }
+}</code>
+</pre>
+
+<pre class="line-numbers language-java ">
+<code>public static void main(String[] args) throws InterruptedException {
+    InterruptedLockTest2 test = new InterruptedLockTest2();
+
+    Thread t1 = new Thread(test);
+    Thread t2 = new Thread(test);
+
+    t1.start();
+    t2.start();
+
+    TimeUnit.SECONDS.sleep(2);
+    t2.interrupt();
+
+    //等待1秒，让 t2.interrupt(); 执行生效
+    TimeUnit.SECONDS.sleep(1);
+    System.out.println(&#34;线程t1是否存活：&#34; &#43; t1.isAlive());
+    System.out.println(&#34;线程t2是否存活：&#34; &#43; t2.isAlive());
+}</code>
+</pre>
+<h2 id="5公平性">5、公平性</h2>
+<p>　　ReentranLock 提供了两种公平性的悬着：创建一个非公平锁（默认）或者创建一个非公平锁。在公平锁中，线程将按照他们发出请求的顺序来获得锁，非公平锁上则允许“插队”；如果一个线程在请求非公平锁时，如果此时该状态刚好变为可用，则该线程可能会直接获得该锁。</p>
+
+<pre class="line-numbers language-java ">
+<code>// 也可以指定公平性
+public ReentrantLock(boolean fair) {
+    sync = fair ? new FairSync() : new NonfairSync();
+}
+//默认创建非公平锁
+public ReentrantLock() {
+      sync = new NonfairSync();
+}</code>
+</pre>
+<p>　　在公平性的ReentranLock中，如果有一个线程在持有这个锁或是有线程在阻塞队列中等待这个锁，那么新请求的线程会被放入队列中等待。非公平性锁中，只当锁被某个线程占领时，才会把新请求的线程放入阻塞队列中。</p>
+<p>　　在竞争激烈的环境中，公平性锁的性能会比非公平性锁差很多。如果没有特殊的需求，不推荐使用公平锁，因为在公平锁中，恢复一个被挂起的线程与该线程真正开始执行之间存在严重的迟延。假如线程A持有一个锁，线程B请求这个锁，由于这个锁已经被持有，所以B会放入阻塞对类中。如果A释放该锁，B将被唤醒，一次会尝试再次请求该锁。与此同时，如果线程C也请求该锁，那么C很可能在B被完全唤醒之前持有、使用和释放该锁。这样，B既没有延迟使用该锁，C还利用其中间隙完成自己的操作，这是一个双赢的局面。</p>
+<h2 id="6如何选择synchronized和reentranlock">6、如何选择synchronized和ReentranLock</h2>
+<p>　　在Java6中，ReentranLock性能略有胜出synchronized。但是，使用ReentranLock需要在finally语句中手动释放锁，可能会造成一定的编码失误。并且，synchronized使用JVM的内置属性，可提升优化的空间较大。</p>
+<p>　　因此，只有在内置锁无法满足需求的情况下，比如，需要使用：可定时的、可轮询的和可中断的锁获取机制，公平队列。才会考虑使用ReentranLock。否则，优先使用synchronized内置锁。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-11-18
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/reentranlock/">ReenTranLock</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之线程的取消与中断机制</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%BA%90%E7%A0%81%E8%AF%A6%E8%A7%A3/">
+            <span class="next-text nav-default">Java多线程学习之线程池源码详解</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

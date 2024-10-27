@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之线程的取消与中断机制 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8B%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%8F%96%E6%B6%88%E4%B8%8E%E4%B8%AD%E6%96%AD%E6%9C%BA%E5%88%B6/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java多线程学习之线程的取消与中断机制">
+  <meta property="og:description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-11-18T14:16:39+08:00">
+    <meta property="article:modified_time" content="2017-11-18T14:16:39+08:00">
+    <meta property="article:tag" content="线程中断">
+    <meta property="article:tag" content="源码">
+
+  <meta itemprop="name" content="Java多线程学习之线程的取消与中断机制">
+  <meta itemprop="description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户">
+  <meta itemprop="datePublished" content="2017-11-18T14:16:39+08:00">
+  <meta itemprop="dateModified" content="2017-11-18T14:16:39+08:00">
+  <meta itemprop="wordCount" content="2748">
+  <meta itemprop="keywords" content="线程中断,源码">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java多线程学习之线程的取消与中断机制">
+  <meta name="twitter:description" content="任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之线程的取消与中断机制</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-18 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#1使用标志变量取消任务">1、使用“标志”变量取消任务</a></li>
+        <li><a href="#2取消策略">2、取消策略</a></li>
+        <li><a href="#3中断线程">3、中断线程</a></li>
+        <li><a href="#4中断策略">4、中断策略</a></li>
+        <li><a href="#5使用future-来实现取消">5、使用Future 来实现取消</a></li>
+        <li><a href="#6关闭executorservice">6、关闭ExecutorService</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <p>　　任务和线程的启动很容易。在大多数情况下我们都会让他们运行直到结束，或是让他们自行停止。但是，有时我们希望提前结束任务或是线程，可能是因为用户请求取消，或是线程在规定时间内没有结束，或是出现了一些问题迫使线程要提前结束。</p>
+<p>　　强制一个线程或是服务立即停止，可能会造成共享数据状态不一致的问题，比如，两个线程正对一个共享数据进行操作，然后被突然杀死，这样会对数据造成不确定性的影响。Java中没有提供任何机制来安全的终止线程，但它提供了中断，这种协作机制，“提醒”线程可以自己结束自己线程。这种机制提供了更好的灵活性，<strong>因为任务本身的代码比发出取消请求的代码更清楚如何执行停止工作。</strong></p>
+<h2 id="1使用标志变量取消任务">1、使用“标志”变量取消任务</h2>
+
+<pre class="line-numbers language-java ">
+<code>public class PrimeGenerator implements Runnable {
+    private final List&lt;BigInteger&gt; primes = new ArrayList&lt;&gt;();
+    // 标志变量，设置为volatile，保证可见性
+    private volatile boolean canceled = false;
+    @Override
+    public void run() {
+        BigInteger p = BigInteger.ONE;
+        // 依靠标志位判断是否结束线程
+        while(!canceled){
+            p = p.nextProbablePrime();
+            synchronized (this){
+                primes.add(p);
+            }
+        }
+    }
+    // 取消
+    public void cancel(){canceled = true;}
+    //返回结果
+    public synchronized List&lt;BigInteger&gt; get(){
+        return primes;
+    }
+}</code>
+</pre>
+<p>　　上述代码设置一个<code>volatile</code> “已请求取消”标志，而任务将定期查看该标志。 PrimeGenerator 将持续的枚举素数，直到标志位被设置为取消结束。PrimeGenerator 每次枚举素数时候都会检查canceled标志位是否被改变。</p>
+
+<pre class="line-numbers language-java ">
+<code>public List&lt;BigInteger&gt; aPrimes() throws InterruptedException {
+        PrimeGenerator generator = new PrimeGenerator();
+        new Thread(generator).start();
+        try{
+            // 睡眠1秒
+            TimeUnit.SECONDS.sleep(1);
+        }finally {
+            // 1秒后取消
+            generator.cancel();
+        }
+        return generator.get();
+}</code>
+</pre>
+<p>　　调用素数生成器运行1秒后取消，值得注意的是，素数生成器可能不会在1秒后“准时”停止，因为他可能此时刚好在<code>while</code>内执行。取消语句放在finally语句执行，保证该语句一定会被执行。</p>
+<h2 id="2取消策略">2、取消策略</h2>
+<p>　　在设计良好的程序中，一个可取消的任务必须拥有取消策略，这个策略详细定义取消操作的“<strong>How</strong>”、“<strong>When</strong>”、“<strong>What</strong>”，即代码如何（How）请求取消该任务，任务在何时（When）检查是否已经请求了取消，以及在响应时执行那些（What）操作。</p>
+<p>　　在上述代码中，PrimeGenerator采用了简单的取消策略：客户代码通过canceled来请求取消，PrimeGenerator在每次执行搜索前首先检查是否存在取消请求，如果存在则退出。</p>
+<h2 id="3中断线程">3、中断线程</h2>
+<p>　　PrimeGenerator 中取消机制之所以能成功，是因为程序会不间断定期的检查标志位的状态是否被改变。但是，如果程序调用了一个阻塞方法，例如，BlockingQueu.put()那么可能会出现问题，即任务可能永远不会检查取消标志。【<strong>阻塞队列不了解的看看这篇博客：http://www.cnblogs.com/moongeek/p/7832855.html#_label3</strong>】</p>
+
+<pre class="line-numbers language-java ">
+<code>// 不推荐的写法
+public class BrokenPrimeProducer extends Thread {
+    // 阻塞队列
+    private final BlockingQueue&lt;BigInteger&gt; queue;
+    // 中断位
+    private volatile boolean canceled = false;
+
+    public BrokenPrimeProducer(BlockingQueue&lt;BigInteger&gt; queue){
+        this.queue = queue;
+    }
+
+    @Override
+    public void run(){
+        try {
+            BigInteger p = BigInteger.ONE;
+            while (!canceled) {
+              // PUT操作可能会被阻塞，将无法检查 canceled 是否变化，因而无法响应退出
+                queue.put(p = p.nextProbablePrime());
+            }
+        }catch (InterruptedException ex){}
+    }
+
+    public void cancel(){
+        canceled = true;
+    }
+}</code>
+</pre>
+<p>　　如果阻塞队列在 <code>put()</code> 操作被阻塞，此时，即使我们调用cancel() 方法将状态变量改变，进程也无法检查到改变，因为会一直阻塞下去。</p>
+<p>　　每个Thread都有一个boolean类型的中断状态。当中断线程时，改状态会被置为true。Thread中包含的中断方法如下。其中 <code>inturrept()</code> 会将中断状态置为true，而 <code>isInterrupted()</code> 方法会返回当前的中断状态，而 <code>interrupted()</code> 方法则会清除当前状态，并返回它之前的值。</p>
+
+<pre class="line-numbers language-java ">
+<code> public class Thread{
+     public void inturrept(){......}
+       public boolean isInterrupted(){......}
+       public static boolean interrupted(){......}
+ }</code>
+</pre>
+<p>　　通常情况下，如果一个阻塞方法，如：<code>Object.wait(</code>)、<code>Thread.sleep()</code>和<code>Thread.join()</code> 时，都会去检查中断状态的值，发现中断状态变化时都会提前返回并响应中断：<strong>清除中断状态，并抛出InterruptedException异常</strong> 。</p>
+<p>　　**该注意的是，中断操作并不会真正的中断一个正在运行的线程，而只是发出中断请求，然后由程序在合适的时刻中断自己。**一般设计方法时，都需要捕获到中断异常后对中断请求进行某些操作，不能完全忽视或是屏蔽中断请求。</p>
+<p>　　对上代码进行改进，采用中断进行中断程序执行。代码中有两处可以检测中断：在阻塞的<code>put()</code> 方法中，以及循环开始处的查询中断状态时。其实<code>put()</code> 操作会检测响应异常，在循环开始时可以不进行检测，但这样可以获得更高效的响应性能。</p>
+
+<pre class="line-numbers language-java ">
+<code>public class PrimeProducer extends Thread {
+    // 阻塞队列
+    private final BlockingQueue&lt;BigInteger&gt; queue;
+
+    public PrimeProducer(BlockingQueue&lt;BigInteger&gt; queue){
+        this.queue = queue;
+    }
+
+    @Override
+    public void run(){
+        try {
+            BigInteger p = BigInteger.ONE;
+            while (!Thread.currentThread().isInterrupted()) {
+                queue.put(p = p.nextProbablePrime());
+            }
+        }catch (InterruptedException ex){
+            // 允许退出线程
+        }
+    }
+
+    public void cancel(){
+        // 中断
+        interrupt();
+    }
+}</code>
+</pre>
+<p>　　<strong>中断是实现取消的最合理方式，在取消之外的其他操作中使用中断，都是不合理的。</strong></p>
+<h2 id="4中断策略">4、中断策略</h2>
+<p>　　中断策略解释某个中断请求：当发现中断请求时，应该做哪些工作，以多快的速度来响应中断。任务一般不会在其自己拥有的线程中执行，而是在其他某个服务（比如说，在一个其他线程或是线程池）中执行。对于非线程所有者而言（例如，对线程池来说，任何线程池实现之外的代码），应该保存并传递中断状态，使得真正拥有线程的代码才能对中断做出响应。</p>
+<p>　　<strong>比如说，如果你书写一个库函数，一般会抛出InterruptedException作为中断响应，而不会在库函数时候把中断异常捕获并进行提前处理，而导致调用者被屏蔽中断。因为你不清楚调用者想要对异常进行何种处理，比如说，是接收中断后立即停止任务还是进行相关处理并继续执行任务。中断的处理必须由该任务自己决定，而不是由其他线程决定。</strong></p>
+<p>　　因为在捕获InterruptException 中会同时把中断位恢复，所以，如果想捕获异常后恢复中断位，一般会调用 <code>Thread.currentThread.interrupt()</code> 进行中断位的恢复。</p>
+
+<pre class="line-numbers language-java ">
+<code>try {
+    // dosomething();
+ } catch (InterruptedException e) {
+    // 捕获异常后恢复中断位
+   Thread.currentThread().interrupt();
+   e.printStackTrace();
+ }</code>
+</pre>
+<h2 id="5使用future-来实现取消">5、使用Future 来实现取消</h2>
+<p>　　关于<code>Future</code> 对象：<code>ExecutorService.submit</code> 方法将返回一个Future 来描述任务。</p>
+
+<pre class="line-numbers language-java ">
+<code>public interface Future&lt;V&gt; {
+    // 是否取消线程的执行
+    boolean cancel(boolean mayInterruptIfRunning);
+    // 线程是否被取消
+    boolean isCancelled();
+    //线程是否执行完毕
+    boolean isDone();
+      // 立即获得线程返回的结果
+    V get() throws InterruptedException, ExecutionException;
+      // 延时时间后再获得线程返回的结果
+    V get(long timeout, TimeUnit unit)
+        throws InterruptedException, ExecutionException, TimeoutException;
+}</code>
+</pre>
+
+<pre class="line-numbers language-java ">
+<code>public static void main(String[] args) {
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        Future future = service.submit(new TheradDemo());
+
+        try {
+          // 可能抛出异常
+            future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }finally {
+          //终止任务的执行
+            future.cancel(true);
+        }
+ }</code>
+</pre>
+<p>　　Future 中的 <code>cancel(boolean mayInterruptIfRunning)</code> 接受一个布尔参数表示取消操作是否成功。如果<code>Future.get()</code> 抛出异常，如果你不需要得到结果时，就可以通过<code>cancel(boolean)</code> 来取消任务。</p>
+<p>　　对于线程池中的任务，如果想想要取消执行某任务，不宜中断线程池，因为你不知道中断请求到达时正在执行什么任务，所以只能通过<code>cancel(boolean)</code> 来定向取消特定的任务。</p>
+<h2 id="6关闭executorservice">6、关闭ExecutorService</h2>
+<p>　　线程池相关对象<code>ExecutorService</code> 提供了两种关闭的方法：使用 <code>shutdown()</code> 正常关闭，他先把线程池状态设置为<strong>SHUTDOWN</strong> ，禁止再向线程池提交任务，然后把线程池中的任务全部执行完毕，就关闭线程池。这种方法速度较慢，但是更安全。以及使用<code>shutdownNow()</code> 首先关闭正在执行的任务，然后返回所有尚未启动的任务清单。这种方法速度快，但风险也大，因为有的任务可能执行了一般被关闭。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-11-18
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%96%AD/">线程中断</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Java多线程学习之synchronized总结</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Block%E4%B8%8Ereentranlock%E8%AF%A6%E8%A7%A3/">
+            <span class="next-text nav-default">Java多线程学习之Lock与ReentranLock详解</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

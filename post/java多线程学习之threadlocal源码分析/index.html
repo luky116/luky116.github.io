@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Java多线程学习之ThreadLocal源码分析 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互" /><meta name="keywords" content="Hugo, theme, even" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bthreadlocal%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="Java多线程学习之ThreadLocal源码分析">
+  <meta property="og:description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2017-11-20T14:09:22+08:00">
+    <meta property="article:modified_time" content="2017-11-20T14:09:22+08:00">
+    <meta property="article:tag" content="ThreadLocal">
+    <meta property="article:tag" content="源码">
+
+  <meta itemprop="name" content="Java多线程学习之ThreadLocal源码分析">
+  <meta itemprop="description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互">
+  <meta itemprop="datePublished" content="2017-11-20T14:09:22+08:00">
+  <meta itemprop="dateModified" content="2017-11-20T14:09:22+08:00">
+  <meta itemprop="wordCount" content="3649">
+  <meta itemprop="keywords" content="ThreadLocal,源码">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Java多线程学习之ThreadLocal源码分析">
+  <meta name="twitter:description" content="0、概述 ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/post/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">归档</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/post/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">归档</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Java多线程学习之ThreadLocal源码分析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2017-11-20 </span>
+        <div class="post-category">
+            <a href="/categories/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/"> Java多线程 </a>
+            <a href="/categories/java%E6%BA%90%E7%A0%81/"> Java源码 </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#0概述">0、概述</a></li>
+        <li><a href="#1threadlocal-源码分析">1、ThreadLocal 源码分析</a></li>
+        <li><a href="#2threadlocalmap-源码分析">2、ThreadLocalMap 源码分析</a></li>
+        <li><a href="#3总结">3、总结</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <h2 id="0概述">0、概述</h2>
+<p>　　ThreadLocal，即线程本地变量。它是将变量绑定到特定的线程上的“入口“，使每个线程都拥有改变量的一个拷贝，各线程相同变量间互不影响，是实现共享资源的轻量级同步。</p>
+<p>　　下面是个ThreadLocal使用的实例，两个任务共享同一个变量，并且两个任务都把该变量设置为了线程私有变量，这样，虽然两个任务都”持有“同一变量，但各自持有该变量的拷贝。因此，当一个线程修改该变量时，不会影响另一线程该变量的值。</p>
+
+<pre class="line-numbers language-java ">
+<code>public class LocalTest1 implements Runnable {
+    // 一般会把 ThreadLocal 设置为static 。它只是个为线程设置局部变量的入口，多个线程只需要一个入口
+    private static ThreadLocal&lt;Student&gt; localStudent = new ThreadLocal() {
+        // 一般会重写初始化方法，一会分析源码时候会解释为什么
+        @Override
+        public Student initialValue() {
+            return new Student();
+        }
+    };
+
+    private Student student = null;
+
+    @Override
+    public void run() {
+        String threadName = Thread.currentThread().getName();
+
+        System.out.println(&#34;【&#34; &#43; threadName &#43; &#34;】：is running !&#34;);
+
+        Random ramdom = new Random();
+        //随机生成一个变量
+        int age = ramdom.nextInt(100);
+
+        System.out.println(&#34;【&#34; &#43; threadName &#43; &#34;】：set age to :&#34; &#43; age);
+        // 获得线程局部变量，改变属性值
+        Student stu = getStudent();
+        stu.setAge(age);
+
+        System.out.println(&#34;【&#34; &#43; threadName &#43; &#34;】：第一次读到的age值为 :&#34; &#43; stu.getAge());
+
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(&#34;【&#34; &#43; threadName &#43; &#34;】：第二次读到的age值为 :&#34; &#43; stu.getAge());
+    }
+
+    public Student getStudent() {
+        student = localStudent.get();
+
+        // 如果不重写初始化方法，则需要判断是否为空，然后手动为ThreadLocal赋值
+//        if(student == null){
+//            student = new Student();
+//            localStudent.set(student);
+//        }
+
+        return student;
+    }
+
+ public static void main(String[] args) {
+        LocalTest1 ll = new LocalTest1();
+        Thread t1 = new Thread(ll, &#34;线程1&#34;);
+        Thread t2 = new Thread(ll, &#34;线程2&#34;);
+
+        t1.start();
+        t2.start();
+    }
+}
+
+public class Student{
+    private int age;
+
+    public Student(){
+
+    }
+    public Student(int age){
+        this.age = age;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}</code>
+</pre>
+<p>运行结果：</p>
+
+<pre class="line-numbers language- ">
+<code>【线程1】：is running !
+【线程2】：is running !
+【线程2】：set age to :45
+【线程1】：set age to :25
+【线程1】：第一次读到的age值为 :25
+【线程2】：第一次读到的age值为 :45
+【线程1】：第二次读到的age值为 :25
+【线程2】：第二次读到的age值为 :45</code>
+</pre>
+<h2 id="1threadlocal-源码分析">1、ThreadLocal 源码分析</h2>
+<p>　　ThreadLocal 源码有很多方法，但是暴露出来的公共接口只有三个：</p>
+
+<pre class="line-numbers language-java ">
+<code>public ThreadLocal{
+  public T get() {}
+  public void set(T value) {}
+  public void remove() {}
+}</code>
+</pre>
+<p>　　 <code>set(T value)</code> 是设置局部变量的方法，源码如下：</p>
+
+<pre class="line-numbers language-java ">
+<code>public void set(T value) {
+      // 获得当前线程
+    Thread t = Thread.currentThread();
+      // 获得当前线程的 ThreadLocalMap 引用，详细见下
+    ThreadLocalMap map = getMap(t);
+      // 如果不为空，则更新局部变量的值
+    if (map != null)
+      map.set(this, value);
+      //如果不是第一次使用，先进行初始化
+    else
+      createMap(t, value);
+ }</code>
+</pre>
+<p><code>getMap(t)</code> 源码如下，每一个Thread变量都自带了一个ThreadLocalMap类型的成员变量，用于保存该线程的成员变量。</p>
+
+<pre class="line-numbers language-java ">
+<code>ThreadLocalMap getMap(Thread t) {
+   //返回该线程Thread的成员变量threadLocals
+    return t.threadLocals;
+ }</code>
+</pre>
+<p>　　但是，Thread 默认把threadLocals设置为了null，因此第一次使用局部变量时候需要先初始化。</p>
+
+<pre class="no-line-numbers language-java ">
+<code>ThreadLocal.ThreadLocalMap threadLocals = null;</code>
+</pre>
+<p>　　<code>ThreadLocalMap</code> 是定义在<code>ThreadLocal</code> 类里的内部类，它的作用是存储线程的局部变量。<code>ThreadLocalMap</code> 以ThreadLocal的引用作为键，以局部变量作为值，存储在<code>ThreadLocalMap.Entry</code> （一种存储键值的数据结构）里。关于<code>ThreadLocalMap</code> 的源码，后文会详细介绍，这里只要知道大概原理即可。</p>
+<p>　　由此我们可以总结<code>ThreadLocal</code> 的设计思想如下：</p>
+<ol>
+<li><code>ThreadLocal</code> 只是个访问局部变量的入口。</li>
+<li>局部变量的值存在线程<code>Thread</code> 类本地，默认为null，只有通过<code>ThreadLocal</code> 访问时才会进行初始化。</li>
+<li>[ThreadLocalMap 的设计思路在后文介绍<code>ThreadLocalMap</code> 源码时候会分析]</li>
+</ol>
+<p><code>get()</code> 是获得线程本地变量，源码如下：</p>
+
+<pre class="line-numbers language-java ">
+<code>public T get() {
+      //获得当前线程
+    Thread t = Thread.currentThread();
+      //得到当前线程的一个threadLocals 变量
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+      // 如果不为空，以当前ThreadLocal为主键获得对应的Entry
+      ThreadLocalMap.Entry e = map.getEntry(this);
+      if (e != null) {
+        @SuppressWarnings(&#34;unchecked&#34;)
+        T result = (T)e.value;
+        return result;
+      }
+    }
+      //如果值为空，则进行初始化
+    return setInitialValue();
+}</code>
+</pre>
+<p>再来看看初始化函数<code>setInitialValue()</code> 所进行的操作：</p>
+
+<pre class="line-numbers language-java ">
+<code>private T setInitialValue() {
+      //获得初始默认值
+    T value = initialValue();
+      //得到当前线程
+    Thread t = Thread.currentThread();
+      // 获得该线程的ThreadLocalMap引用
+    ThreadLocalMap map = getMap(t);
+      //不为空则覆盖
+    if (map != null)
+        map.set(this, value);
+    else
+          //若是为空，则进行初始化，键为本ThreadLocal变量，值为默认值
+        createMap(t, value);
+}
+
+// 默认初始化返回null值，这也是为什么需要重写该方法的原因。如果没有重写，第一次get()操作获得的线程本地变量为null，需要进行判断并手动调用set()进行初始化
+protected T initialValue() {
+    return null;
+}</code>
+</pre>
+<h2 id="2threadlocalmap-源码分析">2、ThreadLocalMap 源码分析</h2>
+<p>　　Thread类中包含一个ThreadLocalMap 类型的成员变量threadLocals，这是直接存储线程局部变量的数据结构。ThreadLocal 只是一个入口，通过ThreadLocal操作threadLocals，进行局部变量的查改操作。这也是为什么ThreadLocal 暴露的公有接口才三个的原因吧。同时，由于ThreadLocalMap 中的键是ThreadLocal类，也说明了，如果想为一个线程设置多个本地局部变量，需要设置多个 ThreadLocal。下面来分析下ThreadLocalMap 的源码。</p>
+<p>　　<code>ThreadLocalMap</code> 里有几个核心的属性，和HashMap相似：</p>
+
+<pre class="line-numbers language-java ">
+<code>// table 默认大小，大小为2的次方，用于hash定位
+private static final int INITIAL_CAPACITY = 16;
+// 存放键值对的数组
+private Entry[] table;
+// 扩容的临界值，当table元素大到这个值，会进行扩容
+private int threshold;</code>
+</pre>
+<p>　　在调用ThreadLocal 中的<code>set(T)</code> 方法时，调用了ThreadLocalMap 的<code>set(ThreadLocal, T)</code> 方法，</p>
+
+<pre class="line-numbers language-java ">
+<code>private void set(ThreadLocal&lt;?&gt; key, Object value) {
+     Entry[] tab = table;
+     int len = tab.length;
+        // Hash 寻址，与table数组长度减1（二进制全是1）相与，所以数组长度必须为2的次方，减小hash重复的可能性
+     int i = key.threadLocalHashCode &amp; (len-1);
+
+       //从hash值计算出的下标开始遍历
+     for (Entry e = tab[i];
+          e != null;
+          e = tab[i = nextIndex(i, len)]) {
+       //获得该Entry的键
+       ThreadLocal&lt;?&gt; k = e.get();
+        //如果键和传过来的相同，覆盖原值，也说明，一个ThreadLocal变量只能为一个线程保存一个局部变量
+       if (k == key) {
+         e.value = value;
+         return;
+       }
+       // 键为空，则替换该节点
+       if (k == null) {
+         replaceStaleEntry(key, value, i);
+         return;
+       }
+     }
+
+     tab[i] = new Entry(key, value);
+     int sz = &#43;&#43;size;
+       //是否需要扩容
+     if (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)
+       rehash();
+ }</code>
+</pre>
+<p>　　为什么说数组长度为2的次方有利于hash计算不重复呢？我们来看下，显然，和一个二进制全是1的数相于，能最大限度的保证原数的所有位数，因而重复几率会变小。<img src="http://images2017.cnblogs.com/blog/834666/201711/834666-20171120153628180-743076057.jpg" alt="img"></p>
+<p>　　可以看出ThreadLocalMap 采用<strong>线性探测再散列</strong>解决Hash冲突的问题。即，如果一次Hash计算出来的数组下标被占用，即hash值重复了，则在该下标的基础上加1测试下一个下标，直到找到空值。比如说，Hash计算出来下标i为6，table[6] 已经有值了，那么就尝试table[7]是否被占用，依次类推，直到找到空值。以上，就是保存线程本地变量的方法。</p>
+<p>　　再来分析下ThreadLocal 中的<code>get()</code> 方法，其中调用了ThreadLocalMap 的<code>map.getEntry(this)</code> 方法，并把本ThreadLocal作为参数传入，返回一个<code>ThreadLocalMap.Entry</code>对象（以后简称Entry），源码如下：</p>
+
+<pre class="line-numbers language-java ">
+<code>private Entry getEntry(ThreadLocal&lt;?&gt; key) {
+      //Hash计算数组下标
+    int i = key.threadLocalHashCode &amp; (table.length - 1);
+      //得到该下标的节点
+    Entry e = table[i];
+      //如果该节点存在，并且键和传过来的ThreadLocal对象相同，则返回该节点（说明该节点没有进行Hash冲突处理）
+    if (e != null &amp;&amp; e.get() == key)
+      return e;
+      //如果该节点不直接满足需求，可能进行了Hash冲突处理，则另外处理
+    else
+      return getEntryAfterMiss(key, i, e);
+}</code>
+</pre>
+<p>　　再来分析下<code>getEntryAfterMiss(ThreadLocal, int , Entry)</code> 的源码：</p>
+
+<pre class="line-numbers language-java ">
+<code>//  if (e == null || e.get() != key)
+private Entry getEntryAfterMiss(ThreadLocal&lt;?&gt; key, int i, Entry e) {
+    Entry[] tab = table;
+    int len = tab.length;
+    //从洗标为i开始遍历，直到遇到下一空节点或或是满足需求的节点
+    while (e != null) {
+        ThreadLocal&lt;?&gt; k = e.get();
+        if (k == key)
+            return e;
+        if (k == null)
+              //节点不为空，键为空，则清理该节点
+            expungeStaleEntry(i);
+        else
+              // i后移
+            i = nextIndex(i, len);
+        e = tab[i];
+    }
+      //否则返回空值
+    return null;
+}</code>
+</pre>
+<p>　　以上就是ThreadLocalMap 几个比较关键的源码分析。</p>
+<h2 id="3总结">3、总结</h2>
+<p>　　综上所述可知，ThreadLocal 只是访问Thread本地变量的一个入口，正真存储本地变量的其实是在Thread本地，同时ThreadLocal也作为一个键去Hash找到变量所在的位置。也许你会想，为什么不把ThreadLocalMap设置为&lt; Thread,Variable&gt;类型，把Thread作为主键，而要增加一个中间模块ThreadLocal？我的想法是，一来，这样确实可以满足需求，但是这样无法进行hash查找，如果一个Thread的本地变量过多，通过线性查找会花费大量时间，使用ThreadLocal作为中间键，可以进行Hash查找；二来，其实本地变量的添加、查找和删除需要进行大量的操作，设计者的思路是把这些操作封装在一个ThreadLocal类里，而只暴露了三个常用的接口，如果把ThreadLocal去掉，这些操作可能要写在Thread类里，违背了设计类的“单一性”原则；三来，我们这样相当于为每个本地变量取了个“名字”（即，一个ThreadLocal对应一个本地变量），使用方便。</p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2017-11-20
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/threadlocal/">ThreadLocal</a>
+          <a href="/tags/%E6%BA%90%E7%A0%81/">源码</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/mysql%E6%9F%A5%E8%AF%A2%E4%BC%98%E5%8C%96-%E5%85%B3%E8%81%94%E6%9F%A5%E8%AF%A2/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">MySQL查询优化 关联查询</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/">
+            <span class="next-text nav-default">Java多线程学习之synchronized总结</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?cabc0a71f63da092412d82d1aefe7d1c";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>

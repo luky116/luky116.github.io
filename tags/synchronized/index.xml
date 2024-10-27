@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Synchronized on 三月的博客</title>
+    <link>https://luky116.github.io/tags/synchronized/</link>
+    <description>Recent content in Synchronized on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 19 Nov 2017 14:14:42 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/tags/synchronized/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Java多线程学习之synchronized总结</title>
+      <link>https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sun, 19 Nov 2017 14:14:42 +0800</pubDate>
+      <guid>https://luky116.github.io/post/java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%AD%A6%E4%B9%A0%E4%B9%8Bsynchronized%E6%80%BB%E7%BB%93/</guid>
+      <description>0、概述 synchronized是Java提供的内置的锁机制，来实现代对码块的同步访问，称为内置锁（Intrinsic Lock） 。内置锁包括</description>
+    </item>
+  </channel>
+</rss>

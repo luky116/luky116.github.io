@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>设计模式 on 三月的博客</title>
+    <link>https://luky116.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/</link>
+    <description>Recent content in 设计模式 on 三月的博客</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 24 May 2020 10:22:17 +0800</lastBuildDate>
+    <atom:link href="https://luky116.github.io/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>23种设计模式(13) - 责任链模式</title>
+      <link>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F13---%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F-/</link>
+      <pubDate>Sun, 24 May 2020 10:22:17 +0800</pubDate>
+      <guid>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F13---%E8%B4%A3%E4%BB%BB%E9%93%BE%E6%A8%A1%E5%BC%8F-/</guid>
+      <description>23种设计模式(13) - 责任链模式 1、定义 使多个对象都有机会处理请求，从而避免请求的发送者和接受者质检的耦合关系。将这个接收对象连成一条链，</description>
+    </item>
+    <item>
+      <title>23种设计模式(4) - 适配器模式</title>
+      <link>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F4---%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F-/</link>
+      <pubDate>Fri, 22 May 2020 10:22:17 +0800</pubDate>
+      <guid>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F4---%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F-/</guid>
+      <description>1、定义 将一个接口转换成客户希望的另一个接口。Adapter 模式使得原本由于接口不兼容而不能一起工作的那些类，可以一起工作。 2、UML图 3、</description>
+    </item>
+    <item>
+      <title>23种设计模式(3) - 创建者模式</title>
+      <link>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F3---%E5%88%9B%E5%BB%BA%E8%80%85%E6%A8%A1%E5%BC%8F-/</link>
+      <pubDate>Mon, 18 May 2020 10:22:17 +0800</pubDate>
+      <guid>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F3---%E5%88%9B%E5%BB%BA%E8%80%85%E6%A8%A1%E5%BC%8F-/</guid>
+      <description>1、定义 将一个复杂对象的创建和他的表示分离，使用同样的创建过程可以创建不同的表示（类的不同属性的实例）。 2、UML 图 3、组成 产品类（Prod</description>
+    </item>
+    <item>
+      <title>23种设计模式(1) - 工厂方法模式</title>
+      <link>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1---%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/</link>
+      <pubDate>Tue, 12 May 2020 10:22:17 +0800</pubDate>
+      <guid>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F1---%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/</guid>
+      <description>1、定义 定义一个用于创建对象的接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。 2、举例 有一个Animal接口，有两个类</description>
+    </item>
+    <item>
+      <title>23种设计模式(0) - 设计模式六大原则</title>
+      <link>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F0---%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%85%AD%E5%A4%A7%E5%8E%9F%E5%88%99/</link>
+      <pubDate>Sun, 10 May 2020 10:22:17 +0800</pubDate>
+      <guid>https://luky116.github.io/post/23%E7%A7%8D%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F0---%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E5%85%AD%E5%A4%A7%E5%8E%9F%E5%88%99/</guid>
+      <description>1、单一职责原则 就一个类而言，应该只有一个引起它变化的原因。意思是，一个类应该实现单一的职责，如果功能太多就应该将类拆分。 2、开放-封闭原则</description>
+    </item>
+  </channel>
+</rss>

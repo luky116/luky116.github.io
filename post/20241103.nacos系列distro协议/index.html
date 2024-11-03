@@ -188,7 +188,7 @@
 	
     <div class="post-content image-border">
 	 <h1 id="distro-介绍">Distro 介绍</h1>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302799-ec5946bf-31fd-4e6e-86a6-423b256ac3be.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode.webp" alt="image.png"></p>
 <p>Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。</p>
 <p>Distro 协议的设计思想：</p>
 <ol>
@@ -227,7 +227,7 @@
 <li>startVerifyTask() ：定时任务，每隔 5 秒和其他节点校验每个 Client 数据是否一致 ，如果发现数据不一致，会推送本地数据给其他节点；</li>
 <li>startLoadTask()：从其他 Distro 节点拉取数据</li>
 </ol>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302469-350934a4-40f2-4041-9495-52f2d9cb3e1f.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-1.webp" alt="image.png"></p>
 
 <pre class="line-numbers language-plain ">
 <code>@Component
@@ -286,9 +286,9 @@ public class DistroProtocol {
             new DistroLoadDataTask(memberManager, distroComponentHolder, DistroConfig.getInstance(), loadCallback));
 }</code>
 </pre>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301493-950fe292-fb8d-4c9a-b537-642484c15ab5.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-2.webp" alt="image.png"></p>
 <p>DistroLoadDataTask 是一个线程类，只需要关注 run 方法的逻辑即可，其核心逻辑在 load() 方法中：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301491-3119e30c-cf27-41fa-94d4-aa6de2fd1b89.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-3.webp" alt="image.png"></p>
 
 <pre class="line-numbers language-plain ">
 <code>@Override
@@ -555,7 +555,7 @@ private void load() throws Exception {
 <h1 id="增量数据同步">增量数据同步</h1>
 <p>startLoadTask 用来同步全量数据（Nacos 初始化过程中），Nacos 通过发布 Event 的机制，来同步增量数据（Nacos 运行过程中）。</p>
 <p>DistroClientDataProcessor 继承了 Subscriber 事件订阅类，他在初始化的时候，会订阅这几种事件：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301591-72a02768-5f4b-46be-8d61-d2148e48f1e8.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-4.webp" alt="image.png"></p>
 
 <pre class="line-numbers language-plain ">
 <code>@Override
@@ -1150,7 +1150,7 @@ private void syncToVerifyFailedServer(ClientEvent.ClientVerifyFailedEvent event)
 <p>Distro 节点收到 ADD 请求后，处理逻辑和上述 snapshot 逻辑类似，不再赘述。</p>
 <h1 id="注册服务写入新服务">注册服务/写入新服务</h1>
 <p>如果使用 Nacos client 注册临时服务，那么默认会发送一个 InstanceRequest 的 RPC 请求到 Nacos server 端，并交由 InstanceRequestHandler 进行处理（详细流程，可以参考上篇文章）：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302445-8c0a2e02-5947-49c4-9703-0b91b63d3ed9.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-5.webp" alt="image.png"></p>
 <p>但是，如果通过 HTTP 方式调用 URL 路由来注册，则会经过前置的拦截器 Filter，判断该请求 IP:PORT 所属的节点，并负责请求转发：</p>
 
 <pre class="line-numbers language-plain ">
@@ -1267,7 +1267,7 @@ private void syncToVerifyFailedServer(ClientEvent.ClientVerifyFailedEvent event)
 <p>http是无状态的，需要心跳判断实例是否过期。因为不是长链接每次请求到的节点可能是不同的，需要把所有心跳都转发到同一个节点处理，其心跳长能维护正确。同理其它写操作和心跳操作一样转发到同一个节点，统一只由一个节点操作，可以尽量避免冲突，保证数据正确。所以http请求时，集群需要根据分区规则转发到同一个节点管理操作。</p>
 <h1 id="读取服务">读取服务</h1>
 <p>Distro 节点之间会定期同步全量数据，所以当有读请求进来，Distro 节点会直接从本地的缓存中拉取数据。此时可能数据会有延时，但是 Distro 的心跳机制（5秒），会感知并拉取到对方最新数据，然后再 Push 给用户，实现最终一致性。具体可以参考上周分享的流程：</p>
-<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302799-84e3c12b-ca44-49f1-8158-af988902db01.png" alt=""></p>
+<p><img src="/img/nacos/distro/asynccode-6.webp" alt="image.png"></p>
 <h1 id="参考资料">参考资料</h1>
 <p>[1] 5000 字 | 揭秘 Nacos 的 AP 架构 「Distro 一致性协议」（一）</p>
 <p><a href="https://ost.51cto.com/posts/13166">https://ost.51cto.com/posts/13166</a></p>

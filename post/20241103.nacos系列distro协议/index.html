@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>【Nacos系列】Distro协议 - 三月的博客</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="Luky116" /><meta name="description" content="Distro 介绍 Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。 Distro 协议的设计思想： 每个节点只负责部分数据， 定时发送自己负责数据的校验" /><meta name="keywords" content="Distro, Nacos, 分布式" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.126.1 with theme even" />
+
+
+<link rel="canonical" href="https://luky116.github.io/post/20241103.nacos%E7%B3%BB%E5%88%97distro%E5%8D%8F%E8%AE%AE/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.73db591f2a62e178a7e21e92549934d42e8d734d4150222e6eddc38d7961af87.css" rel="stylesheet">
+<link href="/lib/fancybox/jquery.fancybox-3.1.20.min.css" rel="stylesheet">
+
+
+<meta property="og:url" content="https://luky116.github.io/post/20241103.nacos%E7%B3%BB%E5%88%97distro%E5%8D%8F%E8%AE%AE/">
+  <meta property="og:site_name" content="三月的博客">
+  <meta property="og:title" content="【Nacos系列】Distro协议">
+  <meta property="og:description" content="Distro 介绍 Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。 Distro 协议的设计思想： 每个节点只负责部分数据， 定时发送自己负责数据的校验">
+  <meta property="og:locale" content="en">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="post">
+    <meta property="article:published_time" content="2024-11-03T20:09:00+08:00">
+    <meta property="article:modified_time" content="2024-11-03T20:09:00+08:00">
+    <meta property="article:tag" content="Nacos">
+    <meta property="article:tag" content="Distro">
+
+  <meta itemprop="name" content="【Nacos系列】Distro协议">
+  <meta itemprop="description" content="Distro 介绍 Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。 Distro 协议的设计思想： 每个节点只负责部分数据， 定时发送自己负责数据的校验">
+  <meta itemprop="datePublished" content="2024-11-03T20:09:00+08:00">
+  <meta itemprop="dateModified" content="2024-11-03T20:09:00+08:00">
+  <meta itemprop="wordCount" content="6826">
+  <meta itemprop="keywords" content="Distro,Nacos,分布式">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="【Nacos系列】Distro协议">
+  <meta name="twitter:description" content="Distro 介绍 Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。 Distro 协议的设计思想： 每个节点只负责部分数据， 定时发送自己负责数据的校验">
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/themes/prism-solarizedlight.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.css" integrity="sha512-nXlJLUeqPMp1Q3+Bd8Qds8tXeRVQscMscwysJm821C++9w6WtsFbJjPenZ8cQVMXyqSAismveQJc0C1splFDCA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.css" integrity="sha512-cbQXwDFK7lj2Fqfkuxbo5iD1dSbLlJGXGpfTDqbggqjHJeyzx88I3rfwjS38WJag/ihH7lzuGlGHpDBymLirZQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
+</head>
+<body>
+
+  
+	  
+	  
+	  <a href="https://github.com/luky116" title="https://github.com/luky116" target="_blank">  
+	  <img style="position: fixed; top: 0; right: 0; border: 0; z-index:9999;" 
+		 src="/blog_img/forkme_right_gray.png" 
+		 alt="Fork me on GitHub">
+	  </a>
+  
+
+
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">Luky116</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">主页</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">标签</li>
+      </a><a href="/categories/">
+        <li class="mobile-menu-item">分类</li>
+      </a><a href="/search/">
+        <li class="mobile-menu-item">搜索</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">Luky116</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">主页</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">标签</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/categories/">分类</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/search/">搜索</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">【Nacos系列】Distro协议</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2024-11-03 </span>
+        <div class="post-category">
+            <a href="/categories/nacos/"> Nacos </a>
+            </div>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#distro-介绍">Distro 介绍</a></li>
+    <li><a href="#distro-初始化">Distro 初始化</a></li>
+    <li><a href="#增量数据同步">增量数据同步</a></li>
+    <li><a href="#心跳机制元数据校验">心跳机制（元数据校验）</a></li>
+    <li><a href="#注册服务写入新服务">注册服务/写入新服务</a>
+      <ul>
+        <li><a href="#总结">总结</a></li>
+      </ul>
+    </li>
+    <li><a href="#读取服务">读取服务</a></li>
+    <li><a href="#参考资料">参考资料</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+	 
+	  	
+	
+    <div class="post-content image-border">
+	 <h1 id="distro-介绍">Distro 介绍</h1>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302799-ec5946bf-31fd-4e6e-86a6-423b256ac3be.png" alt=""></p>
+<p>Distro 协议是一个 AP 协议，只能保证数据的最终一致性，用于 Nacos 中的临时服务。</p>
+<p>Distro 协议的设计思想：</p>
+<ol>
+<li>每个节点只负责部分数据， 定时发送自己负责数据的校验值到其他节点来保持数据⼀致性。
+<ol>
+<li>RPC 模式下，Client 直连的节点，则负责此 Client</li>
+<li>HTTP 模式下，通过 instance 的 IP:PORT 计算 hash 取模，来确定负责的节点</li>
+</ol>
+</li>
+<li>Nacos 每个节点是“平等”的都可以处理写请求， 同时把新数据同步到其他节点。
+<ol>
+<li>全量数据同步：Distro 节点启动时，会从所有节点拉取 snapshot 全量数据（该节点负责的数据），更新本地数据</li>
+<li>增量数据同步：
+<ul>
+<li>心跳机制：通过心跳来校验所有 Client 的数据 hash 是否和其他节点一致，如果不一致，则拉取</li>
+<li>实时推送：如果有服务注册或注销，Distro 节点会主动给其他节点推送变更数据</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>每个节点独立处理所有读请求， 返回本地缓存的数据
+<ol>
+<li>本地缓存的数据可能会有延时，当本地缓存更新时，会主动推送最新数据给 Client，达到最终一致性</li>
+<li>提高服务可用性</li>
+</ol>
+</li>
+</ol>
+<p>特点：</p>
+<ol>
+<li>Distro 协议是一个 AP 协议，只能保证数据的最终一致性</li>
+<li>Distro 节点之间进行数据验证时，需要将本地所有数据计算成 hash 值，所以 Distro 协议不适用于大量数据的场景</li>
+</ol>
+<h1 id="distro-初始化">Distro 初始化</h1>
+<p>DistroProtocol 类在初始化的时候，会：</p>
+<ol>
+<li>startVerifyTask() ：定时任务，每隔 5 秒和其他节点校验每个 Client 数据是否一致 ，如果发现数据不一致，会推送本地数据给其他节点；</li>
+<li>startLoadTask()：从其他 Distro 节点拉取数据</li>
+</ol>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302469-350934a4-40f2-4041-9495-52f2d9cb3e1f.png" alt=""></p>
+
+<pre class="line-numbers language-plain ">
+<code>@Component
+public class DistroProtocol {
+    // 维护了集群所有节点的信息
+    private final ServerMemberManager memberManager;
+
+    // 维护了 Distro 事件处理器
+    private final DistroComponentHolder distroComponentHolder;
+
+    // 负责执行定时任务
+    private final DistroTaskEngineHolder distroTaskEngineHolder;
+    
+    public DistroProtocol(ServerMemberManager memberManager, DistroComponentHolder distroComponentHolder,
+        DistroTaskEngineHolder distroTaskEngineHolder) {
+        this.memberManager = memberManager;
+        this.distroComponentHolder = distroComponentHolder;
+        this.distroTaskEngineHolder = distroTaskEngineHolder;
+        // 启动 Distro 任务
+        startDistroTask();
+    }
+    
+    private void startDistroTask() {
+        if (EnvUtil.getStandaloneMode()) {
+            // 单机模式无需使用Distro协议
+            isInitialized = true;
+            return;
+        }
+        // 定时任务，每隔 5 秒和其他节点校验每个 Client 数据是否一致 
+        startVerifyTask();
+        // 从其他 Distro 节点拉取数据
+        startLoadTask();
+    }
+
+ }</code>
+</pre>
+<p>初始化时候，当前节点会从其他的节点拉取所有的服务 snapshot 数据，当所有的 snapshot 数据拉取完成，当前 Distro 节点初始化完成，通过回调函数设置 isInitialized 为 true：</p>
+
+<pre class="line-numbers language-plain ">
+<code>private void startLoadTask() {
+    // 回调函数
+    DistroCallback loadCallback = new DistroCallback() {
+        @Override
+        public void onSuccess() {
+            // Distro 节点初始化完成
+            isInitialized = true;
+        }
+        
+        @Override
+        public void onFailed(Throwable throwable) {
+            isInitialized = false;
+        }
+    };
+    // 从其他节点拉取 snapshot 数据
+    GlobalExecutor.submitLoadDataTask(
+            new DistroLoadDataTask(memberManager, distroComponentHolder, DistroConfig.getInstance(), loadCallback));
+}</code>
+</pre>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301493-950fe292-fb8d-4c9a-b537-642484c15ab5.png" alt=""></p>
+<p>DistroLoadDataTask 是一个线程类，只需要关注 run 方法的逻辑即可，其核心逻辑在 load() 方法中：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301491-3119e30c-cf27-41fa-94d4-aa6de2fd1b89.png" alt=""></p>
+
+<pre class="line-numbers language-plain ">
+<code>@Override
+public void run() {
+    try {
+        load();
+        if (!checkCompleted()) {
+            // 如果加载数据失败，会再次执行加载任务，30秒后继续重试
+            GlobalExecutor.submitLoadDataTask(this, distroConfig.getLoadDataRetryDelayMillis());
+        } else {
+            loadCallback.onSuccess();
+            Loggers.DISTRO.info(&#34;[DISTRO-INIT] load snapshot data success&#34;);
+        }
+    } catch (Exception e) {
+        loadCallback.onFailed(e);
+        Loggers.DISTRO.error(&#34;[DISTRO-INIT] load snapshot data failed. &#34;, e);
+    }
+}
+
+private void load() throws Exception {
+    // 若出自身之外没有其他节点，则休眠1秒，可能其他节点还未启动完毕
+    // 注意：如果有新的节点进来，通过心跳来同步数据
+    while (memberManager.allMembersWithoutSelf().isEmpty()) {
+        Loggers.DISTRO.info(&#34;[DISTRO-INIT] waiting server list init...&#34;);
+        TimeUnit.SECONDS.sleep(1);
+    }
+    // 若数据类型为空，说明distroComponentHolder的组件注册器还未初始化完毕
+    while (distroComponentHolder.getDataStorageTypes().isEmpty()) {
+        Loggers.DISTRO.info(&#34;[DISTRO-INIT] waiting distro data storage register...&#34;);
+        TimeUnit.SECONDS.sleep(1);
+    }
+    // 加载每个类型的数据
+    for (String each : distroComponentHolder.getDataStorageTypes()) {
+        if (!loadCompletedMap.containsKey(each) || !loadCompletedMap.get(each)) {
+            // 调用加载方法，并标记已处理
+            loadCompletedMap.put(each, loadAllDataSnapshotFromRemote(each));
+        }
+    }
+}</code>
+</pre>
+<p>最终会调用 loadAllDataSnapshotFromRemote 方法同步数据：</p>
+<ol>
+<li>从远端拉取 snapshot 数据；</li>
+<li>将 snapshot 数据应用到本地内存；</li>
+<li>标记数据初始化成功。</li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>private boolean loadAllDataSnapshotFromRemote(String resourceType) {
+    // 获取数据传输对象
+    DistroTransportAgent transportAgent = distroComponentHolder.findTransportAgent(resourceType);
+    // 获取数据处理器
+    DistroDataProcessor dataProcessor = distroComponentHolder.findDataProcessor(resourceType);
+    if (null == transportAgent || null == dataProcessor) {
+        Loggers.DISTRO.warn(&#34;[DISTRO-INIT] Can&#39;t find component for type {}, transportAgent: {}, dataProcessor: {}&#34;,
+                resourceType, transportAgent, dataProcessor);
+        return false;
+    }
+    // 向每个节点请求数据
+    for (Member each : memberManager.allMembersWithoutSelf()) {
+        long startTime = System.currentTimeMillis();
+        try {
+            Loggers.DISTRO.info(&#34;[DISTRO-INIT] load snapshot {} from {}&#34;, resourceType, each.getAddress());
+            /** 
+             * 发送请求拉取 snapshot 数据
+             *  @see com.alibaba.nacos.naming.consistency.ephemeral.distro.v2.DistroClientTransportAgent#getDatumSnapshot(String)
+             */
+            DistroData distroData = transportAgent.getDatumSnapshot(each.getAddress());
+            Loggers.DISTRO.info(&#34;[DISTRO-INIT] it took {} ms to load snapshot {} from {} and snapshot size is {}.&#34;,
+                    System.currentTimeMillis() - startTime, resourceType, each.getAddress(),
+                    getDistroDataLength(distroData));
+            /**
+             * 解析数据
+             * @see com.alibaba.nacos.naming.consistency.ephemeral.distro.v2.DistroClientDataProcessor#processSnapshot(DistroData)
+             */
+            boolean result = dataProcessor.processSnapshot(distroData);
+            Loggers.DISTRO
+                    .info(&#34;[DISTRO-INIT] load snapshot {} from {} result: {}&#34;, resourceType, each.getAddress(),
+                            result);
+            // 若解析成功，标记此类型数据已加载完毕
+            if (result) {
+                distroComponentHolder.findDataStorage(resourceType).finishInitial();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Loggers.DISTRO.error(&#34;[DISTRO-INIT] load snapshot {} from {} failed.&#34;, resourceType, each.getAddress(), e);
+        }
+    }
+    return false;
+}</code>
+</pre>
+<p>getDatumSnapshot 最终会调用 DistroClientTransportAgent#getDatumSnapshot ：</p>
+<ol>
+<li>判断目标节点的连接状态是否正常；</li>
+<li>构建 DistroDataRequest 请求，类型为 DataOperation.SNAPSHOT，并给目标节点发送该请求；</li>
+<li>如果期间有其他情况，皆抛出 DistroException 异常；</li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroClientTransportAgent implements DistroTransportAgent {
+    
+    // 负责发送 RPC 请求
+    private final ClusterRpcClientProxy clusterRpcClientProxy;
+    
+    // 管理 Distro 节点信息
+    private final ServerMemberManager memberManager;
+
+    public DistroData getDatumSnapshot(String targetServer) {
+        // 从节点管理器获取目标节点信息
+        Member member = memberManager.find(targetServer);
+        // 判断目标服务器是否健康
+        if (checkTargetServerStatusUnhealthy(member)) {
+            throw new DistroException(
+                    String.format(&#34;[DISTRO] Cancel get snapshot caused by target server %s unhealthy&#34;, targetServer));
+        }
+        // 构建请求参数
+        DistroDataRequest request = new DistroDataRequest();
+        // 设置请求的操作类型为DataOperation.SNAPSHOT
+        request.setDataOperation(DataOperation.SNAPSHOT);
+        try {
+            // 使用Rpc代理对象发送同步rpc请求
+            Response response = clusterRpcClientProxy
+                    .sendRequest(member, request, DistroConfig.getInstance().getLoadDataTimeoutMillis());
+            if (checkResponse(response)) {
+                return ((DistroDataResponse) response).getDistroData();
+            } else {
+                throw new DistroException(
+                        String.format(&#34;[DISTRO-FAILED] Get snapshot request to %s failed, code: %d, message: %s&#34;,
+                                targetServer, response.getErrorCode(), response.getMessage()));
+            }
+        } catch (NacosException e) {
+            e.printStackTrace();
+            throw new DistroException(&#34;[DISTRO-FAILED] Get distro snapshot failed! &#34;, e);
+        }
+    }
+}</code>
+</pre>
+<p>processSnapshot 会调用 DistroClientDataProcessor#processSnapshot() 方法来处理拉取到的 snapshot 数据：</p>
+<ol>
+<li>将获取的 snapshot 数据反序列化成 ClientSyncDatumSnapshot 类型；</li>
+<li>创建 IpPortBasedClient 对象，放到 ClientManager 中，并启动心跳检测任务；</li>
+<li>调用 upgradeClient 更新 <em>ServiceManager、ClientServiceIndexesManager、Push 给订阅者等操作；</em></li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroClientDataProcessor extends SmartSubscriber implements DistroDataStorage, DistroDataProcessor {
+    public static final String TYPE = &#34;Nacos:Naming:v2:ClientData&#34;;
+
+    /**
+     * @see ClientManagerDelegate 
+     * 里面包含了 EphemeralIpPortClientManager 和 PersistentIpPortClientManager
+     */
+    private final ClientManager clientManager;
+    
+    private final DistroProtocol distroProtocol;
+    
+    @Override
+    public boolean processSnapshot(DistroData distroData) {
+        // 反序列化获取的DistroData为ClientSyncDatumSnapshot
+        ClientSyncDatumSnapshot snapshot = ApplicationUtils.getBean(Serializer.class)
+                .deserialize(distroData.getContent(), ClientSyncDatumSnapshot.class);
+        // 处理结果集，这里将返回远程节点负责的所有client以及client下面的service、instance信息
+        for (ClientSyncData each : snapshot.getClientSyncDataList()) {
+            // 每次处理一个client
+            handlerClientSyncData(each);
+        }
+        return true;
+    }
+    
+    // 备注：这里只需要维护 publisher 的关系，不需要维护 subscriber 的关系
+    private void handlerClientSyncData(ClientSyncData clientSyncData) {
+        Loggers.DISTRO.info(&#34;[Client-Add] Received distro client sync data {}, revision={}&#34;,
+                clientSyncData.getClientId(),
+                clientSyncData.getAttributes().getClientAttribute(ClientConstants.REVISION, 0L));
+        // 因为是同步数据，因此创建IpPortBasedClient，并缓存
+        clientManager.syncClientConnected(clientSyncData.getClientId(), clientSyncData.getAttributes());
+        Client client = clientManager.getClient(clientSyncData.getClientId());
+        // 升级此客户端的服务信息
+        upgradeClient(client, clientSyncData);
+    }
+
+}</code>
+</pre>
+<p>ClientSyncData 中包含了其他节点 namespace、service、instance 等信息，要注意，这里的数据，是以每个 Client （即，发布者）为单位的：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class ClientSyncData implements Serializable {
+    
+    private static final long serialVersionUID = -5141768777704539562L;
+    
+    private String clientId;
+    
+    private ClientAttributes attributes;
+    
+    private List&lt;String&gt; namespaces;
+    
+    private List&lt;String&gt; groupNames;
+    
+    private List&lt;String&gt; serviceNames;
+    
+    private List&lt;InstancePublishInfo&gt; instancePublishInfos;
+    
+    private BatchInstanceData batchInstanceData;
+}</code>
+</pre>
+<p>upgradeClient 是将远程数据应用到当前节点本地的核心流程:</p>
+<ol>
+<li><em>更新 ServiceManager 下的数据</em></li>
+<li><em>更新 ClientServiceIndexesManager</em></li>
+<li><em>发布 ServiceEvent.ServiceChangedEvent 事件</em></li>
+<li><em>给订阅者 Push PushDelayTask，通知订阅者更新自己的 instance 数据</em></li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>private void upgradeClient(Client client, ClientSyncData clientSyncData) {
+    // 已同步的服务集合
+
+    Set&lt;Service&gt; syncedService = new HashSet&lt;&gt;();
+    // process batch instance sync logic
+    // 0、更新 ServiceManager 下的数据
+    // 1、更新 ClientServiceIndexesManager
+    // 2、发布 ServiceEvent.ServiceChangedEvent 事件
+    // 3、给订阅者 Push PushDelayTask，通知订阅者更新自己的 instance 数据
+    processBatchInstanceDistroData(syncedService, client, clientSyncData);
+
+    List&lt;String&gt; namespaces = clientSyncData.getNamespaces();
+    List&lt;String&gt; groupNames = clientSyncData.getGroupNames();
+    List&lt;String&gt; serviceNames = clientSyncData.getServiceNames();
+    List&lt;InstancePublishInfo&gt; instances = clientSyncData.getInstancePublishInfos();
+
+    // TODO 这段逻辑，和 processBatchInstanceDistroData 里面逻辑差不多，为啥这里要在执行一遍？？？？
+    for (int i = 0; i &lt; namespaces.size(); i&#43;&#43;) {
+        Service service = Service.newService(namespaces.get(i), groupNames.get(i), serviceNames.get(i));
+        Service singleton = ServiceManager.getInstance().getSingleton(service);
+        // 标记该 Service 已经被处理
+        syncedService.add(singleton);
+        InstancePublishInfo instancePublishInfo = instances.get(i); // TODO 如果一个 Service 有多个 instance，该怎么处理呢
+        // 当前 instance 不存在本地的 client 中，视为从 其他节点获取的新服务，新服务需要 Push 给订阅者
+        if (!instancePublishInfo.equals(client.getInstancePublishInfo(singleton))) {
+            // 添加到 ClientInfo 中
+            client.addServiceInstance(singleton, instancePublishInfo);
+            // 当前节点发布服务注册事件
+            NotifyCenter.publishEvent(
+                    new ClientOperationEvent.ClientRegisterServiceEvent(singleton, client.getClientId()));
+            NotifyCenter.publishEvent(
+                    new MetadataEvent.InstanceMetadataEvent(singleton, instancePublishInfo.getMetadataId(), false));
+        }
+    }
+    // 若当前client内部已发布的service不在本次同步的列表内，说明已经过时了，要删掉
+    // TODO 为啥这么判断？如果两个 Node 数据不一致，以远程数据为准？这样好像会出问题？
+    for (Service each : client.getAllPublishedService()) {
+        // 如果 client 有多余的 Service，从 client 中移除
+        if (!syncedService.contains(each)) {
+            client.removeServiceInstance(each);
+            NotifyCenter.publishEvent(
+                    new ClientOperationEvent.ClientDeregisterServiceEvent(each, client.getClientId()));
+        }
+    }
+    client.setRevision(
+            clientSyncData.getAttributes().&lt;Integer&gt;getClientAttribute(ClientConstants.REVISION, 0));
+}</code>
+</pre>
+<h1 id="增量数据同步">增量数据同步</h1>
+<p>startLoadTask 用来同步全量数据（Nacos 初始化过程中），Nacos 通过发布 Event 的机制，来同步增量数据（Nacos 运行过程中）。</p>
+<p>DistroClientDataProcessor 继承了 Subscriber 事件订阅类，他在初始化的时候，会订阅这几种事件：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635301591-72a02768-5f4b-46be-8d61-d2148e48f1e8.png" alt=""></p>
+
+<pre class="line-numbers language-plain ">
+<code>@Override
+public List&lt;Class&lt;? extends Event&gt;&gt; subscribeTypes() {
+    List&lt;Class&lt;? extends Event&gt;&gt; result = new LinkedList&lt;&gt;();
+    result.add(ClientEvent.ClientChangedEvent.class);
+    result.add(ClientEvent.ClientDisconnectEvent.class);
+    result.add(ClientEvent.ClientVerifyFailedEvent.class);
+    return result;
+}</code>
+</pre>
+<p>当有服务注册时，会发送 ClientEvent.ClientChangedEvent 事件；当有服务下线时，会发送 ClientEvent.ClientDisconnectEvent 事件，这俩事件会被此类处理。</p>
+
+<pre class="line-numbers language-plain ">
+<code>private void syncToAllServer(ClientEvent event) {
+    Client client = event.getClient();
+    // Only ephemeral data sync by Distro, persist client should sync by raft.
+    // distro 协议下，每个 node 只负责部分服务的数据同步
+    // TODO isResponsibleClient 的逻辑解析
+    if (null == client || !client.isEphemeral() || !clientManager.isResponsibleClient(client)) {
+        return;
+    }
+    if (event instanceof ClientEvent.ClientDisconnectEvent) {
+        DistroKey distroKey = new DistroKey(client.getClientId(), TYPE);
+        // 删除事件
+        distroProtocol.sync(distroKey, DataOperation.DELETE);
+    } else if (event instanceof ClientEvent.ClientChangedEvent) {
+        // 可以看到，增量数据同步是以 client 发布的数据为单位进行的
+        DistroKey distroKey = new DistroKey(client.getClientId(), TYPE);
+        // 节点变更事件，即增量数据的同步方法
+        distroProtocol.sync(distroKey, DataOperation.CHANGE);
+    }
+}</code>
+</pre>
+<p>可以看到， Distro 节点会通过 distroProtocol.sync 给其他节点发送 RPC 请求，请求的 Type 分别是 DELETE 和 CHANGE：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public void sync(DistroKey distroKey, DataOperation action, long delay) {
+    for (Member each : memberManager.allMembersWithoutSelf()) {
+        syncToTarget(distroKey, action, each.getAddress(), delay);
+    }
+}
+
+public void syncToTarget(DistroKey distroKey, DataOperation action, String targetServer, long delay) {
+    DistroKey distroKeyWithTarget = new DistroKey(distroKey.getResourceKey(), distroKey.getResourceType(),
+            targetServer);
+    DistroDelayTask distroDelayTask = new DistroDelayTask(distroKeyWithTarget, action, delay);
+    /**
+     * 发布任务 DistroDelayTask
+     * @see DistroDelayTaskProcessor#process(NacosTask)
+     */
+    distroTaskEngineHolder.getDelayTaskExecuteEngine().addTask(distroKeyWithTarget, distroDelayTask);
+    if (Loggers.DISTRO.isDebugEnabled()) {
+        Loggers.DISTRO.debug(&#34;[DISTRO-SCHEDULE] {} to {}&#34;, distroKey, targetServer);
+    }
+}</code>
+</pre>
+<p>会走到 DistroDelayTaskProcessor 的 process 方法，分别转换成 DistroSyncDeleteTask 和 DistroSyncChangeTask 进行任务投递：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public boolean process(NacosTask task) {
+    if (!(task instanceof DistroDelayTask)) {
+        return true;
+    }
+    DistroDelayTask distroDelayTask = (DistroDelayTask) task;
+    DistroKey distroKey = distroDelayTask.getDistroKey();
+    switch (distroDelayTask.getAction()) {
+        case DELETE:
+            DistroSyncDeleteTask syncDeleteTask = new DistroSyncDeleteTask(distroKey, distroComponentHolder);
+            distroTaskEngineHolder.getExecuteWorkersManager().addTask(distroKey, syncDeleteTask);
+            return true;
+        case CHANGE:
+        case ADD:
+            DistroSyncChangeTask syncChangeTask = new DistroSyncChangeTask(distroKey, distroComponentHolder);
+            distroTaskEngineHolder.getExecuteWorkersManager().addTask(distroKey, syncChangeTask);
+            return true;
+        default:
+            return false;
+    }
+}</code>
+</pre>
+<p>在 DistroClientDataProcessor 中，他会生成，他会调用 client.generateSyncData() 生成要同步的数据，病序列化放到 Request 中，发送给对方节点：</p>
+
+<pre class="line-numbers language-plain ">
+<code>DistroClientDataProcessorpublic DistroData getDistroData(DistroKey distroKey) {
+    Client client = clientManager.getClient(distroKey.getResourceKey());
+    if (null == client) {
+        return null;
+    }
+    byte[] data = ApplicationUtils.getBean(Serializer.class).serialize(client.generateSyncData());
+    return new DistroData(distroKey, data);
+}</code>
+</pre>
+<p>可以看到 client 生成这个 client 的同步数据的流程，他会将所有的 namespace、service、instance 等信息进行序列化：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public abstract class AbstractClient implements Client {
+    @Override
+    public ClientSyncData generateSyncData() {
+        List&lt;String&gt; namespaces = new LinkedList&lt;&gt;();
+        List&lt;String&gt; groupNames = new LinkedList&lt;&gt;();
+        List&lt;String&gt; serviceNames = new LinkedList&lt;&gt;();
+    
+        List&lt;String&gt; batchNamespaces = new LinkedList&lt;&gt;();
+        List&lt;String&gt; batchGroupNames = new LinkedList&lt;&gt;();
+        List&lt;String&gt; batchServiceNames = new LinkedList&lt;&gt;();
+        
+        List&lt;InstancePublishInfo&gt; instances = new LinkedList&lt;&gt;();
+        List&lt;BatchInstancePublishInfo&gt; batchInstancePublishInfos = new LinkedList&lt;&gt;();
+        BatchInstanceData  batchInstanceData = new BatchInstanceData();
+        for (Map.Entry&lt;Service, InstancePublishInfo&gt; entry : publishers.entrySet()) {
+            InstancePublishInfo instancePublishInfo = entry.getValue();
+            if (instancePublishInfo instanceof BatchInstancePublishInfo) {
+                BatchInstancePublishInfo batchInstance = (BatchInstancePublishInfo) instancePublishInfo;
+                batchInstancePublishInfos.add(batchInstance);
+                buildBatchInstanceData(batchInstanceData, batchNamespaces, batchGroupNames, batchServiceNames, entry);
+                batchInstanceData.setBatchInstancePublishInfos(batchInstancePublishInfos);
+            } else {
+                namespaces.add(entry.getKey().getNamespace());
+                groupNames.add(entry.getKey().getGroup());
+                serviceNames.add(entry.getKey().getName());
+                instances.add(entry.getValue());
+            }
+        }
+        ClientSyncData data = new ClientSyncData(getClientId(), namespaces, groupNames, serviceNames, instances, batchInstanceData);
+        data.getAttributes().addClientAttribute(REVISION, getRevision());
+        return data;
+    }
+}</code>
+</pre>
+<p>最终会走到 <font style="color:rgb(143,149,158);">DistroClientTransportAgent 发送一个 RPC 请求给对方：</font></p>
+
+<pre class="line-numbers language-plain ">
+<code>public boolean syncData(DistroData data, String targetServer) {
+    // 目标服务不存在
+    if (isNoExistTarget(targetServer)) {
+        return true;
+    }
+    // 构造distro协议数据的请求
+    DistroDataRequest request = new DistroDataRequest(data, data.getType());
+    // 找到对应的ip,端口等属性信息
+    Member member = memberManager.find(targetServer);
+    // 检查服务节点是否在线
+    if (checkTargetServerStatusUnhealthy(member)) {
+        Loggers.DISTRO
+                .warn(&#34;[DISTRO] Cancel distro sync caused by target server {} unhealthy, key: {}&#34;, targetServer,
+                        data.getDistroKey());
+        return false;
+    }
+    try {
+        // 在线的话，发送grpc的请求
+        Response response = clusterRpcClientProxy.sendRequest(member, request);
+        // 检查结果是否成功
+        return checkResponse(response);
+    } catch (NacosException e) {
+        Loggers.DISTRO.error(&#34;[DISTRO-FAILED] Sync distro data failed! key: {}&#34;, data.getDistroKey(), e);
+    }
+    return false;
+}</code>
+</pre>
+<p>对方节点收到 RPC 请求，会调用 DistroDataRequestHandler 进行处理。他会根据 Request 的 Type 来选择处理逻辑：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroDataRequestHandler extends RequestHandler&lt;DistroDataRequest, DistroDataResponse&gt; {
+    
+    private final DistroProtocol distroProtocol;
+    
+    @Override
+    public DistroDataResponse handle(DistroDataRequest request, RequestMeta meta) throws NacosException {
+        try {
+            switch (request.getDataOperation()) {
+                case VERIFY:
+                    // 心跳请求，每隔 5 秒发送一次
+                    return handleVerify(request.getDistroData(), meta);
+                case SNAPSHOT:
+                    // 处理快照请求
+                    // 全量数据同步
+                    return handleSnapshot();
+                case ADD:
+                case CHANGE:
+                case DELETE:
+                    // 增量数据同步
+                    return handleSyncData(request.getDistroData());
+                case QUERY:
+                    // 处理查询数据的请求
+                    return handleQueryData(request.getDistroData());
+                default:
+                    // 默认的返回
+                    return new DistroDataResponse();
+            }
+        } catch (Exception e) {
+            Loggers.DISTRO.error(&#34;[DISTRO-FAILED] distro handle with exception&#34;, e);
+            DistroDataResponse result = new DistroDataResponse();
+            result.setErrorCode(ResponseCode.FAIL.getCode());
+            result.setMessage(&#34;handle distro request with exception&#34;);
+            return result;
+        }
+    }
+    
+}</code>
+</pre>
+<p>handleSyncData 最终会走到 DistroClientDataProcessor 进行处理：</p>
+
+<pre class="line-numbers language-plain ">
+<code>@Override
+public boolean processData(DistroData distroData) {
+    switch (distroData.getType()) {
+        case ADD:
+        case CHANGE:
+            // 反序列化获取的DistroData为ClientSyncDatumSnapshot
+            // TODO 发送事件的逻辑：@see com.alibaba.nacos.core.distributed.distro.DistroProtocol.syncToTarget 方法
+            ClientSyncData clientSyncData = ApplicationUtils.getBean(Serializer.class)
+                    .deserialize(distroData.getContent(), ClientSyncData.class);
+            // 处理 client 变更的事件
+            handlerClientSyncData(clientSyncData);
+            return true;
+        case DELETE:
+            String deleteClientId = distroData.getDistroKey().getResourceKey();
+            Loggers.DISTRO.info(&#34;[Client-Delete] Received distro client sync data {}&#34;, deleteClientId);
+            // 处理 client 下线（删除）的事件
+            clientManager.clientDisconnected(deleteClientId);
+            return true;
+        default:
+            return false;
+    }
+}</code>
+</pre>
+<p>handlerClientSyncData 的逻辑和 Distro 初始化逻辑类似，核心都在 upgradeClient 中：</p>
+<ol>
+<li>创建一个 IpPortBasedClient 对象，放到 clientManager 中</li>
+<li><em>更新 ServiceManager 下的数据</em></li>
+<li><em>更新 ClientServiceIndexesManager</em></li>
+<li><em>发布 ServiceEvent.ServiceChangedEvent 事件</em></li>
+<li><em>给订阅者 Push PushDelayTask，通知订阅者更新自己的 instance 数据</em></li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>// 备注：这里只需要维护 publisher 的关系，不需要维护 subscriber 的关系
+private void handlerClientSyncData(ClientSyncData clientSyncData) {
+    Loggers.DISTRO.info(&#34;[Client-Add] Received distro client sync data {}, revision={}&#34;,
+            clientSyncData.getClientId(),
+            clientSyncData.getAttributes().getClientAttribute(ClientConstants.REVISION, 0L));
+    // 因为是同步数据，因此创建IpPortBasedClient，并缓存
+    clientManager.syncClientConnected(clientSyncData.getClientId(), clientSyncData.getAttributes());
+    Client client = clientManager.getClient(clientSyncData.getClientId());
+    // 升级此客户端的服务信息
+    upgradeClient(client, clientSyncData);
+}</code>
+</pre>
+<p>在 clientDisconnected 方法中，会进行：</p>
+<ol>
+<li>将 client 从 ClientManager 中移除；</li>
+<li>发布 ClientEvent.ClientDisconnectEvent 事件
+<ol>
+<li>更新 <em>ClientServiceIndexesManager</em></li>
+<li>更新 NamingMetadataManager</li>
+<li>通知订阅者修改自己的服务</li>
+</ol>
+</li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>@Override
+public boolean clientDisconnected(String clientId) {
+    Loggers.SRV_LOG.info(&#34;Client connection {} disconnect, remove instances and subscribers&#34;, clientId);
+    IpPortBasedClient client = clients.remove(clientId);
+    if (null == client) {
+        return true;
+    }
+    NotifyCenter.publishEvent(new ClientEvent.ClientDisconnectEvent(client, isResponsibleClient(client)));
+    client.release();
+    return true;
+}</code>
+</pre>
+<p>至此，流程完成。</p>
+<h1 id="心跳机制元数据校验">心跳机制（元数据校验）</h1>
+<p>上面我们提到，DistroProtocol 初始化完成后，会启动一个 VerifyTask 任务，这个任务会每隔 5 秒给其他节点发送当前节点负责的 Client 的数据信息（revision hash 值），来对比两个节点数据是否一致，如果不一致会触发两者之间进行数据同步。</p>
+
+<pre class="line-numbers language-plain ">
+<code>private void startVerifyTask() {
+    // 每隔 5 秒给其他 member 发送验证请求
+    /**
+     * @see DistroVerifyTimedTask#run()
+     */
+    GlobalExecutor.schedulePartitionDataTimedSync(new DistroVerifyTimedTask(memberManager, distroComponentHolder,
+                    distroTaskEngineHolder.getExecuteWorkersManager()),
+            DistroConfig.getInstance().getVerifyIntervalMillis()); // 间隔 5 秒一次
+}</code>
+</pre>
+<p>DistroVerifyTimedTask 也是一个线程类，所以只关心他的 run 方法逻辑即可：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroVerifyTimedTask implements Runnable {
+    
+    // 管理所有的服务节点
+    private final ServerMemberManager serverMemberManager;
+    
+    // Distro 组件持有器
+    private final DistroComponentHolder distroComponentHolder;
+    
+    // 执行定时任务
+    private final DistroExecuteTaskExecuteEngine executeTaskExecuteEngine;
+    
+    @Override
+    public void run() {
+        try {
+            // 获取所有的服务节点
+            List&lt;Member&gt; targetServer = serverMemberManager.allMembersWithoutSelf();
+            if (Loggers.DISTRO.isDebugEnabled()) {
+                Loggers.DISTRO.debug(&#34;server list is: {}&#34;, targetServer);
+            }
+            for (String each : distroComponentHolder.getDataStorageTypes()) {
+                /**
+                 * 这里我们注关注 Nacos:Naming:v2:ClientData 类型
+                 * @see DistroVerifyTimedTask#verifyForDataStorage(String, List)
+                 */
+                verifyForDataStorage(each, targetServer);
+            }
+        } catch (Exception e) {
+            Loggers.DISTRO.error(&#34;[DISTRO-FAILED] verify task failed.&#34;, e);
+        }
+    }
+    
+}</code>
+</pre>
+<p>verifyForDataStorage 获取到本地的数据，然后将数据发送给其他的节点：</p>
+
+<pre class="line-numbers language-plain ">
+<code>private void verifyForDataStorage(String type, List&lt;Member&gt; targetServer) {
+    // 获取处理存储类
+    DistroDataStorage dataStorage = distroComponentHolder.findDataStorage(type);
+    if (!dataStorage.isFinishInitial()) {
+        Loggers.DISTRO.warn(&#34;data storage {} has not finished initial step, do not send verify data&#34;,
+                dataStorage.getClass().getSimpleName());
+        return;
+    }
+    // 拿到验证的数据
+    List&lt;DistroData&gt; verifyData = dataStorage.getVerifyData();
+    if (null == verifyData || verifyData.isEmpty()) {
+        return;
+    }
+    for (Member member : targetServer) {
+        DistroTransportAgent agent = distroComponentHolder.findTransportAgent(type);
+        if (null == agent) {
+            continue;
+        }
+        // 通过执行器执行
+        /**
+         * @see DistroVerifyExecuteTask#run()
+         */
+        executeTaskExecuteEngine.addTask(member.getAddress() &#43; type,
+                new DistroVerifyExecuteTask(agent, verifyData, member.getAddress(), type));
+    }
+}</code>
+</pre>
+<p>getVerifyData 可以看到 Distro 要验证的数据内容：</p>
+<ol>
+<li>遍历所有的 client，即发布者；</li>
+<li>将 client 的 clientId 和 revision 作为此服务当前的状态。</li>
+</ol>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroClientDataProcessor extends SmartSubscriber implements DistroDataStorage, DistroDataProcessor {
+    @Override
+    public List&lt;DistroData&gt; getVerifyData() {
+        List&lt;DistroData&gt; result = null;
+        // 数据验证的单位是每个 Client 的数据
+        for (String each : clientManager.allClientId()) {
+            // 对每个本机所管理的注册客户端进行处理
+            Client client = clientManager.getClient(each);
+            if (null == client || !client.isEphemeral()) {
+                // 空的或者是非临时性的节点，不处理
+                continue;
+            }
+            // 如果是自己管理的客户端
+            // TODO 待分析这块流程
+            if (clientManager.isResponsibleClient(client)) {
+                // 需要验证的数据就是每个节点的clientId和revision
+                // revision 是用 client 里面所有的 service、instance 等信息通过计算 hash 来获取的
+                // 可以看到，是通过 client 为单位来进行数据校验的
+                DistroClientVerifyInfo verifyData = new DistroClientVerifyInfo(client.getClientId(),
+                        client.getRevision());
+                DistroKey distroKey = new DistroKey(client.getClientId(), TYPE);
+                DistroData data = new DistroData(distroKey,
+                        ApplicationUtils.getBean(Serializer.class).serialize(verifyData));
+                data.setType(DataOperation.VERIFY);
+                if (result == null) {
+                    result = new LinkedList&lt;&gt;();
+                }
+                result.add(data);
+            }
+        }
+        return result;
+    }
+}</code>
+</pre>
+<p>上篇文章，我们提到了 revision 的计算逻辑：将 client 拥有的 namespace、group、ip、port、instance、metadata 等所有的状态信息计算一个 hash 值：</p>
+
+<pre class="line-numbers language-plain ">
+<code>// client.recalculateRevision() 会调用如下方法，计算该 client 当前服务的状态
+public static int hash(Client client) {
+    if (!(client instanceof IpPortBasedClient)) {
+        return 0;
+    }
+    return Objects.hash(client.getClientId(),
+            client.getAllPublishedService().stream()
+                    .map(s -&gt; {
+                        InstancePublishInfo ip = client.getInstancePublishInfo(s);
+                        double weight = getWeight(ip);
+                        Boolean enabled = getEnabled(ip);
+                        String cluster = StringUtils.defaultIfBlank(ip.getCluster(), DEFAULT_CLUSTER_NAME);
+                        return Objects.hash(
+                                s.getNamespace(),
+                                s.getGroup(),
+                                s.getName(),
+                                s.isEphemeral(),
+                                ip.getIp(),
+                                ip.getPort(),
+                                weight,
+                                ip.isHealthy(),
+                                enabled,
+                                cluster,
+                                ip.getExtendDatum()
+                        );
+                    })
+                    .collect(Collectors.toSet()));
+}</code>
+</pre>
+<p>DistroVerifyExecuteTask 最终会调用 DistroClientTransportAgent 给其他 Node 发送一个 DistroDataRequest 请求，请求的 type 为 DataOperation.VERIFY。如果对方校验成功或失败，会触发回调：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroClientTransportAgent implements DistroTransportAgent {
+
+    @Override
+    public void syncVerifyData(DistroData verifyData, String targetServer, DistroCallback callback) {
+        if (isNoExistTarget(targetServer)) {
+            callback.onSuccess();
+            return;
+        }
+        DistroDataRequest request = new DistroDataRequest(verifyData, DataOperation.VERIFY);
+        Member member = memberManager.find(targetServer);
+        if (checkTargetServerStatusUnhealthy(member)) {
+            Loggers.DISTRO
+                    .warn(&#34;[DISTRO] Cancel distro verify caused by target server {} unhealthy, key: {}&#34;, targetServer,
+                            verifyData.getDistroKey());
+            callback.onFailed(null);
+            return;
+        }
+        try {
+            DistroVerifyCallbackWrapper wrapper = new DistroVerifyCallbackWrapper(targetServer,
+                    verifyData.getDistroKey().getResourceKey(), callback, member);
+            clusterRpcClientProxy.asyncRequest(member, request, wrapper);
+        } catch (NacosException nacosException) {
+            callback.onFailed(nacosException);
+        }
+    }
+}</code>
+</pre>
+<p>对方节点收到 RPC 请求，会调用 DistroDataRequestHandler 进行处理。他会根据 Request 的 Type 来选择处理逻辑：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroDataRequestHandler extends RequestHandler&lt;DistroDataRequest, DistroDataResponse&gt; {
+    
+    private final DistroProtocol distroProtocol;
+    
+    @Override
+    public DistroDataResponse handle(DistroDataRequest request, RequestMeta meta) throws NacosException {
+        try {
+            switch (request.getDataOperation()) {
+                case VERIFY:
+                    // 心跳请求，每隔 5 秒发送一次
+                    return handleVerify(request.getDistroData(), meta);
+                case SNAPSHOT:
+                    // 处理快照请求
+                    // 全量数据同步
+                    return handleSnapshot();
+                case ADD:
+                case CHANGE:
+                case DELETE:
+                    // 增量数据同步
+                    return handleSyncData(request.getDistroData());
+                case QUERY:
+                    // 处理查询数据的请求
+                    return handleQueryData(request.getDistroData());
+                default:
+                    // 默认的返回
+                    return new DistroDataResponse();
+            }
+        } catch (Exception e) {
+            Loggers.DISTRO.error(&#34;[DISTRO-FAILED] distro handle with exception&#34;, e);
+            DistroDataResponse result = new DistroDataResponse();
+            result.setErrorCode(ResponseCode.FAIL.getCode());
+            result.setMessage(&#34;handle distro request with exception&#34;);
+            return result;
+        }
+    }
+    
+}</code>
+</pre>
+<p>handleVerify 方法最终会调用 ConnectionBasedClientManager 的 verifyClient 进行校验：</p>
+
+<pre class="line-numbers language-plain ">
+<code>private DistroDataResponse handleVerify(DistroData distroData, RequestMeta meta) {
+    DistroDataResponse result = new DistroDataResponse();
+    // 如果返回 false， RPC 的 Response 会带上错误标识
+    if (!distroProtocol.onVerify(distroData, meta.getClientIp())) {
+        result.setErrorInfo(ResponseCode.FAIL.getCode(), &#34;[DISTRO-FAILED] distro data verify failed&#34;);
+    }
+    return result;
+}
+
+public class ConnectionBasedClientManager extends ClientConnectionEventListener implements ClientManager {
+
+    @Override
+    public boolean verifyClient(DistroClientVerifyInfo verifyData) {
+        ConnectionBasedClient client = clients.get(verifyData.getClientId());
+        if (null != client) {
+            // remote node of old version will always verify with zero revision
+            // 如果本地 client 的 revision 和远端传来的一致，说明数据一致，返回 true
+            if (0 == verifyData.getRevision() || client.getRevision() == verifyData.getRevision()) {
+                // 更新该 client 的最新更新时间
+                // TODO 这个字段的含义
+                client.setLastRenewTime();
+                return true;
+            } else {
+                Loggers.DISTRO.info(&#34;[DISTRO-VERIFY-FAILED] ConnectionBasedClient[{}] revision local={}, remote={}&#34;,
+                        client.getClientId(), client.getRevision(), verifyData.getRevision());
+            }
+        }
+        // 数据不一致，校验失败
+        return false;
+    }
+
+
+}</code>
+</pre>
+<p>Distro 收到 Response 之后，会触发回调函数，如果数据同步失败，会发布 ClientVerifyFailedEvent 事件：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public class DistroClientTransportAgent implements DistroTransportAgent {
+    @Override
+    public void onResponse(Response response) {
+        if (checkResponse(response)) {
+            NamingTpsMonitor.distroVerifySuccess(member.getAddress(), member.getIp());
+            // 输出日志
+            distroCallback.onSuccess();
+        } else {
+            // 触发时机：对方返回了失败的响应
+            // 校验失败发布ClientVerifyFailedEvent事件
+            Loggers.DISTRO.info(&#34;Target {} verify client {} failed, sync new client&#34;, targetServer, clientId);
+            NotifyCenter.publishEvent(new ClientEvent.ClientVerifyFailedEvent(clientId, targetServer));
+            NamingTpsMonitor.distroVerifyFail(member.getAddress(), member.getIp());
+            distroCallback.onFailed(null);
+        }
+    }
+
+}</code>
+</pre>
+<p>ClientVerifyFailedEvent 的处理逻辑在 DistroClientDataProcessor 类中：</p>
+
+<pre class="line-numbers language-plain ">
+<code>@Override
+public void onEvent(Event event) {
+    if (EnvUtil.getStandaloneMode()) {
+        return;
+    }
+    if (!upgradeJudgement.isUseGrpcFeatures()) {
+        return;
+    }
+    // 本地数据和远端数据不一致，将本地数据发送给远端
+    if (event instanceof ClientEvent.ClientVerifyFailedEvent) {
+        syncToVerifyFailedServer((ClientEvent.ClientVerifyFailedEvent) event);
+    } else {
+        // ClientEvent.ClientChangedEvent 和 ClientEvent.ClientDisconnectEvent 事件逻辑
+        syncToAllServer((ClientEvent) event);
+    }
+}
+
+// 将本地这个 client 数据发送给远端
+private void syncToVerifyFailedServer(ClientEvent.ClientVerifyFailedEvent event) {
+    Client client = clientManager.getClient(event.getClientId());
+    if (null == client || !client.isEphemeral() || !clientManager.isResponsibleClient(client)) {
+        return;
+    }
+    // TYPE 为 &#34;Nacos:Naming:v2:ClientData&#34;
+    DistroKey distroKey = new DistroKey(client.getClientId(), TYPE);
+    // Verify failed data should be sync directly.
+    // 将 client 数据发送给远方的节点，类型为 ADD
+    distroProtocol.syncToTarget(distroKey, DataOperation.ADD, event.getTargetServer(), 0L);
+}</code>
+</pre>
+<p>Distro 节点收到 ADD 请求后，处理逻辑和上述 snapshot 逻辑类似，不再赘述。</p>
+<h1 id="注册服务写入新服务">注册服务/写入新服务</h1>
+<p>如果使用 Nacos client 注册临时服务，那么默认会发送一个 InstanceRequest 的 RPC 请求到 Nacos server 端，并交由 InstanceRequestHandler 进行处理（详细流程，可以参考上篇文章）：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302445-8c0a2e02-5947-49c4-9703-0b91b63d3ed9.png" alt=""></p>
+<p>但是，如果通过 HTTP 方式调用 URL 路由来注册，则会经过前置的拦截器 Filter，判断该请求 IP:PORT 所属的节点，并负责请求转发：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
+        
+        try {
+            Method method = controllerMethodsCache.getMethod(req);
+            
+            String path = new URI(req.getRequestURI()).getPath();
+            if (method == null) {
+                throw new NoSuchMethodException(req.getMethod() &#43; &#34; &#34; &#43; path);
+            }
+            // 带了 @CanDistro 注解的方法才需要处理
+            if (!method.isAnnotationPresent(CanDistro.class)) {
+                filterChain.doFilter(req, resp);
+                return;
+            }
+            
+            //根据请求获取路径，格式为IP:PORT
+            // 测试发现，他是 instance 实例的 IP:PORT，也就是说，所属关系是以 instance 级别来划分的
+            String distroTag = distroTagGenerator.getResponsibleTag(req);
+            
+            //判断是否为本节点负责，如果不是就进行下面的逻辑进行请求转发
+            if (distroMapper.responsible(distroTag)) {
+                filterChain.doFilter(req, resp);
+                return;
+            }
+            
+            ......
+            
+            //通过distroTag计算其所属的 Distro 责任节点
+            final String targetServer = distroMapper.mapSrv(distroTag);
+            
+            List&lt;String&gt; headerList = new ArrayList&lt;&gt;(16);
+            Enumeration&lt;String&gt; headers = req.getHeaderNames();
+            while (headers.hasMoreElements()) {
+                String headerName = headers.nextElement();
+                headerList.add(headerName);
+                headerList.add(req.getHeader(headerName));
+            }
+            
+            final String body = IoUtils.toString(req.getInputStream(), StandardCharsets.UTF_8.name());
+            final Map&lt;String, String&gt; paramsValue = HttpClient.translateParameterMap(req.getParameterMap());
+            
+            //转发请求
+            RestResult&lt;String&gt; result = HttpClient
+                    .request(HTTP_PREFIX &#43; targetServer &#43; req.getRequestURI(), headerList, paramsValue, body,
+                            PROXY_CONNECT_TIMEOUT, PROXY_READ_TIMEOUT, StandardCharsets.UTF_8.name(), req.getMethod());
+            String data = result.ok() ? result.getData() : result.getMessage();
+            try {
+                WebUtils.response(resp, data, result.getCode());
+            } catch (Exception ignore) {
+                Loggers.SRV_LOG.warn(&#34;[DISTRO-FILTER] request failed: &#34; &#43; distroMapper.mapSrv(distroTag) &#43; urlString);
+            }
+            
+          .....
+}</code>
+</pre>
+<p>distroMapper.responsible 会将 tag 计算 hash 值，然后与 servers.size() 取模，来判断该 instance 是否由当前服务负责：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public boolean responsible(String responsibleTag) {
+    final List&lt;String&gt; servers = healthyList;
+    
+    if (!switchDomain.isDistroEnabled() || EnvUtil.getStandaloneMode()) {
+        return true;
+    }
+    
+    if (CollectionUtils.isEmpty(servers)) {
+        // means distro config is not ready yet
+        return false;
+    }
+
+    // TODO 为啥要计算两次？
+    String localAddress = EnvUtil.getLocalAddress();
+    int index = servers.indexOf(localAddress);
+    int lastIndex = servers.lastIndexOf(localAddress);
+    if (lastIndex &lt; 0 || index &lt; 0) {
+        return true;
+    }
+
+    // clientID 的 # 之前的内容 取 hash，然后和 node size 取模。
+    int target = distroHash(responsibleTag) % servers.size();
+    // 判断是否包含
+    return target &gt;= index &amp;&amp; target &lt;= lastIndex;
+}</code>
+</pre>
+<p>如果上述通过 hash 计算发现不是本节点负责，distroMapper.mapSrv 会计算出哪个节点负责此 instance 的更新：</p>
+
+<pre class="line-numbers language-plain ">
+<code>public String mapSrv(String responsibleTag) {
+    // 所有健康的节点
+    final List&lt;String&gt; servers = healthyList;
+    
+    if (CollectionUtils.isEmpty(servers) || !switchDomain.isDistroEnabled()) {
+        return EnvUtil.getLocalAddress();
+    }
+    
+    try {
+        // hash 取模选择一个 server
+        int index = distroHash(responsibleTag) % servers.size();
+        return servers.get(index);
+    } catch (Throwable e) {
+        Loggers.SRV_LOG
+                .warn(&#34;[NACOS-DISTRO] distro mapper failed, return localhost: &#34; &#43; EnvUtil.getLocalAddress(), e);
+        return EnvUtil.getLocalAddress();
+    }
+}</code>
+</pre>
+<h2 id="总结">总结</h2>
+<p>为什么 gRpc 注册服务，不需要判断负责节点并进行路由转发，而 Http 的方式需要做这些事情呢？</p>
+<p>grpc是长链接，只有直接接收连接的节点可以和client直接通信，后面client的每次请求都会到当前节点（段开重新链接后由新的收到节点管理）；另外长链接可以用长链接心跳来判断这个链接注册的服务实例是否过期。所以用接收节点管理对应的信息，不需要再转发。</p>
+<p>http是无状态的，需要心跳判断实例是否过期。因为不是长链接每次请求到的节点可能是不同的，需要把所有心跳都转发到同一个节点处理，其心跳长能维护正确。同理其它写操作和心跳操作一样转发到同一个节点，统一只由一个节点操作，可以尽量避免冲突，保证数据正确。所以http请求时，集群需要根据分区规则转发到同一个节点管理操作。</p>
+<h1 id="读取服务">读取服务</h1>
+<p>Distro 节点之间会定期同步全量数据，所以当有读请求进来，Distro 节点会直接从本地的缓存中拉取数据。此时可能数据会有延时，但是 Distro 的心跳机制（5秒），会感知并拉取到对方最新数据，然后再 Push 给用户，实现最终一致性。具体可以参考上周分享的流程：</p>
+<p><img src="https://cdn.nlark.com/yuque/0/2024/png/22263069/1730635302799-84e3c12b-ca44-49f1-8158-af988902db01.png" alt=""></p>
+<h1 id="参考资料">参考资料</h1>
+<p>[1] 5000 字 | 揭秘 Nacos 的 AP 架构 「Distro 一致性协议」（一）</p>
+<p><a href="https://ost.51cto.com/posts/13166">https://ost.51cto.com/posts/13166</a></p>
+<p>[2] Nacos 2.0原理解析（一）：Distro协议</p>
+<p><a href="https://blog.csdn.net/zcrzcrzcrzcrzcr/article/details/122260705">https://blog.csdn.net/zcrzcrzcrzcrzcr/article/details/122260705</a></p>
+<p>[3] Nacos 2.0源码分析-Distro协议详解</p>
+<p><a href="https://www.cnblogs.com/lukama/p/14918667.html">https://www.cnblogs.com/lukama/p/14918667.html</a></p>
+<p>[4] Nacos 的 Distro 一致性协议</p>
+<p><a href="https://nacos.io/blog/article-nacos-distro-mechanism/">https://nacos.io/blog/article-nacos-distro-mechanism/</a></p>
+
+    </div>
+
+    <div class="post-copyright">
+  <p class="copyright-item">
+    <span class="item-title">文章作者</span>
+    <span class="item-content">Luky116</span>
+  </p>
+  <p class="copyright-item">
+    <span class="item-title">上次更新</span>
+    <span class="item-content">
+        2024-11-03
+        
+    </span>
+  </p>
+  
+  
+</div>
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/nacos/">Nacos</a>
+          <a href="/tags/distro/">Distro</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/arana-%E5%90%AF%E5%8A%A8%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+            <span class="next-text nav-default">Arana 启动源码分析</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+  
+
+  
+    <script src="https://giscus.app/client.js"
+            data-repo="luky116/luky116.github.io"
+            data-repo-id="MDEwOlJlcG9zaXRvcnkyNzgxMzMyOTY="
+            data-category="Announcements"
+            data-category-id="DIC_kwDOEJP6MM4CjuRr"
+            data-mapping="pathname"
+            data-strict="0"
+            data-reactions-enabled="1"
+            data-emit-metadata="0"
+            data-input-position="top"
+            data-theme="light"
+            data-lang="en"
+            data-loading="lazy"
+            crossorigin="anonymous"
+            async>
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/giscus/giscus">comments powered by giscus.</a></noscript>
+
+      </div>
+    </main>
+	
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:luky116@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/luky116" class="iconfont icon-github" title="github"></a>
+  <a href="" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    Powered by <a class="hexo-link" href="https://gohugo.io">Hugo</a>
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    Theme - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2016 - 
+    2024<span class="heart"><i class="iconfont icon-heart"></i></span><span></span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top" title="回到顶部">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery/jquery-3.6.4.min.js"></script>
+  <script type="text/javascript" src="/lib/slideout/slideout-1.0.1.min.js"></script>
+  <script type="text/javascript" src="/lib/fancybox/jquery.fancybox-3.1.20.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js"></script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-75123653-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-75123653-1');
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3S3FFW5PH3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-3S3FFW5PH3');
+</script><script id="baidu_analytics">
+	  var _hmt = _hmt || [];
+	  (function() {
+		if (window.location.hostname === 'localhost') return;
+		var hm = document.createElement("script"); hm.async = true;
+		hm.src = "https://hm.baidu.com/hm.js?bd124b9b0cfd93ddf2a8b53a7fa51aa5";
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(hm, s);
+	  })();
+	</script>
+
+
+	<script id="baidu_push">
+	  (function(){
+		if (window.location.hostname === 'localhost') return;
+		var bp = document.createElement('script'); bp.async = true;
+		var curProtocol = window.location.protocol.split(':')[0];
+		if (curProtocol === 'https') {
+		  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+		}
+		else {
+		  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+		}
+		var s = document.getElementsByTagName("script")[0];
+		s.parentNode.insertBefore(bp, s);
+	  })();
+	</script>
+
+
+<script>
+  let copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" 
+  d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 
+      5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z"/>
+</svg>`;
+  let copiedIcon=`<svg clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.25 12.321 7.27 6.491c.143.127.321.19.499.19.206 0 .41-.084.559-.249l11.23-12.501c.129-.143.192-.321.192-.5 0-.419-.338-.75-.749-.75-.206 0-.411.084-.559.249l-10.731 11.945-6.711-5.994c-.144-.127-.322-.19-.5-.19-.417 0-.75.336-.75.749 0 .206.084.412.25.56" fill-rule="nonzero"/></svg>`;
+  function createCopyButton(codeDiv) {
+    const div = document.createElement("div");
+    div.className = "copy-code";
+    div.innerHTML = copyIcon;
+    div.addEventListener("click", () =>
+      copyCodeToClipboard(div, codeDiv)
+    );
+    addCopyButtonToDom(div, codeDiv);
+  }
+
+  async function copyCodeToClipboard(button, codeDiv) {
+    console.log(codeDiv);
+    const codeToCopy = codeDiv.querySelector(":scope > code")
+      .innerText;
+    await navigator.clipboard.writeText(codeToCopy);
+    button.blur();
+    
+	button.innerHTML = copiedIcon;
+    setTimeout(() => button.innerHTML = copyIcon, 2000);
+  }
+
+  function addCopyButtonToDom(button, codeDiv) {
+    codeDiv.insertBefore(button, codeDiv.firstChild);
+    const wrapper = document.createElement("div");
+    wrapper.className = "highlight-wrapper";
+    codeDiv.parentNode.insertBefore(wrapper, codeDiv);
+    wrapper.appendChild(codeDiv);
+  }
+
+  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if(!isMobile){
+     document.querySelectorAll("pre[class*=language]").forEach((codeDiv) => createCopyButton(codeDiv));
+  }
+</script>  
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/components/prism-core.min.js" integrity="sha512-9khQRAUBYEJDCDVP2yw3LRUQvjJ0Pjx0EShmaQjcHa6AXiOv6qHQu9lCAIR8O+/D8FtaCoJ2c0Tf9Xo7hYH01Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-fTl/qcO1VgvKtOMApX2PdZzkziyr2stM65GYPLGuYMnuMm1z2JLJG6XVU7C/mR+E7xBUqCivykuhlzfqxXBXbg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-highlight/prism-line-highlight.min.js" integrity="sha512-sXBpWttHfaxTNfMdM4N1gfeIc01bFaKVrPdaECaHxNQy1QOAOt1R6HVcpPyPtwIr5pAsfa7eIg+DQIHzIODh8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.28.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6osIg7lbizJchuAMotOkdLxHxwt/Hyo+cl47bZU0QADg+Qt5DJwni3SbYGXeGMB5cBcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</body>
+</html>
